@@ -1,0 +1,10 @@
+.office-pera {
+    padding: 85px 81px 68px 90px;
+    background: #FEF2ED;
+    @media #{$sm}{
+        padding: 65px 46px 24px 50px;
+    }
+    @media #{$xs}{
+        padding: 44px 28px 34px 35px;
+    }
+  }

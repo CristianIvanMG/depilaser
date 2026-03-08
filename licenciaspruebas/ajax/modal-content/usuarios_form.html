@@ -1,0 +1,102 @@
+<div class="modal-header">
+           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+           &times;
+	       </button>
+	       <h4 class="modal-title" id="lblModalHeader">Agregar registro</h4>
+	       </div>
+	       
+	       <div class="modal-body">
+	       
+            <form class="smart-form">
+            
+            <fieldset>
+            
+            <div class="row">
+                                
+                       <section  class="col col-6">
+                       <label class="input"> <i class="icon-append fa fa-user"></i>
+                       <input type="text" name="" placeholder="Nombres*" id="txt_nombres" class="focus" >
+                       <b class="tooltip tooltip-bottom-right">
+                       <i class="fa fa-warning txt-color-teal"></i> 
+                       Nombres*</b> </label>
+                       </section>
+                       
+                       <section  class="col col-6">
+                       <label class="input"> <i class="icon-append fa fa-user"></i>
+                       <input type="text" name="" placeholder="Apellidos" id="txt_apellidos" class="focus">
+                       <b class="tooltip tooltip-bottom-right">
+                       <i class="fa fa-warning txt-color-teal"></i> 
+                       Apellidos</b> </label>
+				       </section>
+                        
+				       
+				       
+            </div>
+            <section>
+                       <label class="input"> <i class="icon-append fa fa-envelope-o"></i>
+                       <input type="email" name="" placeholder="E-mail*" id="txt_email" class="focus">
+                       <b class="tooltip tooltip-bottom-right"><i class="fa fa-warning txt-color-teal"></i>
+                        E-mail*</b> </label>
+				       </section>
+            
+            
+            
+            </fieldset>
+              
+              <fieldset>
+      
+
+            
+                       <section >
+                       <label class="input"> <i class="icon-append fa fa-user"></i>
+                       <input type="text" name="" placeholder="Nombre de usuario*" id="txt_usuario" class="focus" >
+                       <b class="tooltip tooltip-bottom-right">
+                       <i class="fa fa-warning txt-color-teal"></i> 
+                       Nombre de usuario*
+                       </b> 
+                       </label>
+				       </section>
+                       <section>
+                       <label class="input"><i class="icon-append fa fa-lock"></i>
+                       <input type="password" name="" placeholder="Contraseña" id="txt_password_1" class="focus">
+                       <b class="tooltip tooltip-bottom-right">
+                       <i class="fa fa-warning txt-color-teal"></i> 
+                       Contraseña</b> </label>
+				       </section>
+				       
+				       <section>
+                       <label class="input"> <i class="icon-append fa fa-lock"></i>
+                       <input type="password" name="" placeholder="Repetir contraseña" id="txt_password_2" class="focus">
+                       <b class="tooltip tooltip-bottom-right">
+                       <i class="fa fa-warning txt-color-teal"></i> 
+                       Repetir contraseña</b> </label>
+				       </section>
+				       
+				       <section class="col col-3">
+				       
+				        <label class="toggle"><input type="checkbox" id="chk_activo" checked><i data-swchon-text="SI" data-swchoff-text="NO"></i>Activo</label>
+				        
+				        </section>
+				        <section class="col col-9">
+				        <label class="text-danger font-sm">Si el usuario no está activo no tendrá acceso al sistema</label>
+				        </section>
+                        
+     
+            </fieldset>
+               
+							
+</form>
+</div>
+
+            <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal" id="btn_cancelar">
+            <i class="fa fa-undo"></i> Cancelar
+	        </button>
+	        <button type="button" class="btn btn-success" id="btn_guardar">
+            <i class="fa fa-save"></i> Guardar
+    	    </button>
+            </div>
+<script src="ajax/js/myjs/focus_form.js"></script>
+<script>
+    $('#btn_guardar').click(accion_btn_guardar);
+</script>

@@ -1,0 +1,75 @@
+<div class="modal-header">
+           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+           &times;
+	       </button>
+	       <h4 class="modal-title" id="lblModalHeader">Agregar registro</h4>
+	       </div>
+	       
+	       <div class="modal-body">
+	       
+	       
+              
+
+    <section>
+       <div class="note">
+                <label class="text-danger"><i class="fa fa-warning"></i> El código del software es único y no podrá ser modificado. Este código debe ser igual al escrito en el código fuente de cada software (consultar con el desarrollador para más información).</label>
+        </div>
+    </section>
+    
+	<div class="row">
+		<div class="col-md-3">
+			<div class="form-group">
+            <input type="text" class="form-control focus" placeholder="Código*" id="txt_codigo_1" required />
+            <b class="tooltip tooltip-bottom-right">
+            <i class="fa fa-warning txt-color-teal"></i> 
+            Código*</b> 
+			</div>
+		</div>
+		<div class="col-md-9">
+			<div class="form-group">
+				<input type="text" class="form-control" placeholder="Nombre del producto*" id="txt_nombre_producto" required />
+			</div>
+		</div>
+		<div class="col-md-12">
+		    <div class="form-group">
+				<textarea class="form-control" placeholder="Descripción*" rows="2" id="txt_descripcion" ></textarea>
+			</div>
+		</div>
+		<div class="col-md-9">
+			<div class="form-group">
+				<select class="form-control" id="combo_plataforma" required>
+				    <option value="" selected disabled>Plataforma*</option>
+					<option value="Android">Android</option>
+					<option value="Windows Mobile">Windows Mobile</option>
+					<option value="Windows CE">Windows CE</option>
+					<option value="Windows Desktop">Windows Desktop</option>
+					<option value="Web">Web</option>
+				</select>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="form-group">
+				<input type="number" class="form-control" placeholder="Precio" id="txt_precio" />
+			</div>
+		</div>
+		<div class="col-md-12">
+			<div class="form-group">
+				<input type="text" class="form-control" placeholder="Link de descarga" id="txt_link_descarga" />
+			</div>
+		</div>
+	</div>
+
+    </div>
+           
+    <div class="modal-footer">
+       <button type="button" class="btn btn-default" data-dismiss="modal" id="btn_cancelar">
+        <i class="fa fa-undo"></i> Cancelar
+	   </button>
+        <button type="button" class="btn btn-success" id="btn_guardar">
+            <i class="fa fa-save"></i> Guardar
+    	</button>
+     </div>
+
+<script>
+$('#btn_guardar').click(accion_btn_guardar);
+</script>

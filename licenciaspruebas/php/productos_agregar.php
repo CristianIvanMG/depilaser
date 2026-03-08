@@ -1,0 +1,67 @@
+<?php
+try {
+	//session_start();
+    //header("Access-Control-Allow-Origin: *");
+    //header("Access-Control-Allow-Methods: *");
+    //header("Access-Control-Allow-Headers: *");
+	include_once('conexion.php');
+    
+	date_default_timezone_set('America/Mexico_City'); //establecemos la zona horaria de México
+	
+    $codigo_1 = $_POST["codigo_1"];
+	$nombre_producto = $_POST["nombre_producto"];
+	$descripcion = $_POST["descripcion"];
+    $plataforma = $_POST["plataforma"];
+	$link_descarga = $_POST["link_descarga"];
+	$precio_venta = $_POST["precio_venta"];
+	$fecha = date("Y-m-d");
+	$hora = date("H:i:s");
+    $respuesta = array();
+    
+	$charset = $conexion->query("SET NAMES 'utf8'");
+    
+	$query0 = "SELECT codigo_1 FROM productos WHERE codigo_1='".$codigo_1."' AND eliminado='0'";
+	$consulta_duplicado = $conexion->query($query0);
+	if ($consulta_duplicado->num_rows > 0)
+	{
+        $datos[] = array(
+            "status" => "warning",
+            "mensaje" => "El código ".$codigo_1." ya está asignado a otro producto, verifíquelo por favor.",
+            "color" => "#739E73",
+            "icono" => "fa fa-check-square-o bounce animated",
+            "tiempo" => "5500"
+        );
+        echo json_encode($datos, JSON_PRETTY_PRINT);
+        return;
+		//exit('El c&oacute;digo '.$codigo_cliente.' ya asignado a otro producto, verif&iacute;quelo por favor.');	
+	}
+	
+    $query1 = "INSERT INTO productos (codigo_1, nombre_producto, descripcion, plataforma, link_descarga, precio_venta, fecha_registro) VALUES ('" . $codigo_1 . "', '" . $nombre_producto . "', '" . $descripcion . "', '" . $plataforma . "','" . $link_descarga . "','" . $precio_venta . "', '".$fecha.' '.$hora."')";
+	if($conexion->query($query1)){
+         $respuesta[] = array(
+            "status" => "success",
+            "mensaje" => "Los datos fueron guardados exitosamente.",
+            "color" => "#739E73",
+            "icono" => "fa fa-check-square-o bounce animated",
+            "tiempo" => "4000"               
+        );
+        echo json_encode($respuesta, JSON_PRETTY_PRINT);
+        return;
+    }
+    
+     $respuesta[] = array(
+            "status" => "error",
+            "mensaje" => "Algo salió mal, intente de nuevo y si el problema persiste contacte al administrador.",
+            "color" => "#A65858",
+            "icono" => "fa fa-times-circle shake animated",
+            "tiempo" => "5500"               
+    );
+    
+	echo json_encode($respuesta, JSON_PRETTY_PRINT);
+    return;
+	//exit('Atenci&oacute;n|Algo sali&oacute; mal, intente de nuevo y si el problema persiste contacte al administrador.|#A65858|fa fa-times-circle shake animated|5500|error');
+}
+catch (Exception $e) {
+	echo 'Error|'.$e->getMessage().'|#A65858|fa fa-times-circle shake animated|5500|error';
+}
+?>
