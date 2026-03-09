@@ -1,1 +1,0 @@
-<?php    $cnx=new PDO("mysql:host=149.100.151.29;dbname=u242983485_dbmysql","u242983485_intelisy_root","Lmenss130813**");  $res=$cnx->query("SELECT * FROM usuarios");  $datos=array();foreach ($res as $row){ array_push($datos, array(     'usuario'=>$row['usuario'],      'password'=>$row['password'], ));}echo utf8_encode(json_encode($datos));?> 
