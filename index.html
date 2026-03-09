@@ -85,10 +85,6 @@
                                             <li><a href="#Servicio">Servicios</a></li>
                                             <li><a href="#">Blog</a></li>
                                             <li><a href="#Pie">Contacto</a></li>
-                                            <!-- Aquí: Ingresar (lleva al formulario en login.php) -->
-                                            <li> <a id="btnOpenLogin" href="#loginModal"
-                                                    aria-haspopup="dialog">Ingresar</a></li>
-                                            </ul>
                                         </nav>
                                     </div>
                                     <!-- left Btn -->
@@ -784,90 +780,6 @@
     <script src="./assets/js/plugins.js"></script>
     <script src="./assets/js/main.js"></script>
     <script async src="https://www.tiktok.com/embed.js"></script>
-
-    <script>
-        (async function () {
-            const openBtn = document.getElementById('btnOpenLogin');
-            const closeBtn = document.getElementById('btnCloseLogin');
-            const modal = document.getElementById('loginModal');
-            const form = document.getElementById('loginForm');
-            const msg = document.getElementById('loginMsg');
-            const csrfInput = document.getElementById('csrf');
-
-            function openModal() {
-                modal.style.display = 'block';
-                modal.setAttribute('aria-hidden', 'false');
-                document.getElementById('loginEmail')?.focus();
-            }
-            function closeModal() {
-                modal.style.display = 'none';
-                modal.setAttribute('aria-hidden', 'true');
-                openBtn?.focus();
-            }
-
-            openBtn?.addEventListener('click', (e) => { e.preventDefault(); openModal(); });
-            closeBtn?.addEventListener('click', closeModal);
-            modal?.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
-
-            // 1) Obtener CSRF
-            try {
-                const res = await fetch('/api/csrf.php', { credentials: 'same-origin' });
-                const data = await res.json();
-                csrfInput.value = data.csrf;
-
-
-                const me = await fetch('php/me.php', { credentials: 'same-origin' }).then(r => r.json());
-                const nav = document.getElementById('navigation');
-                if (!nav) return;
-
-                if (me.auth) {
-                    // Reemplazar "Ingresar" por "Mi cuenta" y "Cerrar sesión"
-                    const liCuenta = document.createElement('li');
-                    liCuenta.innerHTML = '<a href="/dashboard.php">Mi cuenta</a>';
-                    const liSalir = document.createElement('li');
-                    liSalir.innerHTML = '<a href="/logout.php">Cerrar sesión</a>';
-                    nav.appendChild(liCuenta);
-                    nav.appendChild(liSalir);
-                } else {
-                    const liLogin = document.createElement('li');
-                    liLogin.innerHTML = '<a href="/login.php">Ingresar</a>';
-                    nav.appendChild(liLogin);
-                }
-
-            } catch (_) {
-                console.warn('No se pudo cargar CSRF.');
-            }
-
-            // 2) Enviar login por fetch → login.php (debe devolver JSON si Accept: application/json)
-            form?.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                msg.textContent = 'Ingresando...';
-
-                const formData = new FormData(form);
-                try {
-                    const resp = await fetch('/login.php', {
-                        method: 'POST',
-                        body: formData,
-                        headers: { 'Accept': 'application/json' },
-                        credentials: 'same-origin'
-                    });
-
-                    if (!resp.ok) throw new Error('Error de red');
-                    const json = await resp.json();
-
-                    if (json.ok) {
-                        msg.textContent = 'Listo. Redirigiendo…';
-                        window.location.href = '/dashboard.php';
-                    } else {
-                        msg.textContent = json.error || 'Credenciales inválidas';
-                    }
-                } catch (err) {
-                    msg.textContent = 'No se pudo iniciar sesión. Intenta nuevamente.';
-                }
-            });
-        })();
-    </script>
 
 </body>
 
