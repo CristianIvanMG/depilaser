@@ -1,1 +1,59 @@
-<?php    if(isset($_GET['usuario']) && isset($_GET['password']))       {      $Usuario = $_GET['usuario'];      $Pass = $_GET['password'];          $cnx=new PDO("mysql:host=149.100.151.29;dbname=u242983485_dbmysql","u242983485_intelisy_root","Lmenss130813**");      $result=$cnx->query("SELECT * FROM usuarios WHERE usuario='$Usuario' AND password='$Pass'");                          $nrow = $result->rowCount();            if ($nrow > 0)             {                $datos=array();              foreach ($result as $row)              {                 array_push($datos, array(                 'usuario'=>$row['usuario'],                 'password'=>$row['password'],                 'administrador'=>$row['administrador'],                 'nombre_usuario'=>$row['nombre_usuario'],                 'apellidos'=>$row['apellidos']));              }                   echo utf8_encode(json_encode($datos));            }            else            {                 $datos=array();                 array_push($datos,array(                 'error'=>"1",'mensaje'=>"Usuario o Contraseña incorrecto"));                  echo utf8_encode(json_encode($datos));            }    }    else    {         $datos=array();         array_push($datos,array(         'error'=>"1",'mensaje'=>"Error de comunicación con el servidor"));         echo utf8_encode(json_encode($datos));    }?>
+<?php
+require __DIR__ . '/includes/config.php';
+require __DIR__ . '/includes/functions.php';
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    exit('Método no permitido');
+}
+
+if (!csrf_check($_POST['csrf'] ?? '')) {
+    http_response_code(400);
+    exit('CSRF inválido');
+}
+
+$email = trim(strtolower($_POST['email'] ?? ''));
+$pass  = $_POST['password'] ?? '';
+
+if ($email === '' || $pass === '') {
+    $_SESSION['flash'] = 'Completa los campos.';
+    header('Location: /index.php'); exit;
+}
+
+// Rate limit por IP (y puedes incluir por email)
+if (too_many_attempts($pdo, $email)) {
+    $_SESSION['flash'] = 'Demasiados intentos. Intenta más tarde.';
+    header('Location: /index.php'); exit;
+}
+
+register_attempt($pdo, $email);
+
+// Buscar usuario
+$stmt = $pdo->prepare("SELECT id, password_hash, is_active FROM users WHERE email = ?");
+$stmt->execute([$email]);
+$user = $stmt->fetch();
+
+$ok = false;
+if ($user && (int)$user['is_active'] === 1) {
+    $ok = password_verify($pass, $user['password_hash']);
+}
+
+// Importante: tiempo constante (evitar filtrar si existe o no)
+if (!$ok) {
+    // No reveles si el correo existe
+    $_SESSION['flash'] = 'Credenciales inválidas.';
+    echo json_encode(['ok' => false, 'error' => 'Credenciales inválidas']); exit;
+    header('Location: /index.php'); exit;
+}
+
+// Éxito: regenerar ID de sesión para evitar fijación
+session_regenerate_id(true);
+$_SESSION['uid']   = (int)$user['id'];
+$_SESSION['email'] = $email;
+echo json_encode(['ok' => true]); exit;
+// Si quieres, guarda hash del user-agent/IP para “atar” sesión
+// $_SESSION['ua'] = hash('sha256', $_SERVER['HTTP_USER_AGENT'] ?? '');
+
+header('Location: /dashboard.php');
+exit;
+
