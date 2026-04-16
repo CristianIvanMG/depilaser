@@ -1,0 +1,124 @@
+<div class="modal-header">
+           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+           &times;
+	       </button>
+	       <h4 class="modal-title" id="lblModalHeader">Agregar registro</h4>
+	       </div>
+	       
+	       <div class="modal-body">
+	       
+	       
+         
+
+         <form class="smart-form">
+          <fieldset>
+          <div class="row">
+                       <section  class="col col-4">
+                       <label class="input"> <i class="icon-append fa fa-info"></i>
+                       <input type="text" name="" placeholder="Código de cliente*" id="txt_codigo" class="focus" >
+                       <b class="tooltip tooltip-bottom-right">
+                       <i class="fa fa-warning txt-color-teal"></i> 
+                       Código de cliente*
+                       </b> 
+                       </label>
+                       </section>
+                       
+                       <section  class="col col-8">
+                       <label class="input"> <i class="icon-append fa fa-briefcase"></i>
+                       <input type="text" name="" placeholder="Empresa*" id="txt_empresa" class="focus">
+                       <b class="tooltip tooltip-bottom-right">
+                       <i class="fa fa-warning txt-color-teal"></i> 
+                       Empresa*
+                       </b> 
+                       </label>
+				       </section>
+            </div>
+            </fieldset>
+            
+            <fieldset>
+            
+            <section>
+				       <div class="note">
+				       <label style="color:red;"><i class="fa fa-warning"></i> La dirección de correo es obligatoria y será utilizada para el proceso de activación de cada software.</label>
+				       </div>
+				       </section>
+            
+            <div class="row">
+                                
+                       <section  class="col col-6">
+                   
+                       <label class="input"> <i class="icon-append fa fa-user"></i>
+                       <input type="text" name="" placeholder="Nombres del contacto" id="txt_nombres" class="focus" >
+                       <b class="tooltip tooltip-bottom-right">Nombres del contacto</b> </label>
+                       </section>
+                       
+                       <section  class="col col-6">
+                       <label class="input"> <i class="icon-append fa fa-user"></i>
+                       <input type="text" name="" placeholder="Apellidos del contacto" id="txt_apellidos" class="focus">
+                       <b class="tooltip tooltip-bottom-right">Apellidos del contacto</b> </label>
+				       </section>
+            
+                       <section  class="col col-6">
+                       <label class="input"> <i class="icon-append fa fa-phone"></i>
+                       <input type="text" name="" placeholder="Teléfono" id="txt_telefono" class="focus">
+                       <b class="tooltip tooltip-bottom-right">Teléfono</b> </label>
+				       </section>
+				       
+				       <section  class="col col-6">
+                       <label class="input"> <i class="icon-append fa fa-envelope-o"></i>
+                       <input type="email" name="" placeholder="E-mail*" id="txt_email" class="focus">
+                       <b class="tooltip tooltip-bottom-right"><i class="fa fa-warning txt-color-teal"></i> E-mail*</b> </label>
+				       </section>
+            </div>
+            
+            
+            
+            </fieldset>
+              
+              <fieldset>
+              
+               <section>
+                       <label class="input"> <i class="icon-append fa fa-home"></i>
+                       <input type="text" name="" placeholder="Dirección" id="txt_calle" class="focus" >
+                       <b class="tooltip tooltip-bottom-right">Dirección</b> </label>
+                       </section>
+                       
+            <div class="row">
+            
+                       <section  class="col col-8">
+                       <label class="input"> <i class="icon-append fa fa-home"></i>
+                       <input type="text" name="" placeholder="Colonia" id="txt_colonia" class="focus">
+                       <b class="tooltip tooltip-bottom-right">Colonia</b> </label>
+				       </section>
+            
+                       <section  class="col col-4">
+                       <label class="input"><i class="icon-append fa fa-home"></i>
+                       <input type="text" name="" placeholder="CP" id="txt_cp" class="focus">
+                       <b class="tooltip tooltip-bottom-right">CP</b> </label>
+				       </section>
+				       
+				       <section  class="col col-6">
+                       <label class="input"> <i class="icon-append fa fa-flag"></i>
+                       <input type="text" name="" placeholder="País" id="txt_pais" class="focus">
+                       <b class="tooltip tooltip-bottom-right">País</b> </label>
+				       </section>
+            
+            </div>
+            </fieldset>
+               
+							
+</form>
+</div>
+
+            <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal" id="btn_cancelar">
+            <i class="fa fa-undo"></i> Cancelar
+	        </button>
+	        <button type="button" class="btn btn-success" id="btn_guardar">
+            <i class="fa fa-save"></i> Guardar
+    	    </button>
+            </div>
+<script src="ajax/js/myjs/focus_form.js"></script>
+<script>
+    $('#btn_guardar').click(accion_btn_guardar);
+</script>

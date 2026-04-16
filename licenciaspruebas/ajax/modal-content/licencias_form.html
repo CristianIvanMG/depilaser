@@ -1,0 +1,527 @@
+ <div class="modal-header">
+           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+           &times;
+	       </button>
+	       <h4 class="modal-title" id="lblModalHeader">Agregar registro</h4>
+	       </div>
+	       
+	       <div class="modal-body">
+	       
+	       
+    
+        <form class="smart-form">
+                 
+          <fieldset>
+          
+           <section>
+              <label class="input"> <i class="icon-append fa fa-user"></i>
+              <input type="text" class="typeahead" data-provide="typeahead" placeholder="Buscar cliente" id="lst_clientes" class="focus">
+              <b class="tooltip tooltip-bottom-right">Seleccione un cliente</b>
+              </label>  
+            </section>
+            
+            <section hidden>
+                    <strong>Id Cliente: </strong><label id="lbl_id_cliente"></label>
+            </section>
+            
+            <div class="row">
+                <section  class="col col-4">
+                    <strong>Código: </strong><label id="lbl_codigo_cliente"></label>
+                </section>
+                
+                <section  class="col col-8">
+                    <strong>Empresa: </strong><label id="lbl_empresa"></label>
+				</section>        
+            </div>
+            
+            <section>
+                <strong>Contacto: </strong><label id="lbl_nombres"></label>
+            </section>
+            <!--
+            <section>          
+                <label id="lbl_direccion">Dirección </label>
+            </section>
+            -->
+            </fieldset>
+            
+            <fieldset>
+            
+           
+            
+            <section>
+              <label class="input"> <i class="icon-append fa fa-code"></i>
+              <input type="text" class="typeahead" data-provide="typeahead" placeholder="Buscar programa" id="lst_productos" class="focus">
+              <b class="tooltip tooltip-bottom-right">Seleccione un programa programa</b>
+              </label>  
+            </section>
+           
+            <div class="row">
+                 <section  class="col col-4">
+                    <strong>Código producto: </strong><label id="lbl_codigo_producto"></label>
+                 </section>
+                       
+                 <section  class="col col-8">
+                    <strong>Nombre: </strong><label id="lbl_nombre_producto"></label>
+				 </section>
+            </div>
+            
+            <section>    
+                <strong>Descripción: </strong><label id="lbl_descripcion_producto"></label>
+            </section>
+            
+            
+            
+            <div class="row">
+                      
+            <section  class="col col-6">
+				<select class="form-control" id="combo_tipo_licencia" required>
+				    <option value="" selected disabled>Tipo de licencia*</option>
+					<option value="4">1 mes</option>
+                    <option value="5">2 meses</option>
+                    <option value="6">3 meses</option>
+                    <option value="7">6 meses</option>
+                    <option value="8">1 año</option>
+                    <option value="9">Permanente</option>
+				</select>
+            </section>
+                       
+
+            <section  class="col col-6">
+               <label class="input"> <i class="icon-append fa fa-usd"></i>
+               <input type="number" name="" placeholder="Costo" id="txt_precio_venta" class="focus" >
+               <b class="tooltip tooltip-bottom-right">Costo unitario</b> </label>
+            </section>
+                
+            </div>
+            
+              <div class="row">
+                   <section  class="col col-6">
+                       <label class="input"> <i class="icon-append fa fa-info"></i>
+                       <input type="number" name="" placeholder="Número de licencias" id="txt_cantidad" class="focus">
+                       <b class="tooltip tooltip-bottom-right">Número de licencias</b> </label>
+				       </section>
+				       
+				     <section  class="col col-6">
+                    
+                         Importe total: <label id="lbl_importe" class="font-md text-danger"><strong>0.00</strong></label>
+              
+                     </section>
+              </div>
+              
+              <section>
+				<label class="textarea"> <i class="icon-append fa fa-comment"></i>
+                    <textarea rows="1" id="txt_comentarios" placeholder="Comentarios" class="focus"></textarea> 
+				</label>
+              </section>
+               
+            </fieldset>
+            
+</form>
+
+</div>
+
+            <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal" id="btn_cancelar">
+            <i class="fa fa-undo"></i> Cancelar
+	        </button>
+	        <button type="button" class="btn btn-success" id="btn_guardar">
+            <i class="fa fa-save"></i> Guardar
+    	    </button>
+            </div>
+
+<script src="ajax/js/myjs/focus_form.js"></script>
+<script>
+
+//clientes
+function consulta_clientes() {
+    try{
+        var php_consulta = ruta_php + 'clientes_catalogo.php';
+        var datos = '';
+        var lst_datos = $('#lst_clientes');
+       
+        ////mostramos el loader
+        muestra_loader();
+        $.ajax({
+            type: 'POST',
+            url: encodeURI(php_consulta),
+            data: datos,
+            crossDomain: true,
+            cache: false,
+            success: function (respuesta) {
+              
+                //alert(respuesta);
+                var datos_tabla = JSON.parse(respuesta);
+                
+                var registros = [];
+                var ids = {};
+                
+                $.each(datos_tabla, function (i, registro) {
+                    var reg = registro.empresa + ' - ' + registro.nombres + ' ' + registro.apellidos;
+                    ids[reg] = registro;
+                    registros.push(reg);
+                });
+                            
+                lst_datos.typeahead({
+                    source: registros,
+                    autoSelect: false, 
+                    updater: function (item) {
+                        id_sel = ids[item].id_cliente;
+                        return item;
+                       
+                    },
+                    highlighter: function (item) {
+                        var regex = new RegExp( '(' + this.query + ')', 'gi' );
+                        return item.replace( regex, "<strong>$1</strong>" );
+                    },
+                    afterSelect: function(item) {
+                        id_sel = ids[item].id_cliente;
+                        consulta_cliente(id_sel);
+                        //alert(id_sel);
+                    }                    
+                    
+                });
+                ////ocultamos el loader
+                oculta_loader();
+            },
+            error: function (respuesta) {
+                oculta_loader();
+                var mensaje = 'No pude acceder al servidor en estos momentos, intente nuevamente y verifíque que el dispositivo tenga conexión a internet y si el problema persiste comuniquese con el administrador.';
+                alert(JSON.stringify(respuesta));
+            }
+        });
+    }
+    catch(err) {
+        alert(err.message); 
+    }
+}
+
+function consulta_cliente(id_sel){
+    
+    try{
+
+        var php_consulta = ruta_php + 'clientes_consultar.php';
+        var datos = 'id_seleccionado=' + id_sel;
+        ////mostramos el loader
+        muestra_loader();
+        $.ajax({
+            type: 'POST',
+            url: encodeURI(php_consulta),
+            data: datos,
+            crossDomain: true,
+            cache: false,
+            success: function (respuesta) {
+                //alert(respuesta);
+                
+                var datos_tabla = JSON.parse(respuesta);
+                
+                for (var i = 0; i < datos_tabla.length; i++) {
+                    
+                    var codigo_cliente = datos_tabla[i].codigo_cliente;
+                    var empresa = datos_tabla[i].empresa;
+                    var nombres = datos_tabla[i].nombres;
+                    var apellidos = datos_tabla[i].apellidos;
+                    var email = datos_tabla[i].email;
+                    var telefono_1 = datos_tabla[i].telefono_1;
+                    var direccion = datos_tabla[i].direccion;
+                    var colonia = datos_tabla[i].colonia;
+                    var cp = datos_tabla[i].cp;
+                    var pais = datos_tabla[i].pais;
+                
+                }
+                
+                $('#lbl_id_cliente').text(id_sel);
+                $('#lbl_codigo_cliente').text(codigo_cliente);
+                $('#lbl_empresa').text(empresa);
+                $('#lbl_nombres').text(nombres + ' ' + apellidos);    
+                //$('#lbl_direccion').text(direccion);
+                ////ocultamos el loader
+                oculta_loader();
+                $('#lst_productos').focus();
+            },
+            error: function (respuesta) {
+                oculta_loader();
+                var mensaje = 'No pude acceder al servidor en estos momentos, intente nuevamente y verifíque que el dispositivo tenga conexión a internet y si el problema persiste comuniquese con el administrador.';
+                alert(mensaje);
+            }
+        });
+    }
+    catch(err) {
+        alert(err.message); 
+    }
+    
+}
+
+//productos
+function consulta_productos() {
+    try{
+        var php_consulta = ruta_php + 'productos_catalogo.php';
+        var datos = '';
+        var lst_datos = $('#lst_productos');
+       
+        ////mostramos el loader
+        muestra_loader();
+        $.ajax({
+            type: 'POST',
+            url: encodeURI(php_consulta),
+            data: datos,
+            crossDomain: true,
+            cache: false,
+            success: function (respuesta) {
+              
+                //alert(respuesta);
+                var datos_tabla = JSON.parse(respuesta);
+                
+                var registros = [];
+                var ids = {};
+                
+                $.each(datos_tabla, function (i, registro) {
+                    var reg = registro.codigo_1 + ' - ' + registro.nombre_producto;
+                    ids[reg] = registro;
+                    registros.push(reg);
+                });
+                
+                lst_datos.typeahead({
+                    source: registros,
+                    autoSelect: false,
+                    updater: function (item) {
+                        id_sel = ids[item].id_producto;
+                        return item;
+                    },
+                    highlighter: function (item) {
+                        var regex = new RegExp( '(' + this.query + ')', 'gi' );
+                        return item.replace( regex, "<strong>$1</strong>" );
+                    },
+                    afterSelect: function(item) {
+                        id_sel = ids[item].id_producto;
+                        consulta_producto(id_sel);
+                        //alert(id_sel);
+                    }
+                });
+                ////ocultamos el loader
+                oculta_loader();
+            },
+            error: function (respuesta) {
+                oculta_loader();
+                var mensaje = 'No pude acceder al servidor en estos momentos, intente nuevamente y verifíque que el dispositivo tenga conexión a internet y si el problema persiste comuniquese con el administrador.';
+                alert(JSON.stringify(respuesta));
+            }
+        });
+    }
+    catch(err) {
+        alert(err.message); 
+    }
+}
+
+function consulta_producto(id_sel){
+    
+    try{
+
+        var php_consulta = ruta_php + 'productos_consultar.php';
+        var datos = 'id_seleccionado=' + id_sel;
+        ////mostramos el loader
+        muestra_loader();
+        $.ajax({
+            type: 'POST',
+            url: encodeURI(php_consulta),
+            data: datos,
+            crossDomain: true,
+            cache: false,
+            success: function (respuesta) {
+                //alert(respuesta);
+                
+                var datos_tabla = JSON.parse(respuesta);
+                
+                for (var i = 0; i < datos_tabla.length; i++) {
+                    
+                    var codigo_1 = datos_tabla[i].codigo_1;
+                    //var codigo_2 = datos_tabla[i].codigo_2;
+                    var nombre_producto = datos_tabla[i].nombre_producto;
+                    var descripcion = datos_tabla[i].descripcion;
+                    var plataforma = datos_tabla[i].plataforma;
+                    var link_descarga = datos_tabla[i].link_descarga;
+                    var precio_venta = datos_tabla[i].precio_venta;
+
+                }
+                
+                $('#lbl_codigo_producto').text(codigo_1);
+                $('#lbl_nombre_producto').text(nombre_producto);
+                $('#lbl_descripcion_producto').text(descripcion);    
+                $('#txt_precio_venta').val(precio_venta);
+                ////ocultamos el loader
+                oculta_loader();
+                $('#txt_cantidad').val('').focus();
+            },
+            error: function (respuesta) {
+                oculta_loader();
+                var mensaje = 'No pude acceder al servidor en estos momentos, intente nuevamente y verifíque que el dispositivo tenga conexión a internet y si el problema persiste comuniquese con el administrador.';
+                alert(mensaje);
+            }
+        });
+    }
+    catch(err) {
+        alert(err.message); 
+    }
+    
+}
+
+
+function genera_cadena(){
+    var caracteres = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    var cadena = '';
+    for(var i=0; i < 12; i++) {
+        cadena += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+    }
+    return cadena;
+}
+    
+$('#btn_guardar').click(function(e){
+    
+    var id_cliente = $('#lbl_id_cliente').text();
+    var codigo_cliente = $('#lbl_codigo_cliente').text();
+    var empresa_cliente = $('#lbl_empresa').text();
+    var nombre_cliente = $('#lbl_nombres').text();
+    var codigo_producto = $('#lbl_codigo_producto').text();
+    var nombre_producto = $('#lbl_nombre_producto').text();
+    var tipo_licencia = $('#combo_tipo_licencia').val();
+    var precio_venta = $('#txt_precio_venta').val();
+    var cantidad = $('#txt_cantidad').val();
+    var importe = $('#lbl_importe').text();
+    var comentarios = $('#txt_comentarios').val();
+    var cadena = genera_cadena();
+       
+    if(codigo_cliente === '' || codigo_producto === '' || tipo_licencia === null || cantidad <= 0){
+        mensaje_alerta('Capture los campos obligatorios');
+    }
+    if(codigo_cliente === ''){
+        $('#lst_clientes').val('').focus();
+        return;
+    }
+    if(codigo_producto === ''){
+        $('#lst_productos').val('').focus();
+        return;
+    }
+    if(tipo_licencia === null){
+        $('#combo_tipo_licencia').focus();
+        return;
+    }
+        
+     if(cantidad <= 0){
+        $('#txt_cantidad').val('').focus();
+        return;
+    }
+        
+        var datos = 'id_cliente=' + id_cliente +
+            '&codigo_cliente=' + codigo_cliente +
+            '&codigo_producto=' + codigo_producto +
+            '&tipo_licencia=' + tipo_licencia +
+            '&precio_venta=' + precio_venta +
+            '&cantidad=' + cantidad + 
+            '&importe=' + importe +
+            '&comentarios=' + comentarios +
+            '&cadena=' + cadena
+        ;
+       
+        //alert(php_consulta);
+        //alert(datos);
+        //return;
+    
+        $.SmartMessageBox({
+            title : 'Atención',
+            content : 'Se asignarán ' + cantidad + ' nuevas licencias del programa "' + nombre_producto + '" al cliente ' + empresa_cliente + '.\n¿Desea continuar?',
+            buttons : '[No][Si]'
+        }, function(ButtonPressed) {
+            if (ButtonPressed === 'Si') {
+                guarda_registro(datos);
+            }
+            if (ButtonPressed === 'No') {
+                
+            }
+        });
+        e.preventDefault();
+        
+        
+         
+    });
+    
+function guarda_registro(datos){
+    try{
+         var php_consulta = ruta_php + "licencias_agregar.php";
+        ////mostramos el loader
+        //muestra_loader();
+        $.ajax({
+            type: 'POST',
+            url: encodeURI(php_consulta),
+            data: datos,
+            crossDomain: true,
+            cache: false,
+            success: function (respuesta) {
+                ////ocultamos el loader  
+                //oculta_loader();
+                var datos_tabla = JSON.parse(respuesta);
+                for (var i = 0; i < datos_tabla.length; i++) {
+                    var status = datos_tabla[i].status;
+                    var mensaje = datos_tabla[i].mensaje;
+                }
+                if(status === 'warning'){
+                    mensaje_alerta(mensaje);
+                    $('#txt_codigo_1').focus();
+                }
+                if(status === 'success'){
+                    $('#modal_form').modal('toggle');
+                    mensaje_exito(mensaje);
+                    consulta_catalogo();
+                }
+                if(status === 'error'){
+                    mensaje_error(mensaje);
+                }
+                              
+            },
+            error: function (respuesta) {
+                //oculta_loader();
+                //alert(JSON.stringify(respuesta));
+                var mensaje = 'No pude acceder al servidor en estos momentos, intente nuevamente y verifíque que el dispositivo tenga conexión a Internet y si el problema persiste comuníquese con el administrador.';
+                mensaje_error(mensaje);
+            }
+        });
+    }
+    catch(err){
+        //oculta_loader();
+        alert(err.message);
+    }
+}
+ 
+$('#txt_precio_venta').on('change paste keyup', function () {
+    var precio_venta = Number($('#txt_precio_venta').val());
+    var cantidad = Number($('#txt_cantidad').val());
+    var importe = precio_venta * cantidad;
+    $('#lbl_importe').html('<strong>' + importe.toFixed(2) + '</strong>');
+});
+
+$('#txt_cantidad').on('change paste keyup', function () { 
+    var precio_venta = Number($('#txt_precio_venta').val());
+    var cantidad = Number($('#txt_cantidad').val());
+    var importe = precio_venta * cantidad;
+    $('#lbl_importe').html('<strong>' + importe.toFixed(2) + '</strong>');
+});
+    
+$('#txt_precio_venta').focusout(function () {
+    if ($('#txt_precio_venta').val() === '') {
+        $('#txt_precio_venta').val(0);
+    }
+});
+    
+$('#txt_cantidad').focusout(function () {
+    if ($('#txt_cantidad').val() === '') {
+        $('#txt_cantidad').val(0);
+    }
+});
+
+    
+$(document).ready(function () {
+    
+    consulta_clientes();
+    consulta_productos();
+    
+})();
+    
+</script>

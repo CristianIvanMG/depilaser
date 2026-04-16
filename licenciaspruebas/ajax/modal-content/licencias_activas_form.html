@@ -1,0 +1,336 @@
+ <div class="modal-header">
+           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+           &times;
+	       </button>
+	       <h4 class="modal-title" id="lblModalHeader">Dispositivos activados</h4>
+	       </div>
+	       
+	       <div class="modal-body">
+	       
+	       <!-- widget grid -->
+<section id="widget-grid" class="">
+	<!-- row -->
+	<div class="row">
+
+		<!-- NEW WIDGET START -->
+		<article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+			<!-- Widget ID (each widget will need unique ID)-->
+			
+				
+				<header>
+				
+				</header>
+
+				<!-- widget div-->
+				<div>
+					<!-- widget edit box -->
+					<div class="jarviswidget-editbox">
+						<!-- This area used as dropdown edit box -->
+					</div>
+					<!-- end widget edit box -->
+                    
+					<!-- widget content -->
+					<div class="widget-body no-padding">
+      
+                      <div class="widget-body-toolbar">
+							<div class="row">
+								<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+									<div class="input-group">
+								    
+									
+									<button class="btn btn-danger" id="btn_elimina_lic">
+										<i class="fa fa-trash-o"></i> <span class="hidden-mobile">Eliminar dispositivo</span>
+									</button>
+									
+									<button class="btn bg-color-blueDark txt-color-white" id="btn_lista_negra">
+										<i class="fa fa-ban"></i> <span class="hidden-mobile">Enviar a lista negra</span>
+									</button>
+									<!--
+									<button class="btn bg-color-orange txt-color-white" id="btn_eliminar_lista_negra">
+										<i class="fa fa-circle-o"></i> <span class="hidden-mobile">Sacar de lista negra</span>
+									</button>
+									-->
+									</div>
+								</div>
+							</div>
+						</div>
+       
+                        
+						<table id="tabla_lic_activas" class="table table-striped table-bordered" width="100%">
+					        <thead>
+					            <tr>
+                                  <th>i</th>
+                                  <th>ID</th>
+                                  <th>ID Activación</th>
+                                  <th>Nombre dispositivo</th>
+				                  <th>Tipo dispositivo</th>
+				                  <th>Licencia</th>
+				                  <th>Fecha activación</th>
+				                  <th>Vigencia</th>
+				                  <th>Núm. activaciones</th>
+				                  <th>Eliminado</th>
+				                  <th>Lista negra</th>
+					            </tr>
+					        </thead>
+					        <tbody></tbody>
+						</table>
+
+					</div>
+					<!-- end widget content -->
+
+				</div>
+				<!-- end widget div -->
+        </article>
+		<!-- WIDGET END -->
+	</div>
+	<!-- end row -->
+	<!-- end row -->
+</section>
+<!-- end widget grid -->
+
+           </div>
+
+            <div class="modal-footer">
+            <!--
+            <button type="button" class="btn btn-default" data-dismiss="modal" id="btn_cancelar">
+            <i class="fa fa-undo"></i> Cancelar
+	        </button>
+	        <button type="button" class="btn btn-success" id="btn_guardar">
+            <i class="fa fa-save"></i> Guardar
+    	    </button>
+           
+           -->
+            </div>
+            
+            
+
+<script>
+
+//
+    $('#btn_elimina_lic').click(function(e){
+        
+        var n_seleccionados = tabla_lic.rows('.selected').count();
+        if(n_seleccionados === 0){
+            mensaje_alerta('Selecciona un registro para continuar');
+            return;
+        }
+    
+        $.SmartMessageBox({
+            
+            title : '<i class="fa fa-warning txt-color-orangeDark"></i> Atención',
+            content : 'Al eliminar un dispositivo activado la licencia del mismo se libera para volver a ser usada en otro dispositivo sin garantizar la desactivación del software. Esta acción no podrá ser deshecha. ¿Realmente desea continuar?',
+		    buttons : '[No][Si]'
+            
+        }, function(ButtonPressed) {
+            
+            if (ButtonPressed === 'Si') {
+                elimina_activacion();
+            }
+            if (ButtonPressed === 'No') {
+                
+            }
+            
+        });
+        e.preventDefault();
+    
+    });
+    
+    function elimina_activacion(){
+    try{
+        
+        var php_consulta = ruta_php + "licencias_activas_eliminar.php";
+        var datos = 'id_seleccionado=' + id_lic_seleccionado;
+        //alert(php_consulta);
+        ////mostramos el loader
+        
+        muestra_loader();
+        
+        $.ajax({
+            type: 'POST',
+            url: encodeURI(php_consulta),
+            data: datos,
+            crossDomain: true,
+            cache: false,
+            success: function (respuesta) {
+                ////ocultamos el loader
+                oculta_loader();
+                var datos_tabla = JSON.parse(respuesta);
+                for (var i = 0; i < datos_tabla.length; i++) {
+                    var status = datos_tabla[i].status;
+                    var mensaje = datos_tabla[i].mensaje;
+                }
+                if(status === 'warning'){
+                    tabla_lic.cell( index_lic_seleccionado, 9 ).data( '<span class="center-block padding-5 label label-danger">SI</span>' ).draw();
+                    mensaje_alerta(mensaje);
+                }
+                if(status === 'success'){
+                    tabla_lic.cell( index_lic_seleccionado, 9 ).data( '<span class="center-block padding-5 label label-danger">SI</span>' ).draw();
+                    mensaje_exito(mensaje);
+                }
+                if(status === 'error'){
+                    mensaje_error(mensaje);
+                }
+            },
+            error: function (respuesta) {
+                oculta_loader();
+                var mensaje = 'No pude acceder al servidor en estos momentos, intente nuevamente y verifíque que el dispositivo tenga conexión a internet y si el problema persiste comuniquese con el administrador.';
+                mensaje_error(mensaje);
+            }
+        });
+    }
+    catch(err){
+        oculta_loader();
+        alert(err.message);
+    }
+}
+
+
+
+//
+  
+    $('#btn_lista_negra').click(function(e){
+        
+        var n_seleccionados = tabla_lic.rows('.selected').count();
+        if(n_seleccionados === 0){
+            mensaje_alerta('Selecciona un registro para continuar');
+            return;
+        }
+    
+        $.SmartMessageBox({
+            
+            title : '<i class="fa fa-warning txt-color-orangeDark"></i> Atención',
+            content : 'Al enviar un dispositivo a LISTA NEGRA éste ya no tendrá permiso de usar nuevamente el código activado y tendrá que ingresar un nuevo código de activación, esto no libera la licencia ni garantiza la desactivación del software. Esta acción no podrá ser deshecha. ¿Realmente desea continuar?',
+		    buttons : '[No][Si]'
+            
+        }, function(ButtonPressed) {
+            
+            if (ButtonPressed === 'Si') {
+                envia_lista_negra();
+            }
+            if (ButtonPressed === 'No') {
+                
+            }
+            
+        });
+        e.preventDefault();
+    
+    });
+    
+    function envia_lista_negra(){
+    try{
+        
+        var php_consulta = ruta_php + "licencias_lista_negra_insertar.php";
+        var datos = 'id_seleccionado=' + id_lic_seleccionado;
+        //alert(php_consulta);
+        ////mostramos el loader
+        
+        muestra_loader();
+        
+        $.ajax({
+            type: 'POST',
+            url: encodeURI(php_consulta),
+            data: datos,
+            crossDomain: true,
+            cache: false,
+            success: function (respuesta) {
+                ////ocultamos el loader
+                oculta_loader();
+                var datos_tabla = JSON.parse(respuesta);
+                for (var i = 0; i < datos_tabla.length; i++) {
+                    var status = datos_tabla[i].status;
+                    var mensaje = datos_tabla[i].mensaje;
+                }
+                if(status === 'warning'){
+                    tabla_lic.cell( index_lic_seleccionado, 10 ).data( '<span class="center-block padding-5 label label-danger">SI</span>' ).draw();
+                    mensaje_alerta(mensaje);
+                }
+                if(status === 'success'){
+                    tabla_lic.cell( index_lic_seleccionado, 10 ).data( '<span class="center-block padding-5 label label-danger">SI</span>' ).draw();
+                    mensaje_exito(mensaje);
+                }
+                if(status === 'error'){
+                    mensaje_error(mensaje);
+                }
+            },
+            error: function (respuesta) {
+                oculta_loader();
+                var mensaje = 'No pude acceder al servidor en estos momentos, intente nuevamente y verifíque que el dispositivo tenga conexión a internet y si el problema persiste comuniquese con el administrador.';
+                mensaje_error(mensaje);
+            }
+        });
+    }
+    catch(err){
+        oculta_loader();
+        alert(err.message);
+    }
+}
+
+//
+    
+    
+//tabla licencias
+var tabla_lic = $('#tabla_lic_activas').DataTable({
+    colReorder: false, 
+    ordering: true,
+    order: [[ 0, 'asc' ]],
+    bFilter: true,
+	bInfo: true,
+	//bLengthChange: false,
+    lengthMenu: [[25, 50, 100, -1], [25, 50, 100, "Todo"]],
+    paging: true,
+    bStateSave: false, // saves sort state using localStorage
+    scrollY: '50vh',
+    scrollX: true,
+    searching: true,
+    autoWidth : true,
+    language: {
+       // url: "http://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
+    },
+    dom: "<'dt-toolbar'<'col-xs-12 col-sm-6 hidden-xs'f >l<'col-sm-6 col-xs-12 hidden-xs'<'toolbar'>> r >" + "t" + "<'dt-toolbar-footer'<'col-sm-6 col-xs-12 hidden-xs'i><'col-xs-12 col-sm-6'p>> "
+    /*,
+    fixedColumns:   {
+       leftColumns: 1,
+       rightColumns: 1
+    }*/
+});
+
+
+var id_lic_seleccionado = 0;
+var index_lic_seleccionado = -1;
+
+$('#tabla_lic_activas tbody').on( 'click', 'tr', function () {
+    
+    index_lic_seleccionado = this;
+    id_lic_seleccionado = tabla_lic.cell(index_lic_seleccionado, 1).data(); //conseguimos el valos de la celda deseada
+    //alert(id_lic_seleccionado);
+    if ( $(this).hasClass('selected') ) {
+        $(this).removeClass('selected');
+    }
+    else {
+        $('#tabla_lic_activas').DataTable().$('tr.selected').removeClass('selected');
+        $(this).addClass('selected');
+    }
+} );
+
+function oculta_columnas_tabla(indices){
+    $.each( indices, function( index, value ) {
+        tabla_lic.column(value).visible(false);  
+    });
+}
+    
+function muestra_columnas_tabla(indices){
+    //lista de los indices de las columnas que queremos mostrar
+    $.each( indices, function( index, value ) {
+        tabla_lic.column(value).visible(true);  
+    });
+}
+    
+
+$(document).ready(function () {
+    //lista de los indices de las columnas de la tabla que queremos ocultar o mostrar
+    var indices = [1];
+    oculta_columnas_tabla(indices);
+    
+})();
+        
+</script>
