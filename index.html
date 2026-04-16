@@ -2166,7 +2166,7 @@
       addMessage("bella", "Escribiendo...");
 
       try {
-        const response = await fetch("chat.php", {
+        const response = await fetch("php/chat.php", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: text })
