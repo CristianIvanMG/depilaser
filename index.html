@@ -1433,9 +1433,9 @@
       }
     }
 
-    @media (max-width: 640px) {
+    @media (max-width: 768px) {
       .nav-toggle {
-        display: block;
+        display: flex;
       }
 
       .nav-menu {
@@ -1495,6 +1495,12 @@
       }
     }
 
+    @media (min-width: 769px) {
+      .nav-toggle {
+        display: none;
+      }
+    }
+
     /* ====================================================
          ASISTENTE
       ==================================================== */
@@ -1523,7 +1529,7 @@
       padding: 12px;
       overflow-y: auto;
       background: #f7f7f8;
-      flex: 1;   
+      flex: 1;
     }
 
     .chat-input {
@@ -1531,9 +1537,9 @@
       gap: 8px;
       padding: 10px;
       border-top: 1px solid #eee;
-flex-shrink: 0;   
-  align-items: center;
-  background: #fafafa;
+      flex-shrink: 0;
+      align-items: center;
+      background: #fafafa;
     }
 
     .chat-input {
@@ -2251,7 +2257,8 @@ flex-shrink: 0;
         <address style="font-style:normal;">
           <div class="contacto-item">
             <span>📧</span>
-            <a target="_blank" rel="noopener noreferrer" href="mailto:administracion@depilasermexico.com" style="color:rgba(255,255,255,0.65);">
+            <a target="_blank" rel="noopener noreferrer" href="mailto:administracion@depilasermexico.com"
+              style="color:rgba(255,255,255,0.65);">
               administracion@depilasermexico.com
             </a>
           </div>
@@ -2261,7 +2268,8 @@ flex-shrink: 0;
           </div>
           <div class="contacto-item">
             <span>📞</span>
-            <a target="_blank" rel="noopener noreferrer" href="tel:+525535433490" style="color:rgba(255,255,255,0.65);">(55) 3543-3490</a>
+            <a target="_blank" rel="noopener noreferrer" href="tel:+525535433490"
+              style="color:rgba(255,255,255,0.65);">(55) 3543-3490</a>
           </div>
           <div class="contacto-item">
             <span>📍</span>
@@ -2303,172 +2311,172 @@ flex-shrink: 0;
   </a> -->
   <script>
     // =====================
-// ELEMENTOS
-// =====================
-const chat = document.getElementById("bella-chat");
-const chatToggleBtn = document.getElementById("chatToggle");
-const chatCloseBtn = document.getElementById("chatClose");
-const sendBtn = document.getElementById("sendBtn");
-const input = document.getElementById("userInput");
-const messages = document.getElementById("messages");
+    // ELEMENTOS
+    // =====================
+    const chat = document.getElementById("bella-chat");
+    const chatToggleBtn = document.getElementById("chatToggle");
+    const chatCloseBtn = document.getElementById("chatClose");
+    const sendBtn = document.getElementById("sendBtn");
+    const input = document.getElementById("userInput");
+    const messages = document.getElementById("messages");
+    const navToggleBtn = document.querySelector(".nav-toggle");
+    const navMenu = document.querySelector(".nav-menu");
+    const submenuToggles = document.querySelectorAll(".submenu-toggle");
 
-const navToggleBtn = document.querySelector(".nav-toggle");
-const navMenu = document.querySelector(".nav-menu");
-const submenuToggles = document.querySelectorAll(".submenu-toggle");
+    let iaDisponible = true;
 
-let iaDisponible = true;
-
-// =====================
-// CHAT
-// =====================
-function openChat() {
-  chat.classList.add("activo");
-  if (messages.innerHTML === "") {
-    addMessage(
-      "bella",
-      "👋 Bienvenida a BellaNick Clinic. ¿Te ayudo a agendar una cita o resolver una duda?"
-    );
-  }
-}
-
-function closeChat() {
-  chat.classList.remove("activo");
-  messages.innerHTML = "";
-  resetChatSession();
-  sessionStorage.setItem("chatClosed", "true");
-}
-
-chatToggleBtn.addEventListener("click", openChat);
-
-chatCloseBtn.addEventListener("click", (e) => {
-  e.stopPropagation();
-  closeChat();
-});
-
-// Auto abrir
-window.addEventListener("load", () => {
-  if (!sessionStorage.getItem("chatClosed") && window.innerWidth > 480) {
-    setTimeout(openChat, 1200);
-  }
-});
-
-// =====================
-// MENÚ HAMBURGUESA
-// =====================
-navToggleBtn.addEventListener("click", (e) => {
-  e.stopPropagation();
-  navMenu.classList.toggle("active");
-  navToggleBtn.classList.toggle("open");
-});
-
-// Cerrar menú al clicar links
-document.querySelectorAll(".nav-menu a").forEach(link => {
-  link.addEventListener("click", () => {
-    navMenu.classList.remove("active");
-    navToggleBtn.classList.remove("open");
-  });
-});
-
-// Submenú Servicios
-submenuToggles.forEach(toggle => {
-  toggle.addEventListener("click", (e) => {
-    e.preventDefault();
-    const parent = toggle.closest(".has-submenu");
-
-    submenuToggles.forEach(t => {
-      const p = t.closest(".has-submenu");
-      if (p !== parent) p.classList.remove("open");
-    });
-
-    parent.classList.toggle("open");
-  });
-});
-
-// =====================
-// MENSAJES
-// =====================
-function addMessage(type, text) {
-  const div = document.createElement("div");
-  div.className = type;
-  div.innerText = text;
-  messages.appendChild(div);
-  messages.scrollTop = messages.scrollHeight;
-}
-
-// =====================
-// ENVÍO MENSAJE
-// =====================
-async function sendMessage() {
-  if (!iaDisponible) {
-    window.open("https://wa.me/525535433490", "_blank");
-    return;
-  }
-
-  const text = input.value.trim();
-  if (!text) return;
-
-  const wantsWhatsApp = /\b(whatsapp|wa|wha|por whatsapp|mandame whatsapp|quiero whatsapp)\b/i.test(text);
-
-  addMessage("user", text);
-  input.value = "";
-  addMessage("bella", "Escribiendo...");
-
-  try {
-    const response = await fetch("/php/chat.php?ts=" + Date.now(), {
-      method: "POST",
-      credentials: "same-origin",
-      cache: "no-store",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text })
-    });
-
-    const rawText = await response.text();
-    messages.lastChild.remove();
-
-    const data = JSON.parse(rawText);
-    addMessage("bella", data.reply);
-
-    if (data.ia_disabled) {
-      iaDisponible = false;
-      closeChat();
-      setTimeout(() => {
-        window.open("https://wa.me/525535433490", "_blank");
-      }, 1200);
-      return;
+    // =====================
+    // CHAT
+    // =====================
+    function openChat() {
+      chat.classList.add("activo");
+      if (messages.innerHTML === "") {
+        addMessage(
+          "bella",
+          "👋 Bienvenida a BellaNick Clinic. ¿Te ayudo a agendar una cita o resolver una duda?"
+        );
+      }
     }
 
-    if (wantsWhatsApp) {
-      closeChat();
-      setTimeout(() => {
-        window.open("https://wa.me/525535433490", "_blank");
-      }, 800);
+    function closeChat() {
+      chat.classList.remove("activo");
+      messages.innerHTML = "";
+      resetChatSession();
+      sessionStorage.setItem("chatClosed", "true");
     }
 
-  } catch (e) {
-    addMessage(
-      "bella",
-      "Hubo un problema técnico momentáneo. ¿Prefieres que te atiendan por WhatsApp?"
-    );
-  }
-}
+    chatToggleBtn.addEventListener("click", openChat);
 
-sendBtn.addEventListener("click", sendMessage);
-input.addEventListener("keypress", e => {
-  if (e.key === "Enter") sendMessage();
-});
-
-// =====================
-// RESET SESSION
-// =====================
-async function resetChatSession() {
-  try {
-    await fetch("/php/reset_session.php", {
-      method: "POST",
-      credentials: "same-origin",
-      cache: "no-store"
+    chatCloseBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      closeChat();
     });
-  } catch {}
-}
+
+    // Auto abrir
+    window.addEventListener("load", () => {
+      if (!sessionStorage.getItem("chatClosed") && window.innerWidth > 480) {
+        setTimeout(openChat, 1200);
+      }
+    });
+
+    // =====================
+    // MENÚ HAMBURGUESA
+    // =====================
+    navToggleBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      navMenu.classList.toggle("active");
+      navToggleBtn.classList.toggle("open");
+    });
+
+    // Cerrar menú al clicar links
+    document.querySelectorAll(".nav-menu a").forEach(link => {
+      link.addEventListener("click", () => {
+        navMenu.classList.remove("active");
+        navToggleBtn.classList.remove("open");
+      });
+    });
+
+    // Submenú Servicios
+    submenuToggles.forEach(toggle => {
+      toggle.addEventListener("click", (e) => {
+        e.preventDefault();
+        const parent = toggle.closest(".has-submenu");
+
+        submenuToggles.forEach(t => {
+          const p = t.closest(".has-submenu");
+          if (p !== parent) p.classList.remove("open");
+        });
+
+        parent.classList.toggle("open");
+      });
+    });
+
+    // =====================
+    // MENSAJES
+    // =====================
+    function addMessage(type, text) {
+      const div = document.createElement("div");
+      div.className = type;
+      div.innerText = text;
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    // =====================
+    // ENVÍO MENSAJE
+    // =====================
+    async function sendMessage() {
+      if (!iaDisponible) {
+        window.open("https://wa.me/525535433490", "_blank");
+        return;
+      }
+
+      const text = input.value.trim();
+      if (!text) return;
+
+      const wantsWhatsApp = /\b(whatsapp|wa|wha|por whatsapp|mandame whatsapp|quiero whatsapp)\b/i.test(text);
+
+      addMessage("user", text);
+      input.value = "";
+      addMessage("bella", "Escribiendo...");
+
+      try {
+        const response = await fetch("/php/chat.php?ts=" + Date.now(), {
+          method: "POST",
+          credentials: "same-origin",
+          cache: "no-store",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: text })
+        });
+
+        const rawText = await response.text();
+        messages.lastChild.remove();
+
+        const data = JSON.parse(rawText);
+        addMessage("bella", data.reply);
+
+        if (data.ia_disabled) {
+          iaDisponible = false;
+          closeChat();
+          setTimeout(() => {
+            window.open("https://wa.me/525535433490", "_blank");
+          }, 1200);
+          return;
+        }
+
+        if (wantsWhatsApp) {
+          closeChat();
+          setTimeout(() => {
+            window.open("https://wa.me/525535433490", "_blank");
+          }, 800);
+        }
+
+      } catch (e) {
+        addMessage(
+          "bella",
+          "Hubo un problema técnico momentáneo. ¿Prefieres que te atiendan por WhatsApp?"
+        );
+      }
+    }
+
+    sendBtn.addEventListener("click", sendMessage);
+    input.addEventListener("keypress", e => {
+      if (e.key === "Enter") sendMessage();
+    });
+
+    // =====================
+    // RESET SESSION
+    // =====================
+    async function resetChatSession() {
+      try {
+        await fetch("/php/reset_session.php", {
+          method: "POST",
+          credentials: "same-origin",
+          cache: "no-store"
+        });
+      } catch { }
+    }
+
   </script>
 </body>
 
