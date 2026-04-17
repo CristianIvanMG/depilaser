@@ -364,11 +364,37 @@
     }
 
     .nav-toggle {
-      display: none;
       font-size: 26px;
       background: none;
       border: none;
       cursor: pointer;
+      width: 32px;
+      height: 26px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      z-index: 1001;
+    }
+
+    .nav-toggle .bar {
+      width: 100%;
+      height: 3px;
+      background: #333;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    /* ESTADO ABIERTO → ✕ */
+    .nav-toggle.open .bar:nth-child(1) {
+      transform: translateY(11px) rotate(45deg);
+    }
+
+    .nav-toggle.open .bar:nth-child(2) {
+      opacity: 0;
+    }
+
+    .nav-toggle.open .bar:nth-child(3) {
+      transform: translateY(-11px) rotate(-45deg);
     }
 
     /* ====================================================
@@ -1491,9 +1517,12 @@
     }
 
     #messages {
-      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
       padding: 12px;
       overflow-y: auto;
+      background: #f7f7f8;
     }
 
     .chat-input {
@@ -1551,17 +1580,68 @@
     .chat-input button:active {
       transform: scale(0.96);
     }
+
+    #messages .user,
+    #messages .bella {
+      max-width: 80%;
+      padding: 10px 14px;
+      border-radius: 16px;
+      font-size: 14px;
+      line-height: 1.4;
+      animation: fadeInUp 0.25s ease;
+    }
+
+    #messages .user {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #c53b6d, #e06b9a);
+      color: #fff;
+      border-bottom-right-radius: 6px;
+    }
+
+    #messages .bella {
+      align-self: flex-start;
+      background: #ffffff;
+      color: #333;
+      border-bottom-left-radius: 6px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .chat-close {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      color: #999;
+      z-index: 10;
+    }
+
+    .chat-close:hover {
+      color: #c53b6d;
+    }
   </style>
 </head>
 
 <body>
-
   <!-- ============================================================
        BARRA SUPERIOR 
   ============================================================ -->
   <div class="barra-confianza">
-    <span>2 Sucursales en CDMX</span>
-    <span>1 Sucursal en Querétaro</span>
+    <span>3 Sucursales</span>
     <span>Cita de valoración SIN COSTO</span>
     <span>Tecnología Láser Diodo de última generación</span>
     <span>+300 clientes satisfechos</span>
@@ -2197,18 +2277,14 @@
       </p>
     </div>
   </footer>
-
   <!-- ============================================================
        BOTÓN FLOTANTE DE WHATSAPP
   ============================================================ -->
-
-  <!-- ✅ BOTÓN FLOTANTE -->
   <button id="chatToggle" class="whatsapp-flotante">
     💬
   </button>
-
-  <!-- ✅ CAJA DEL CHAT -->
   <div id="bella-chat" class="bella-chat-box">
+    <button id="chatClose" class="chat-close">✕</button>
     <div id="messages"></div>
 
     <div class="chat-input">
@@ -2216,8 +2292,6 @@
       <button id="sendBtn">Enviar</button>
     </div>
   </div>
-
-
   <!-- <a href="https://wa.me/525535433490?text=Hola%2C%20quiero%20informaci%C3%B3n%20sobre%20sus%20tratamientos"
     class="whatsapp-flotante" target="_blank" rel="noopener noreferrer"
     aria-label="Contactar a BellaNick Clinic por WhatsApp">
@@ -2229,18 +2303,18 @@
     const sendBtn = document.getElementById("sendBtn");
     const input = document.getElementById("userInput");
     const messages = document.getElementById("messages");
-    // Abrir / cerrar chat
+    const closeBtn = document.getElementById("chatClose");
+    const HamburguesaBtn = document.querySelector(".nav-toggle");
+    const navMenu = document.querySelector(".nav-menu");
+
     toggleBtn.addEventListener("click", () => {
       const wasOpen = chat.classList.contains("activo");
-
       chat.classList.toggle("activo");
-
       // ✅ SI SE ACABA DE CERRAR EL CHAT
       if (wasOpen && !chat.classList.contains("activo")) {
         resetChatSession();          // 🔥 AQUÍ VA
         messages.innerHTML = "";     // Limpia mensajes visuales (opcional pero recomendado)
       }
-
       // ✅ SI SE ACABA DE ABRIR EL CHAT
       if (chat.classList.contains("activo") && messages.innerHTML === "") {
         addMessage(
@@ -2249,7 +2323,6 @@
         );
       }
     });
-    // Enviar mensaje
     sendBtn.addEventListener("click", sendMessage);
     input.addEventListener("keypress", e => {
       if (e.key === "Enter") sendMessage();
@@ -2277,7 +2350,37 @@
         });
       });
     });
+    closeBtn.addEventListener("click", () => {
+      bellaChat.classList.remove("activo");
+      messages.innerHTML = "";
+      sessionStorage.setItem("chatClosed", "true");
+      resetChatSession();
+    });
+    window.addEventListener("load", () => {
+      if (!sessionStorage.getItem("chatClosed") && window.innerWidth > 480) {
+        setTimeout(() => {
+          bellaChat.classList.add("activo");
+          if (messages.innerHTML === "") {
+            addMessage(
+              "bella",
+              "👋 Bienvenida a BellaNick Clinic. ¿Te ayudo a agendar una cita o resolver una duda?"
+            );
+          }
+        }, 1200);
+      }
+    });
+    HamburguesaBtn.addEventListener("click", () => {
+      navMenu.classList.toggle("active");
+      HamburguesaBtn.classList.toggle("open"); 
+    });
+    document.querySelectorAll(".nav-menu a").forEach(link => {
+      link.addEventListener("click", () => {
+        navMenu.classList.remove("active");
+        toggleBtn.classList.remove("open");
+      });
+    });
 
+    let iaDisponible = true;
     function addMessage(type, text) {
       const div = document.createElement("div");
       div.className = type;
@@ -2285,7 +2388,6 @@
       messages.appendChild(div);
       messages.scrollTop = messages.scrollHeight;
     }
-    let iaDisponible = true;
     async function sendMessage() {
       if (!iaDisponible) {
         window.open("https://wa.me/525535433490", "_blank");
