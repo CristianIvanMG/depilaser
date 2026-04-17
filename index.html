@@ -2131,9 +2131,19 @@
     const messages = document.getElementById("messages");
 
     // Abrir / cerrar chat
+
     toggleBtn.addEventListener("click", () => {
+      const wasOpen = chat.classList.contains("activo");
+
       chat.classList.toggle("activo");
 
+      // ✅ SI SE ACABA DE CERRAR EL CHAT
+      if (wasOpen && !chat.classList.contains("activo")) {
+        resetChatSession();          // 🔥 AQUÍ VA
+        messages.innerHTML = "";     // Limpia mensajes visuales (opcional pero recomendado)
+      }
+
+      // ✅ SI SE ACABA DE ABRIR EL CHAT
       if (chat.classList.contains("activo") && messages.innerHTML === "") {
         addMessage(
           "bella",
@@ -2141,6 +2151,7 @@
         );
       }
     });
+
 
     // Enviar mensaje
     sendBtn.addEventListener("click", sendMessage);
@@ -2219,6 +2230,20 @@
         );
       }
     }
+
+
+    async function resetChatSession() {
+      try {
+        await fetch("/php/reset_session.php", {
+          method: "POST",
+          credentials: "same-origin",
+          cache: "no-store"
+        });
+      } catch (e) {
+        console.warn("No se pudo resetear la sesión", e);
+      }
+    }
+
   </script>
 
 </body>
