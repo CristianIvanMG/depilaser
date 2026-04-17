@@ -2216,6 +2216,15 @@
         // Mostrar respuesta del asistente
         addMessage("bella", data.reply);
 
+        const whatsappRegex = /wa\.me|whatsapp/i;
+
+        if (whatsappRegex.test(data.reply)) {
+          resetChatSession();
+          setTimeout(() => {
+            window.open("https://wa.me/525535433490", "_blank");
+          }, 1200);
+        }
+
       } catch (error) {
         console.error("Error en sendMessage():", error);
 
