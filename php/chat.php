@@ -1,35 +1,44 @@
 <?php
+// ===========================
+// CONFIGURACIÓN ANTI-BUFFER (LiteSpeed)
+// ===========================
+ini_set('display_errors', 0);
+ini_set('output_buffering', 'off');
+ini_set('zlib.output_compression', 0);
+ob_implicit_flush(true);
+while (ob_get_level()) { ob_end_clean(); }
+
+header("Content-Type: application/json; charset=UTF-8");
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+
 session_start();
-header("Content-Type: application/json");
 
 // ===========================
-// Cargar la API key desde archivo seguro
+// CARGAR API KEY (HOSTINGER)
 // ===========================
 $config = require __DIR__ . '/../config/secrets.php';
 $apiKey = $config['openai_api_key'] ?? null;
 
 if (!$apiKey) {
-  echo json_encode([
-    "reply" => "Error de configuración del servidor."
-  ]);
+  echo json_encode(["reply" => "Error de configuración del servidor."]);
+  flush();
   exit;
 }
 
 // ===========================
-// Obtener mensaje del usuario
+// LEER MENSAJE
 // ===========================
 $input = json_decode(file_get_contents("php://input"), true);
 $userMessage = trim($input["message"] ?? "");
 
 if ($userMessage === "") {
-  echo json_encode([
-    "reply" => "¿En qué puedo ayudarte?"
-  ]);
+  echo json_encode(["reply" => "¿En qué puedo ayudarte?"]);
+  flush();
   exit;
 }
 
 // ===========================
-// Prompt del sistema (NO MODIFICADO)
+// PROMPT (NO TOCADO)
 // ===========================
 $systemPrompt = <<<PROMPT
 Eres Paola, recepcionista virtual de BellaNick Clinic, clínica de depilación láser y estética en CDMX.
@@ -71,7 +80,7 @@ Nunca repitas información innecesaria.
 PROMPT;
 
 // ===========================
-// Inicializar historial de sesión
+// SESIÓN (HISTORIAL)
 // ===========================
 if (!isset($_SESSION["messages"])) {
   $_SESSION["messages"] = [
@@ -79,16 +88,13 @@ if (!isset($_SESSION["messages"])) {
   ];
 }
 
-// ===========================
-// Agregar mensaje del usuario
-// ===========================
 $_SESSION["messages"][] = [
   "role" => "user",
   "content" => $userMessage
 ];
 
 // ===========================
-// Payload para OpenAI
+// PAYLOAD OPENAI
 // ===========================
 $payload = [
   "model" => "gpt-4.1-mini",
@@ -97,7 +103,7 @@ $payload = [
 ];
 
 // ===========================
-// Llamada a OpenAI
+// CURL OPENAI
 // ===========================
 $ch = curl_init("https://api.openai.com/v1/chat/completions");
 curl_setopt_array($ch, [
@@ -115,21 +121,37 @@ $response = curl_exec($ch);
 curl_close($ch);
 
 if ($response === false) {
-  echo json_encode([
-    "reply" => "Lo siento, ocurrió un problema técnico."
-  ]);
+  echo json_encode(["reply" => "Lo siento, ocurrió un problema técnico."]);
+  flush();
   exit;
 }
 
 $data = json_decode($response, true);
 
-// ===========================
-// Manejo de error de OpenAI
-// ===========================
 if (isset($data["error"])) {
   echo json_encode([
     "reply" => "Tenemos un inconveniente técnico, ¿prefieres que te atiendan por WhatsApp?"
   ]);
+  flush();
   exit;
 }
 
+$assistantReply = $data["choices"][0]["message"]["content"] ?? "¿Deseas que agendemos una cita?";
+
+// ===========================
+// GUARDAR RESPUESTA
+// ===========================
+$_SESSION["messages"][] = [
+  "role" => "assistant",
+  "content" => $assistantReply
+];
+
+// ===========================
+// RESPUESTA FINAL (FORZADA)
+// ===========================
+echo json_encode(
+  ["reply" => $assistantReply],
+  JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+);
+flush();
+exit;
