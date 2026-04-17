@@ -1411,6 +1411,19 @@
     }
 
 
+    .nav-link {
+      cursor: default;
+      /* No “mano” de link */
+      color: inherit;
+      font-weight: 500;
+    }
+
+    .has-submenu:hover .submenu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
     /* ====================================================
          ASISTENTE
       ==================================================== */
@@ -1522,7 +1535,7 @@
         <li><a href="#sucursales">Sucursales</a></li>
 
         <li class="has-submenu">
-          <a href="#servicios">Servicios ▾</a>
+          <span class="nav-link">Servicios ▾</span>
           <ul class="submenu">
             <li><a href="depilacion-laser-diodo.html">Depilación Láser Diodo</a></li>
             <li><a href="lipolisis-laser.html">Lipólisis Láser</a></li>
