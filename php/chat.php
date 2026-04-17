@@ -128,13 +128,29 @@ if ($response === false) {
 
 $data = json_decode($response, true);
 
+
 if (isset($data["error"])) {
+
+  // Detectar límite de uso / cuota
+  if (
+    isset($data["error"]["code"]) &&
+    in_array($data["error"]["code"], ["insufficient_quota", "billing_hard_limit_reached"])
+  ) {
+    echo json_encode([
+      "ia_disabled" => true,
+      "reply" => "Nuestro asistente está temporalmente fuera de servicio. Te atendemos de inmediato por WhatsApp."
+    ]);
+    flush();
+    exit;
+  }
+
   echo json_encode([
-    "reply" => "Tenemos un inconveniente técnico, ¿prefieres que te atiendan por WhatsApp?"
+    "reply" => "Tenemos un inconveniente técnico momentáneo. ¿Prefieres que te atiendan por WhatsApp?"
   ]);
   flush();
   exit;
 }
+
 
 $assistantReply = $data["choices"][0]["message"]["content"] ?? "¿Deseas que agendemos una cita?";
 

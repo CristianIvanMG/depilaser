@@ -288,6 +288,11 @@
       top: 0;
       z-index: 1000;
       box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
     }
 
     .nav-inner {
@@ -354,6 +359,84 @@
 
     .nav-cta::after {
       display: none !important;
+    }
+
+    .nav-link {
+      cursor: default;
+      color: inherit;
+      font-weight: 500;
+    }
+
+    .nav-toggle {
+      display: none;
+      font-size: 26px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* ====================================================
+         CONTENEDOR DEL SUBMENÚ 
+      ==================================================== */
+    .has-submenu {
+      position: relative;
+    }
+
+    /* SUBMENÚ OCULTO */
+    .submenu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: #ffffff;
+      list-style: none;
+      padding: 8px 0;
+      margin: 0;
+      min-width: 220px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      border-radius: 8px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
+      transition: all 0.25s ease;
+      z-index: 999;
+    }
+
+    /* MOSTRAR SUBMENÚ */
+    .has-submenu:hover .submenu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    /* LINKS DEL SUBMENÚ */
+    .submenu li a {
+      display: block;
+      padding: 10px 16px;
+      color: #333;
+      text-decoration: none;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    /* HOVER */
+    .submenu li a:hover {
+      background: #f5f5f5;
+      color: #c53b6d;
+      /* rosa BellaNick */
+    }
+
+    .has-submenu:hover .submenu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .submenu {
+      display: none;
+    }
+
+    .has-submenu.open .submenu {
+      display: block;
     }
 
     /* ====================================================
@@ -1329,8 +1412,39 @@
     }
 
     @media (max-width: 640px) {
+      .nav-toggle {
+        display: block;
+      }
+
       .nav-menu {
+        position: absolute;
+        top: 64px;
+        left: 0;
+        width: 100%;
+        background: white;
+        flex-direction: column;
+        gap: 0;
         display: none;
+        padding: 12px 0;
+      }
+
+      .nav-menu.active {
+        display: block;
+      }
+
+      .nav-menu li {
+        padding: 12px 20px;
+      }
+
+      /* SUBMENÚ MOBILE */
+      .submenu {
+        position: static;
+        box-shadow: none;
+        border-radius: 0;
+      }
+
+      .has-submenu.open .submenu {
+        display: block;
       }
 
       .section {
@@ -1357,71 +1471,6 @@
       .prueba-social-inner {
         gap: 20px;
       }
-    }
-
-    /* ====================================================
-         CONTENEDOR DEL SUBMENÚ 
-      ==================================================== */
-
-    .has-submenu {
-      position: relative;
-    }
-
-    /* SUBMENÚ OCULTO */
-    .submenu {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      background: #ffffff;
-      list-style: none;
-      padding: 8px 0;
-      margin: 0;
-      min-width: 220px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-      border-radius: 8px;
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(10px);
-      transition: all 0.25s ease;
-      z-index: 999;
-    }
-
-    /* MOSTRAR SUBMENÚ */
-    .has-submenu:hover .submenu {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0);
-    }
-
-    /* LINKS DEL SUBMENÚ */
-    .submenu li a {
-      display: block;
-      padding: 10px 16px;
-      color: #333;
-      text-decoration: none;
-      font-size: 14px;
-      white-space: nowrap;
-    }
-
-    /* HOVER */
-    .submenu li a:hover {
-      background: #f5f5f5;
-      color: #c53b6d;
-      /* rosa BellaNick */
-    }
-
-
-    .nav-link {
-      cursor: default;
-      /* No “mano” de link */
-      color: inherit;
-      font-weight: 500;
-    }
-
-    .has-submenu:hover .submenu {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0);
     }
 
     /* ====================================================
@@ -1524,18 +1573,21 @@
   <!-- ============================================================
        NAVEGACIÓN
   ============================================================ -->
-  <nav role="navigation" aria-label="Menú principal">
+  <nav class="nav" role="navigation" aria-label="Menú principal">
     <div class="nav-inner">
       <a class="nav-logo" href="https://depilasermexico.com/index.html" aria-label="BellaNick Clinic - Inicio">
         <img src="https://depilasermexico.com/assets/img/logo/logo.webp"
           alt="Logo BellaNick Clinic - Depilación Láser CDMX" width="160" height="48" />
       </a>
+      <button class="nav-toggle" aria-label="Abrir menú">
+        ☰
+      </button>
       <ul class="nav-menu">
         <li><a href="https://depilasermexico.com/index.html">Inicio</a></li>
         <li><a href="#sucursales">Sucursales</a></li>
 
         <li class="has-submenu">
-          <span class="nav-link">Servicios ▾</span>
+          <span class="submenu-toggle">Servicios ▾</span>
           <ul class="submenu">
             <li><a href="depilacion-laser-diodo.html">Depilación Láser Diodo</a></li>
             <li><a href="lipolisis-laser.html">Lipólisis Láser</a></li>
@@ -2174,40 +2226,13 @@
     aria-label="Contactar a BellaNick Clinic por WhatsApp">
     💬
   </a> -->
-
-  <script>
-    async function sendMessage() {
-      const input = document.getElementById("userInput");
-      const message = input.value.trim();
-
-      if (!message) return;
-
-      document.getElementById("messages").innerHTML +=
-        `<p><strong>Tú:</strong> ${message}</p>`;
-
-      input.value = "";
-
-      const response = await fetch("chat.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message })
-      });
-
-      const data = await response.json();
-
-      document.getElementById("messages").innerHTML +=
-        `<p><strong>Bella Nick:</strong> ${data.reply}</p>`;
-    }
-  </script>
   <script>
     const chat = document.getElementById("bella-chat");
     const toggleBtn = document.getElementById("chatToggle");
     const sendBtn = document.getElementById("sendBtn");
     const input = document.getElementById("userInput");
     const messages = document.getElementById("messages");
-
     // Abrir / cerrar chat
-
     toggleBtn.addEventListener("click", () => {
       const wasOpen = chat.classList.contains("activo");
 
@@ -2227,12 +2252,33 @@
         );
       }
     });
-
-
     // Enviar mensaje
     sendBtn.addEventListener("click", sendMessage);
     input.addEventListener("keypress", e => {
       if (e.key === "Enter") sendMessage();
+    });
+    document.addEventListener("DOMContentLoaded", () => {
+      const toggleBtn = document.querySelector(".nav-toggle");
+      const navMenu = document.querySelector(".nav-menu");
+      const toggles = document.querySelectorAll(".submenu-toggle");
+      toggleBtn.addEventListener("click", () => {
+        navMenu.classList.toggle("active");
+      });
+      toggles.forEach(toggle => {
+        toggle.addEventListener("click", (e) => {
+
+          e.preventDefault(); // evita cualquier acción rara
+          const parent = toggle.closest(".has-submenu");
+          // Cierra otros submenús (opcional pero recomendado)
+          document.querySelectorAll(".has-submenu").forEach(item => {
+            if (item !== parent) {
+              item.classList.remove("open");
+            }
+          });
+          // Abre / cierra el actual
+          parent.classList.toggle("open");
+        });
+      });
     });
 
     function addMessage(type, text) {
@@ -2242,15 +2288,18 @@
       messages.appendChild(div);
       messages.scrollTop = messages.scrollHeight;
     }
-
+    let iaDisponible = true;
     async function sendMessage() {
+      if (!iaDisponible) {
+        window.open("https://wa.me/525535433490", "_blank");
+        return;
+      }
       const text = input.value.trim();
       if (!text) return;
       const wantsWhatsApp = /\b(whatsapp|wa|wha|por whatsapp|mandame whatsapp|quiero whatsapp)\b/i.test(text);
       // Mostrar mensaje del usuario
       addMessage("user", text);
       input.value = "";
-
       // Mensaje temporal
       addMessage("bella", "Escribiendo...");
 
@@ -2268,7 +2317,6 @@
         // Leer respuesta como TEXTO (no json directo)
         const rawText = await response.text();
 
-
         // Quitar "Escribiendo..."
         messages.lastChild.remove();
 
@@ -2280,6 +2328,7 @@
         let data;
         try {
           data = JSON.parse(rawText);
+          addMessage("bella", data.reply);
         } catch (err) {
           console.error("Error al parsear JSON:", rawText);
           throw err;
@@ -2288,10 +2337,15 @@
         if (!data.reply) {
           throw new Error("JSON sin propiedad reply");
         }
-
         // Mostrar respuesta del asistente
-        addMessage("bella", data.reply);
-
+        if (data.ia_disabled) {
+          iaDisponible = false;
+          resetChatSession();
+          setTimeout(() => {
+            window.open("https://wa.me/525535433490", "_blank");
+          }, 1200);
+          return;
+        }
 
         if (wantsWhatsApp) {
           resetChatSession(); // opcional pero recomendado
@@ -2300,8 +2354,6 @@
           }, 800);
           return;
         }
-
-
       } catch (error) {
         console.error("Error en sendMessage():", error);
 
@@ -2316,8 +2368,6 @@
         );
       }
     }
-
-
     async function resetChatSession() {
       try {
         await fetch("/php/reset_session.php", {
@@ -2331,7 +2381,6 @@
     }
 
   </script>
-
 </body>
 
 </html>
