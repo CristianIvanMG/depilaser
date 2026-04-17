@@ -1,0 +1,3 @@
+config/secrets.php
+.env
+debug_openai.txt

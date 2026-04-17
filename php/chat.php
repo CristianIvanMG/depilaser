@@ -2,17 +2,35 @@
 session_start();
 header("Content-Type: application/json");
 
-// 1. Obtener mensaje del usuario
+// ===========================
+// Cargar la API key desde archivo seguro
+// ===========================
+$config = require __DIR__ . '/../config/secrets.php';
+$apiKey = $config['openai_api_key'] ?? null;
+
+if (!$apiKey) {
+  echo json_encode([
+    "reply" => "Error de configuración del servidor."
+  ]);
+  exit;
+}
+
+// ===========================
+// Obtener mensaje del usuario
+// ===========================
 $input = json_decode(file_get_contents("php://input"), true);
 $userMessage = trim($input["message"] ?? "");
 
 if ($userMessage === "") {
-  echo json_encode(["reply" => "¿En qué puedo ayudarte?"]);
+  echo json_encode([
+    "reply" => "¿En qué puedo ayudarte?"
+  ]);
   exit;
 }
 
-// 2. Prompt del sistema (rol fijo)
-
+// ===========================
+// Prompt del sistema (NO MODIFICADO)
+// ===========================
 $systemPrompt = <<<PROMPT
 Eres Paola, recepcionista virtual de BellaNick Clinic, clínica de depilación láser y estética en CDMX.
 
@@ -52,34 +70,42 @@ Nunca des más de una opción si la usuaria ya eligió.
 Nunca repitas información innecesaria.
 PROMPT;
 
-
-// 3. Inicializar historial si no existe
+// ===========================
+// Inicializar historial de sesión
+// ===========================
 if (!isset($_SESSION["messages"])) {
   $_SESSION["messages"] = [
     ["role" => "system", "content" => $systemPrompt]
   ];
 }
 
-// 4. Agregar mensaje del usuario al historial
+// ===========================
+// Agregar mensaje del usuario
+// ===========================
 $_SESSION["messages"][] = [
   "role" => "user",
   "content" => $userMessage
 ];
 
-// 5. Llamada a OpenAI
+// ===========================
+// Payload para OpenAI
+// ===========================
 $payload = [
   "model" => "gpt-4.1-mini",
   "messages" => $_SESSION["messages"],
   "temperature" => 0.4
 ];
 
+// ===========================
+// Llamada a OpenAI
+// ===========================
 $ch = curl_init("https://api.openai.com/v1/chat/completions");
 curl_setopt_array($ch, [
   CURLOPT_RETURNTRANSFER => true,
   CURLOPT_POST => true,
   CURLOPT_HTTPHEADER => [
     "Content-Type: application/json",
-    "Authorization: Bearer " . getenv("OPENAI_API_KEY")
+    "Authorization: Bearer " . $apiKey
   ],
   CURLOPT_POSTFIELDS => json_encode($payload),
   CURLOPT_TIMEOUT => 30
@@ -89,24 +115,21 @@ $response = curl_exec($ch);
 curl_close($ch);
 
 if ($response === false) {
-  echo json_encode(["reply" => "Lo siento, hubo un problema. Intenta más tarde."]);
+  echo json_encode([
+    "reply" => "Lo siento, ocurrió un problema técnico."
+  ]);
   exit;
 }
 
 $data = json_decode($response, true);
-$assistantReply = $data["choices"][0]["message"]["content"] ?? "¿Deseas que agendemos una cita?";
 
-// 6. Guardar respuesta del asistente en historial
-$_SESSION["messages"][] = [
-  "role" => "assistant",
-  "content" => $assistantReply
-];
-
-// 7. Limitar tamaño del historial (evita costos altos)
-if (count($_SESSION["messages"]) > 12) {
-  $_SESSION["messages"] = array_slice($_SESSION["messages"], -12);
+// ===========================
+// Manejo de error de OpenAI
+// ===========================
+if (isset($data["error"])) {
+  echo json_encode([
+    "reply" => "Tenemos un inconveniente técnico, ¿prefieres que te atiendan por WhatsApp?"
+  ]);
+  exit;
 }
 
-echo json_encode([
-  "reply" => $assistantReply
-]);
