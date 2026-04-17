@@ -2170,7 +2170,7 @@
     async function sendMessage() {
       const text = input.value.trim();
       if (!text) return;
-
+      const wantsWhatsApp = /\b(whatsapp|wa|wha|por whatsapp|mandame whatsapp|quiero whatsapp)\b/i.test(text);
       // Mostrar mensaje del usuario
       addMessage("user", text);
       input.value = "";
@@ -2191,7 +2191,7 @@
 
         // Leer respuesta como TEXTO (no json directo)
         const rawText = await response.text();
-        console.log("RAW RESPONSE:", rawText);
+
 
         // Quitar "Escribiendo..."
         messages.lastChild.remove();
@@ -2216,14 +2216,15 @@
         // Mostrar respuesta del asistente
         addMessage("bella", data.reply);
 
-        const whatsappRegex = /wa\.me|whatsapp/i;
 
-        if (whatsappRegex.test(data.reply)) {
-          resetChatSession();
+        if (wantsWhatsApp) {
+          resetChatSession(); // opcional pero recomendado
           setTimeout(() => {
             window.open("https://wa.me/525535433490", "_blank");
-          }, 1200);
+          }, 800);
+          return;
         }
+
 
       } catch (error) {
         console.error("Error en sendMessage():", error);
