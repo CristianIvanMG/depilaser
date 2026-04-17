@@ -1,0 +1,8 @@
+<IfModule LiteSpeed>
+  CacheDisable on
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+  Header set Pragma "no-cache"
+</IfModule>

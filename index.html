@@ -2170,6 +2170,7 @@
           fetch("/php/chat.php", {
             method: "POST",
             credentials: "same-origin",
+            cache: "no-store",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ message: text })
           });
