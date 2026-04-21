@@ -15,7 +15,7 @@ Options -Indexes -MultiViews
   <IfModule mod_authz_core.c>
     Require all denied
   </IfModule>
-  <IfModule \!mod_authz_core.c>
+  <IfModule !mod_authz_core.c>
     Order deny,allow
     Deny from all
   </IfModule>
@@ -27,7 +27,7 @@ Options -Indexes -MultiViews
   <IfModule mod_authz_core.c>
     Require all denied
   </IfModule>
-  <IfModule \!mod_authz_core.c>
+  <IfModule !mod_authz_core.c>
     Order deny,allow
     Deny from all
   </IfModule>
@@ -41,7 +41,7 @@ RedirectMatch 404 /\.git(/|$)
   <IfModule mod_authz_core.c>
     Require all denied
   </IfModule>
-  <IfModule \!mod_authz_core.c>
+  <IfModule !mod_authz_core.c>
     Order deny,allow
     Deny from all
   </IfModule>
@@ -52,7 +52,7 @@ RedirectMatch 404 /\.git(/|$)
   <IfModule mod_authz_core.c>
     Require all denied
   </IfModule>
-  <IfModule \!mod_authz_core.c>
+  <IfModule !mod_authz_core.c>
     Order deny,allow
     Deny from all
   </IfModule>
@@ -63,7 +63,7 @@ RedirectMatch 404 /\.git(/|$)
   <IfModule mod_authz_core.c>
     Require all denied
   </IfModule>
-  <IfModule \!mod_authz_core.c>
+  <IfModule !mod_authz_core.c>
     Order deny,allow
     Deny from all
   </IfModule>

@@ -2327,6 +2327,42 @@
         grid-template-columns: 1fr
       }
     }
+    /* =====================================================
+       FIX MOVIL: elimina espacio blanco lateral
+       ===================================================== */
+    html,
+    body {
+      width: 100%;
+      max-width: 100%;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    body>* {
+      max-width: 100vw;
+    }
+
+    img,
+    video,
+    iframe,
+    svg,
+    canvas {
+      max-width: 100%;
+      height: auto;
+    }
+
+    /* Forzar que cualquier seccion principal respete el viewport */
+    nav,
+    main,
+    section,
+    header,
+    footer,
+    .barra-confianza {
+      max-width: 100vw;
+      box-sizing: border-box;
+    }
+
   </style>
 </head>
 

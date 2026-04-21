@@ -16,14 +16,16 @@ session_start();
 // ===========================
 // CARGAR API KEY (HOSTINGER)
 // Busca secrets.php en varias rutas, en orden de seguridad:
-//   1. FUERA de public_html  (ideal: /home/USER/secrets.php)
-//   2. Dos niveles arriba    (por si Hostinger usa otra estructura)
-//   3. Dentro de /config/    (fallback legacy - menos seguro)
+//   1. /home/USER/secrets.php                                (MAS SEGURO - fuera de domains/)
+//   2. /home/USER/domains/secrets.php
+//   3. /home/USER/domains/DOMAIN/secrets.php                 (fuera de public_html)
+//   4. /home/USER/domains/DOMAIN/public_html/config/         (legacy, menos seguro)
 // ===========================
 $secretsPaths = [
-  __DIR__ . '/../../../secrets.php',   // /home/USER/secrets.php       (recomendado)
-  __DIR__ . '/../../secrets.php',      // un nivel arriba de public_html
-  __DIR__ . '/../config/secrets.php',  // ubicacion legacy (fallback)
+  __DIR__ . '/../../../../secrets.php', // /home/USER/secrets.php          (recomendado)
+  __DIR__ . '/../../../secrets.php',    // /home/USER/domains/secrets.php
+  __DIR__ . '/../../secrets.php',       // fuera de public_html
+  __DIR__ . '/../config/secrets.php',   // ubicacion legacy (fallback)
 ];
 
 $config = null;
