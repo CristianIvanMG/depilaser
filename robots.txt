@@ -1,4 +1,68 @@
+# ==========================================================
+# robots.txt - BellaNick Clinic (depilasermexico.com)
+# Actualizado: 2026-04-20
+# ==========================================================
+
+# -------- Reglas generales (todos los bots) --------
 User-agent: *
 Allow: /
+Allow: /assets/
 
+# Bloquear directorios sensibles o de backend
+Disallow: /config/
+Disallow: /php/
+Disallow: /Doc/
+Disallow: /licenciaspruebas/
+Disallow: /.git/
+Disallow: /*.php$
+Disallow: /*?*utm_
+Disallow: /*?*fbclid
+Disallow: /*?*gclid
+
+# -------- Googlebot (permitir recursos estaticos) --------
+User-agent: Googlebot
+Allow: /
+Allow: /assets/
+Allow: /*.css$
+Allow: /*.js$
+Allow: /*.webp$
+Allow: /*.jpg$
+Allow: /*.jpeg$
+Allow: /*.png$
+Allow: /*.svg$
+Disallow: /config/
+Disallow: /php/
+Disallow: /Doc/
+Disallow: /licenciaspruebas/
+
+# -------- Googlebot-Image (imagenes) --------
+User-agent: Googlebot-Image
+Allow: /assets/img/
+Allow: /img/
+Disallow: /config/
+Disallow: /php/
+
+# -------- Bingbot --------
+User-agent: Bingbot
+Allow: /
+Disallow: /config/
+Disallow: /php/
+Disallow: /Doc/
+Disallow: /licenciaspruebas/
+
+# -------- Bots agresivos (crawl-delay o bloqueo) --------
+User-agent: AhrefsBot
+Crawl-delay: 30
+
+User-agent: SemrushBot
+Crawl-delay: 30
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+# -------- Host y sitemap --------
+Host: https://depilasermexico.com
 Sitemap: https://depilasermexico.com/sitemap.xml

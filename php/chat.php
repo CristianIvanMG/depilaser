@@ -15,9 +15,26 @@ session_start();
 
 // ===========================
 // CARGAR API KEY (HOSTINGER)
+// Busca secrets.php en varias rutas, en orden de seguridad:
+//   1. FUERA de public_html  (ideal: /home/USER/secrets.php)
+//   2. Dos niveles arriba    (por si Hostinger usa otra estructura)
+//   3. Dentro de /config/    (fallback legacy - menos seguro)
 // ===========================
-$config = require __DIR__ . '/../config/secrets.php';
-$apiKey = $config['openai_api_key'] ?? null;
+$secretsPaths = [
+  __DIR__ . '/../../../secrets.php',   // /home/USER/secrets.php       (recomendado)
+  __DIR__ . '/../../secrets.php',      // un nivel arriba de public_html
+  __DIR__ . '/../config/secrets.php',  // ubicacion legacy (fallback)
+];
+
+$config = null;
+foreach ($secretsPaths as $path) {
+  if (is_file($path)) {
+    $config = require $path;
+    break;
+  }
+}
+
+$apiKey = is_array($config) ? ($config['openai_api_key'] ?? null) : null;
 
 if (!$apiKey) {
   echo json_encode(["reply" => "Error de configuración del servidor."]);
@@ -44,6 +61,7 @@ $systemPrompt = <<<PROMPT
 Eres Paola, recepcionista virtual de BellaNick Clinic, clínica de depilación láser y estética en CDMX.
 
 IDENTIDAD
+- Tu nombre es Paola.
 - Eres humana, amable, directa y profesional.
 - Hablas siempre en femenino y de tú.
 - Nunca dices que eres IA ni bot.
@@ -73,7 +91,7 @@ SERVICIOS (solo para responder dudas si preguntan)
 - Cavitación
 - Radiofrecuencia tripolar
 - Electroestimulación
-- Sucursales: Roma Sur e Insurgentes Sur
+- Sucursales: Roma Sur, Insurgentes Sur o Queretaro
 
 Nunca des más de una opción si la usuaria ya eligió.
 Nunca repitas información innecesaria.

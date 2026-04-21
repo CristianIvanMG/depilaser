@@ -1,8 +1,46 @@
-# Bloquear acceso HTTP a esta carpeta
+# ============================================================
+# /config/ - BLOQUEO TOTAL
+# Contiene credenciales (secrets.php). NO servir via HTTP.
+# ============================================================
+
+# --- Apache 2.4+ ---
 <IfModule mod_authz_core.c>
   Require all denied
 </IfModule>
 
-<IfModule !mod_authz_core.c>
+# --- Apache 2.2 (compatibilidad) ---
+<IfModule \!mod_authz_core.c>
+  Order deny,allow
   Deny from all
 </IfModule>
+
+# --- Desactivar listado de directorio ---
+Options -Indexes -MultiViews
+
+# --- Bloqueo explicito de cualquier archivo (redundante pero seguro) ---
+<FilesMatch ".*">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule \!mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+# --- Si PHP se desactiva, servir como texto plano bloqueado ---
+<IfModule mod_php7.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+  php_flag engine off
+</IfModule>
+
+# --- Cache headers: no cachear nunca esta carpeta ---
+<IfModule mod_headers.c>
+  Header set Cache-Control "no-store, no-cache, must-revalidate, private"
+  Header set X-Robots-Tag "noindex, nofollow, noarchive"
+</IfModule>
+
+ErrorDocument 403 "Access Denied"
+ErrorDocument 404 "Not Found"

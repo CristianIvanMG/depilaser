@@ -1,0 +1,116 @@
+# ============================================================
+# .htaccess RAIZ - BellaNick Clinic (depilasermexico.com)
+# Seguridad + SEO + performance
+# Version conservadora: compatible con Hostinger / LiteSpeed
+# ============================================================
+
+# --- Desactivar firma del servidor ---
+ServerSignature Off
+
+# --- Desactivar listado de directorios ---
+Options -Indexes -MultiViews
+
+# --- Proteger .htaccess, .htpasswd y archivos ocultos ---
+<FilesMatch "^\.ht">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule \!mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+# --- Bloquear CUALQUIER archivo oculto ---
+# (.git, .env, .DS_Store, .gitignore, .fuse_hidden, etc.)
+<FilesMatch "^\.">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule \!mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+# --- Bloquear acceso a carpeta .git si existe ---
+RedirectMatch 404 /\.git(/|$)
+
+# --- Bloquear archivos de configuracion/backup/logs ---
+<FilesMatch "\.(env|ini|log|sql|bak|old|backup|swp|swo|conf|yml|yaml|lock|sh|bash)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule \!mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+# --- Bloquear composer, package, etc. ---
+<FilesMatch "^(composer\.(json|lock)|package(-lock)?\.json|yarn\.lock|tsconfig\.json|webpack\.config\.js|gulpfile\.js|Gruntfile\.js)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule \!mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+# --- Bloquear archivos .fuse_hidden (resto de FUSE/OneDrive) ---
+<FilesMatch "^\.fuse_hidden">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule \!mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+# --- Security headers (seguros en cualquier hosting con mod_headers) ---
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set Permissions-Policy "geolocation=(self), microphone=(), camera=(), payment=()"
+  # HSTS solo si ya tienes HTTPS confirmado y estable:
+  # Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+</IfModule>
+
+# --- Compresion GZIP (Core Web Vitals) ---
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/xml application/xml+rss application/json image/svg+xml
+</IfModule>
+
+# --- Cache navegador ---
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/html                 "access plus 0 seconds"
+  ExpiresByType text/css                  "access plus 1 month"
+  ExpiresByType application/javascript    "access plus 1 month"
+  ExpiresByType image/jpeg                "access plus 6 months"
+  ExpiresByType image/png                 "access plus 6 months"
+  ExpiresByType image/webp                "access plus 6 months"
+  ExpiresByType image/svg+xml             "access plus 6 months"
+  ExpiresByType image/x-icon              "access plus 1 year"
+  ExpiresByType font/woff2                "access plus 1 year"
+</IfModule>
+
+# ------------------------------------------------------------
+# OPCIONAL (descomentar cuando tengas SSL confirmado y estable)
+# ------------------------------------------------------------
+# <IfModule mod_rewrite.c>
+#   RewriteEngine On
+#   # Forzar HTTPS
+#   RewriteCond %{HTTPS} \!=on
+#   RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+#   # Canonical sin www (elige una y quedate)
+#   RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+#   RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
+# </IfModule>
+
+# --- Paginas de error ---
+ErrorDocument 403 "Acceso denegado"
+# ErrorDocument 404 /index.html   # activar solo si quieres SPA-style fallback
