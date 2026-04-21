@@ -4,7 +4,7 @@
         xmlns:image="http://www.google.com/schemas/sitemap-image/0.9">
   <url>
     <loc>https://depilasermexico.com/</loc>
-    <lastmod>2026-04-20</lastmod>
+    <lastmod>2026-04-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.00</priority>
     <image:image>
@@ -12,64 +12,48 @@
       <image:title>BellaNick Clinic - Depilacion Laser CDMX</image:title>
     </image:image>
   </url>
-  <url>
-    <loc>https://depilasermexico.com/depilacion-laser.html</loc>
-    <lastmod>2026-04-21</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.95</priority>
-  </url>
-  <url>
-    <loc>https://depilasermexico.com/depilacion-laser-diodo.html</loc>
-    <lastmod>2026-04-21</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.95</priority>
-  </url>
-  <url>
-    <loc>https://depilasermexico.com/depilacion-laser-cdmx-insurgentes-sur.html</loc>
-    <lastmod>2026-04-21</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.90</priority>
-  </url>
-  <url>
-    <loc>https://depilasermexico.com/depilacion-laser-cdmx-roma-sur.html</loc>
-    <lastmod>2026-04-21</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.90</priority>
-  </url>
-  <url>
-    <loc>https://depilasermexico.com/depilacion-laser-queretaro-corregidora.html</loc>
-    <lastmod>2026-04-21</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.90</priority>
-  </url>
-  <url>
-    <loc>https://depilasermexico.com/lipolisis-laser.html</loc>
-    <lastmod>2026-04-21</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://depilasermexico.com/cavitacion.html</loc>
-    <lastmod>2026-04-21</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://depilasermexico.com/radiofrecuencia-tripolar.html</loc>
-    <lastmod>2026-04-21</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://depilasermexico.com/electroestimulacion.html</loc>
-    <lastmod>2026-04-21</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://depilasermexico.com/blog.html</loc>
-    <lastmod>2026-04-21</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.70</priority>
-  </url>
+  <url><loc>https://depilasermexico.com/depilacion-laser.html</loc><lastmod>2026-04-21</lastmod><changefreq>weekly</changefreq><priority>0.95</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-diodo.html</loc><lastmod>2026-04-21</lastmod><changefreq>weekly</changefreq><priority>0.95</priority></url>
+  <url><loc>https://depilasermexico.com/precios-depilacion-laser.html</loc><lastmod>2026-04-21</lastmod><changefreq>weekly</changefreq><priority>0.92</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-cdmx-insurgentes-sur.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.90</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-cdmx-roma-sur.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.90</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-queretaro-corregidora.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.90</priority></url>
+  <url><loc>https://depilasermexico.com/lipolisis-laser.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://depilasermexico.com/cavitacion.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://depilasermexico.com/radiofrecuencia-tripolar.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://depilasermexico.com/electroestimulacion.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://depilasermexico.com/blog.html</loc><lastmod>2026-04-21</lastmod><changefreq>weekly</changefreq><priority>0.70</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-bigote.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-menton.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-patillas.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-entrecejo.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.70</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-cuello.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-nuca.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-facial-completo.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-axilas.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-antebrazos.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-brazos.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-linea-alba.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.70</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-abdomen.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-espalda-baja.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-areolas.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.70</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-medias-piernas-abajo.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-medias-piernas-arriba.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-piernas-completas.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-gluteos.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-manos.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.70</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-pies.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.70</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-bikini.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-bikini-plus.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-french-bikini.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-brazilian.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-rebaje-bikini.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.70</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-barba-hombre.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-pecho-hombre.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-abdomen-hombre.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-espalda-hombre.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-hombros-hombre.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.70</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-axilas-hombre.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-piernas-hombre.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://depilasermexico.com/depilacion-laser-gluteos-hombre.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.70</priority></url>
 </urlset>

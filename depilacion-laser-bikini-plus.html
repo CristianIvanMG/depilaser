@@ -23,7 +23,7 @@
   <meta name="geo.placename" content="Ciudad de México" />
   <link rel="icon" type="image/x-icon" href="https://depilasermexico.com/assets/img/faviconBN.ico" />
 
-  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Product", "name": "Depilación Láser Bikini Plus", "description": "Depilación láser de diodo en bikini plus en CDMX y Querétaro ✅ Por cotizar. Valoración gratuita, tecnología de última generación y atención profesional en BellaNick Clinic.", "category": "Íntima / Depilación Láser Diodo", "brand": {"@type": "Brand", "name": "BellaNick Clinic"}, "image": "https://depilasermexico.com/assets/img/hero/h1_hero1.webp", "url": "https://depilasermexico.com/depilacion-laser-bikini-plus.html"}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Inicio", "item": "https://depilasermexico.com/"}, {"@type": "ListItem", "position": 2, "name": "Precios por zona", "item": "https://depilasermexico.com/precios-depilacion-laser.html"}, {"@type": "ListItem", "position": 3, "name": "Bikini Plus", "item": "https://depilasermexico.com/depilacion-laser-bikini-plus.html"}]}]}</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Product", "name": "Depilación Láser Bikini Plus", "description": "Depilación láser de diodo en bikini plus en CDMX y Querétaro ✅ Por cotizar. Valoración gratuita, tecnología de última generación y atención profesional en BellaNick Clinic.", "category": "Íntima / Depilación Láser Diodo", "brand": {"@type": "Brand", "name": "BellaNick Clinic"}, "image": "https://depilasermexico.com/assets/img/hero/h1_hero1.webp", "url": "https://depilasermexico.com/depilacion-laser-bikini-plus.html"}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Inicio", "item": "https://depilasermexico.com/"}, {"@type": "ListItem", "position": 2, "name": "Precios por zona", "item": "https://depilasermexico.com/precios-depilacion-laser.html"}, {"@type": "ListItem", "position": 3, "name": "Bikini Plus", "item": "https://depilasermexico.com/depilacion-laser-bikini-plus.html"}]}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Incluye la zona interior?", "acceptedAnswer": {"@type": "Answer", "text": "Solo parcialmente. Para zona interior completa es french o brasileno."}}, {"@type": "Question", "name": "Puedo cambiar de bikini plus a brasileno a mitad del plan?", "acceptedAnswer": {"@type": "Answer", "text": "Si, se paga la diferencia por zona adicional y se suma a tu plan."}}, {"@type": "Question", "name": "Cual es el mas popular?", "acceptedAnswer": {"@type": "Answer", "text": "Bikini plus y brasileno son los dos mas pedidos; depende del gusto de cada clienta."}}]}]}</script>
 
   <style>
     :root {
@@ -185,7 +185,21 @@
     .chat-input button{padding:10px 16px;background:var(--cp);color:#fff;border-radius:20px;font-weight:600;font-size:13px}
 
     nav,main,section,header,footer,.barra-confianza{max-width:100vw;box-sizing:border-box}
-  </style>
+  
+    .zona-intro{padding:32px 20px;background:#fff;max-width:1100px;margin:0 auto}
+    .zona-intro-inner{max-width:900px;margin:0 auto}
+    .zona-intro h2{font-size:clamp(22px,4vw,30px);margin-bottom:20px;color:var(--cp);line-height:1.25;font-weight:700}
+    .zona-intro p{font-size:15px;line-height:1.75;color:var(--ct);margin-bottom:16px}
+    .zona-faq{padding:32px 20px;background:#fdf6f9;max-width:100%;margin:0}
+    .zona-faq-inner{max-width:900px;margin:0 auto}
+    .zona-faq h2{font-size:clamp(22px,4vw,28px);margin-bottom:20px;color:var(--cp);font-weight:700}
+    .zona-faq details{background:#fff;margin-bottom:12px;padding:16px 18px;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.04);border:1px solid #f3e4ec}
+    .zona-faq summary{font-weight:600;color:var(--ct);cursor:pointer;font-size:15px;list-style:none}
+    .zona-faq summary::-webkit-details-marker{display:none}
+    .zona-faq summary::after{content:'+';float:right;color:var(--cp);font-size:22px;line-height:1;font-weight:300}
+    .zona-faq details[open] summary::after{content:'-'}
+    .zona-faq details p{margin-top:10px;color:var(--ctc);line-height:1.65;font-size:14.5px}
+</style>
 </head>
 <body>
 
@@ -261,7 +275,24 @@
     </div>
   </header>
 
-  <section class="benef">
+    <section class="zona-intro">
+    <div class="zona-intro-inner">
+      <h2>Depilacion laser bikini plus: la linea del bikini mas extendida</h2>
+      <p>Bikini plus es el paso intermedio entre bikini clasico y french: cubre la linea frontal, laterales y un poco mas hacia adentro. Es el mas popular para mujeres que quieren ir progresando hacia brasileno.</p>
+      <p>Sesion de 7 a 12 minutos. Plan de 6 a 8 sesiones.</p>
+    </div>
+  </section>
+
+  <section class="zona-faq">
+    <div class="zona-faq-inner">
+      <h2>Preguntas frecuentes sobre esta zona</h2>
+      <details><summary>Incluye la zona interior?</summary><p>Solo parcialmente. Para zona interior completa es french o brasileno.</p></details>
+      <details><summary>Puedo cambiar de bikini plus a brasileno a mitad del plan?</summary><p>Si, se paga la diferencia por zona adicional y se suma a tu plan.</p></details>
+      <details><summary>Cual es el mas popular?</summary><p>Bikini plus y brasileno son los dos mas pedidos; depende del gusto de cada clienta.</p></details>
+    </div>
+  </section>
+
+<section class="benef">
     <h2>Por qué elegir láser de diodo para <span style="color:var(--cp)">bikini plus</span></h2>
     <p class="lead">Nuestro equipo es una máquina de depilación láser diodo de última generación: segura, eficaz y compatible con todos los fototipos de piel.</p>
     <div class="benef-grid">
