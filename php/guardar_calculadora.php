@@ -6,12 +6,31 @@
 // ============================================================
 
 header('Content-Type: application/json; charset=UTF-8');
-header('Cache-Control: no-store');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+// CORS por si la peticion llega por preflight (algunos CDN / subdominios)
+header('Access-Control-Allow-Origin: ' . ($_SERVER['HTTP_ORIGIN'] ?? '*'));
+header('Access-Control-Allow-Methods: POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, X-Requested-With');
+header('Vary: Origin');
+
 ini_set('display_errors', 0);
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+// ---- Preflight OPTIONS ----
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') {
+  http_response_code(204);
+  exit;
+}
+
+// ---- Metodo (tolerante a mayusculas/minusculas) ----
+$method = strtoupper($_SERVER['REQUEST_METHOD'] ?? '');
+if ($method !== 'POST') {
   http_response_code(405);
-  echo json_encode(['status' => 'error', 'message' => 'Metodo no permitido']);
+  echo json_encode([
+    'status'  => 'error',
+    'message' => 'Metodo no permitido',
+    'got'     => $method ?: 'UNKNOWN'
+  ]);
   exit;
 }
 
@@ -44,11 +63,30 @@ if (!$zona || !$vello || !$rasurado || !$atencion) {
 $sesionesMin = isset($data['sesiones_min']) ? max(1, min(20, (int)$data['sesiones_min'])) : null;
 $sesionesMax = isset($data['sesiones_max']) ? max(1, min(20, (int)$data['sesiones_max'])) : null;
 
-$nombre   = isset($data['nombre'])   ? mb_substr(trim((string)$data['nombre']), 0, 120)   : null;
-$telefono = isset($data['telefono']) ? preg_replace('/[^0-9+\s\-()]/', '', (string)$data['telefono']) : null;
-if ($telefono !== null) $telefono = mb_substr($telefono, 0, 30);
-if ($nombre   === '') $nombre   = null;
-if ($telefono === '') $telefono = null;
+// --- Nombre: solo letras (incluye acentos y ñ) + espacios + apostrofe/guion, 2-80 chars ---
+$nombreRaw = isset($data['nombre']) ? trim((string)$data['nombre']) : '';
+$nombre = null;
+if ($nombreRaw !== '') {
+  if (!preg_match('/^[\p{L}\s\'\-]{2,80}$/u', $nombreRaw)) {
+    http_response_code(422);
+    echo json_encode(['status' => 'error', 'message' => 'Nombre invalido: solo letras y espacios (2 a 80 caracteres).']);
+    exit;
+  }
+  $nombre = mb_substr($nombreRaw, 0, 80);
+}
+
+// --- Telefono: exactamente 10 digitos numericos ---
+$telRaw = isset($data['telefono']) ? (string)$data['telefono'] : '';
+$telDigits = preg_replace('/\D+/', '', $telRaw);
+$telefono = null;
+if ($telRaw !== '') {
+  if (strlen($telDigits) !== 10) {
+    http_response_code(422);
+    echo json_encode(['status' => 'error', 'message' => 'Telefono invalido: deben ser exactamente 10 digitos numericos.']);
+    exit;
+  }
+  $telefono = $telDigits;
+}
 
 $url = isset($data['url']) ? mb_substr((string)$data['url'], 0, 500) : null;
 

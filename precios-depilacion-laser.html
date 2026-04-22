@@ -1631,11 +1631,22 @@
 
     <div class="calc-field">
       <label for="nombre" class="sr-only">Nombre (opcional)</label>
-      <input type="text" id="nombre" name="nombre" placeholder="Tu nombre (opcional)" autocomplete="name">
+      <input type="text" id="nombre" name="nombre"
+             placeholder="Tu nombre (opcional)"
+             autocomplete="name"
+             maxlength="80"
+             pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ '\-]{2,80}"
+             title="Solo letras y espacios (2 a 80 caracteres).">
     </div>
     <div class="calc-field">
       <label for="telefono" class="sr-only">WhatsApp (opcional)</label>
-      <input type="tel" id="telefono" name="telefono" placeholder="WhatsApp (opcional)" autocomplete="tel" inputmode="tel">
+      <input type="tel" id="telefono" name="telefono"
+             placeholder="WhatsApp 10 dígitos (opcional)"
+             autocomplete="tel"
+             inputmode="numeric"
+             maxlength="10"
+             pattern="[0-9]{10}"
+             title="Exactamente 10 dígitos numéricos.">
     </div>
 
     <button type="submit">Ver mi resultado</button>
@@ -2001,6 +2012,45 @@
       });
     });
 
+    // --- Filtrado en tiempo real para nombre y teléfono ---
+    const inputNombre = document.getElementById('nombre');
+    const inputTel    = document.getElementById('telefono');
+
+    if (inputNombre) {
+      // Permite solo letras (incluye acentos/ñ), espacios, apóstrofe y guión.
+      inputNombre.addEventListener('input', function () {
+        const limpio = inputNombre.value.replace(/[^\p{L}\s'\-]/gu, '');
+        if (limpio !== inputNombre.value) inputNombre.value = limpio;
+      });
+      inputNombre.addEventListener('paste', function (e) {
+        const text = (e.clipboardData || window.clipboardData).getData('text') || '';
+        const limpio = text.replace(/[^\p{L}\s'\-]/gu, '');
+        if (limpio !== text) {
+          e.preventDefault();
+          document.execCommand('insertText', false, limpio);
+        }
+      });
+    }
+
+    if (inputTel) {
+      // Solo dígitos, máximo 10.
+      inputTel.addEventListener('input', function () {
+        const soloDigitos = inputTel.value.replace(/\D+/g, '').slice(0, 10);
+        if (soloDigitos !== inputTel.value) inputTel.value = soloDigitos;
+      });
+      inputTel.addEventListener('keypress', function (e) {
+        if (e.key && e.key.length === 1 && !/[0-9]/.test(e.key)) {
+          e.preventDefault();
+        }
+      });
+      inputTel.addEventListener('paste', function (e) {
+        const text = (e.clipboardData || window.clipboardData).getData('text') || '';
+        const soloDigitos = text.replace(/\D+/g, '').slice(0, 10);
+        e.preventDefault();
+        document.execCommand('insertText', false, soloDigitos);
+      });
+    }
+
     // Base de sesiones por zona (rango razonable para depilacion laser diodo)
     const baseSesiones = {
       axilas: 6,
@@ -2037,8 +2087,11 @@
 
     function esTelValido(t) {
       if (!t) return true; // opcional
-      const digits = (t.match(/\d/g) || []).length;
-      return digits >= 10 && digits <= 15;
+      return /^\d{10}$/.test(t);
+    }
+    function esNombreValido(n) {
+      if (!n) return true; // opcional
+      return /^[\p{L}\s'\-]{2,80}$/u.test(n);
     }
 
     const submitBtn = form.querySelector('button[type="submit"]');
@@ -2061,9 +2114,14 @@
         resultadoEl.innerHTML = '<p class="calc-error">Completa las 4 opciones para ver tu estimacion.</p>';
         return;
       }
+      if (!esNombreValido(nombre)) {
+        resultadoEl.style.display = 'block';
+        resultadoEl.innerHTML = '<p class="calc-error">Nombre inválido: solo letras y espacios.</p>';
+        return;
+      }
       if (!esTelValido(telefono)) {
         resultadoEl.style.display = 'block';
-        resultadoEl.innerHTML = '<p class="calc-error">Revisa el WhatsApp: debe tener 10 a 15 digitos.</p>';
+        resultadoEl.innerHTML = '<p class="calc-error">Revisa el WhatsApp: deben ser exactamente 10 dígitos numéricos.</p>';
         return;
       }
 
@@ -2089,9 +2147,10 @@
       submitBtn.disabled = true;
       submitBtn.textContent = 'Enviando...';
       try {
-        await fetch('/php/guardar_calculadora.php', {
+        const res = await fetch('/php/guardar_calculadora.php', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+          credentials: 'same-origin',
           body: JSON.stringify({
             zona: zona,
             vello: vello,
@@ -2104,11 +2163,26 @@
             url: window.location.href
           })
         });
-        yaEnviado = true;
-        submitBtn.textContent = 'Guardado ✓';
+        let data = null;
+        try { data = await res.json(); } catch (_) { /* respuesta no-JSON */ }
+
+        if (res.ok && data && data.status === 'ok') {
+          yaEnviado = true;
+          submitBtn.textContent = 'Guardado ✓';
+        } else {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Ver mi resultado';
+          const msg = (data && data.message) ? data.message : ('HTTP ' + res.status);
+          console.warn('[calculadora] backend error:', res.status, data);
+          const advertencia = document.createElement('p');
+          advertencia.className = 'calc-error';
+          advertencia.textContent = 'No se pudo guardar en base de datos (' + msg + '). Tu estimación sigue siendo válida.';
+          resultadoEl.appendChild(advertencia);
+        }
       } catch (err) {
         submitBtn.disabled = false;
         submitBtn.textContent = 'Ver mi resultado';
+        console.warn('[calculadora] fetch error:', err);
       }
     });
   })();
