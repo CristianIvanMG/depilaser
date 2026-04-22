@@ -1036,12 +1036,13 @@
       width: 58px;
       height: 58px;
       border-radius: 50%;
-      background: linear-gradient(135deg, var(--cp), var(--cp-c));
+      background: linear-gradient(135deg, #25d366, #128c7e);
       color: #fff;
       font-size: 26px;
-      box-shadow: 0 6px 20px rgba(200, 56, 107, .4);
+      box-shadow: 0 6px 20px rgba(37, 211, 102, .4);
       cursor: pointer;
       z-index: 90;
+      border: none;
     }
 
     #bella-chat {
@@ -1141,12 +1142,184 @@
       max-width: 100vw;
       box-sizing: border-box;
     }
+
+    /* ========== CALCULADORA DE SESIONES ========== */
+    #calculadora-sesiones {
+      max-width: 720px;
+      margin: 48px auto;
+      padding: 36px 28px;
+      background: linear-gradient(180deg, #fff 0%, #fff5f9 100%);
+      border: 1px solid #f3e4ec;
+      border-radius: 20px;
+      box-shadow: 0 4px 24px rgba(200, 56, 107, .08);
+    }
+    #calculadora-sesiones h2 {
+      font-family: var(--ft, 'Playfair Display', serif);
+      font-size: clamp(22px, 3.5vw, 30px);
+      color: var(--cp);
+      margin: 0 0 8px;
+      line-height: 1.25;
+      text-align: center;
+    }
+    #calculadora-sesiones > p {
+      text-align: center;
+      color: var(--ctc, #4a4a6a);
+      font-size: 15px;
+      margin: 0 0 28px;
+    }
+    #calcForm {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px 18px;
+    }
+    #calcForm .calc-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+    }
+    #calcForm .calc-field > label {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--ct, #1a1a2e);
+      cursor: pointer;
+    }
+    #calcForm .sr-only {
+      position: absolute !important;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
+    }
+    #calcForm select,
+    #calcForm input[type="text"],
+    #calcForm input[type="tel"] {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #e6d5de;
+      border-radius: 10px;
+      background: #fff;
+      font-size: 15px;
+      color: var(--ct, #1a1a2e);
+      font-family: inherit;
+      transition: border-color .2s, box-shadow .2s;
+      box-sizing: border-box;
+    }
+    #calcForm select {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%23c8386b' d='M1 1l5 5 5-5'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+    #calcForm select::-ms-expand { display: none; }
+    #calcForm select:focus,
+    #calcForm input:focus {
+      outline: none;
+      border-color: var(--cp);
+      box-shadow: 0 0 0 3px rgba(200, 56, 107, .15);
+    }
+    #calcForm h3 {
+      grid-column: 1 / -1;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--cp);
+      margin: 14px 0 2px;
+      padding-top: 16px;
+      border-top: 1px dashed #f0d8e4;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+    #calcForm input[type="text"],
+    #calcForm input[type="tel"] {
+      grid-column: span 1;
+    }
+    #calcForm button[type="submit"] {
+      grid-column: 1 / -1;
+      margin-top: 8px;
+      padding: 14px 20px;
+      background: var(--cp);
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(200, 56, 107, .3);
+      transition: transform .15s, box-shadow .2s, background .2s;
+      font-family: inherit;
+    }
+    #calcForm button[type="submit"]:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(200, 56, 107, .4);
+    }
+    #calcForm button[type="submit"]:disabled {
+      background: #d9a9bd;
+      cursor: wait;
+      box-shadow: none;
+    }
+    #resultado {
+      margin-top: 24px;
+      padding: 20px 22px;
+      background: var(--ca, #f9d4e2);
+      border-left: 4px solid var(--cp);
+      border-radius: 12px;
+      color: var(--ct, #1a1a2e);
+      font-size: 15px;
+      line-height: 1.55;
+      animation: fadeInResult .3s ease;
+    }
+    #resultado p { margin: 0 0 8px; }
+    #resultado p:last-child { margin-bottom: 0; color: var(--ctc, #4a4a6a); font-size: 13.5px; }
+    #resultado strong { color: var(--cp); font-size: 17px; }
+    #resultado .calc-cta {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 11px 20px;
+      background: #25d366;
+      color: #fff;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+      box-shadow: 0 4px 12px rgba(37, 211, 102, .35);
+    }
+    #resultado .calc-error {
+      color: #c8386b;
+      font-size: 13.5px;
+      margin-top: 8px;
+    }
+    @keyframes fadeInResult {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 640px) {
+      #calculadora-sesiones {
+        margin: 32px 14px;
+        padding: 26px 18px;
+        border-radius: 16px;
+      }
+      #calcForm {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+      #calcForm h3 {
+        margin-top: 8px;
+        padding-top: 14px;
+      }
+    }
   </style>
 </head>
 
 <body>
 
-  <!-- BARRA CONFIANZA -->
+  <!-- BARRA -->
   <div class="barra-confianza">
     <span>3 Sucursales</span>
     <span>Cita de valoración SIN COSTO</span>
@@ -1400,6 +1573,76 @@
       <div class="cat-grid" id="cat-grid"></div>
     </section>
   </main>
+<!-- Calculadora -->
+<section id="calculadora-sesiones">
+  <h2>Calcula cuántas sesiones de depilación láser necesitas</h2>
+  <p>Estimación rápida basada en tu zona y tipo de vello.</p>
+
+  <form id="calcForm">
+    <!-- ZONA -->
+    <div class="calc-field">
+      <label for="zona">Zona a tratar</label>
+      <select id="zona" name="zona" required>
+        <option value="">Selecciona</option>
+        <option value="axilas">Axilas</option>
+        <option value="bikini">Bikini</option>
+        <option value="piernas">Piernas</option>
+        <option value="brazos">Brazos</option>
+        <option value="rostro">Rostro</option>
+        <option value="espalda_pecho">Espalda / Pecho</option>
+        <option value="cuerpo_completo">Cuerpo completo</option>
+      </select>
+    </div>
+
+    <!-- VELLO -->
+    <div class="calc-field">
+      <label for="vello">Tipo de vello</label>
+      <select id="vello" name="vello" required>
+        <option value="">Selecciona</option>
+        <option value="delgado">Delgado</option>
+        <option value="medio">Medio</option>
+        <option value="grueso">Grueso</option>
+      </select>
+    </div>
+
+    <!-- RASURADO -->
+    <div class="calc-field">
+      <label for="rasurado">¿Cada cuánto te rasuras?</label>
+      <select id="rasurado" name="rasurado" required>
+        <option value="">Selecciona</option>
+        <option value="cada_semana">Cada semana</option>
+        <option value="cada_2_3">Cada 2–3 semanas</option>
+        <option value="rara_vez">Rara vez</option>
+      </select>
+    </div>
+
+    <!-- ATENCIÓN -->
+    <div class="calc-field">
+      <label for="atencion">Tipo de atención</label>
+      <select id="atencion" name="atencion" required>
+        <option value="">Selecciona</option>
+        <option value="femenino">Femenino</option>
+        <option value="masculino">Masculino</option>
+      </select>
+    </div>
+
+    <!-- DATOS OPCIONALES -->
+    <h3>Recibe tu recomendación personalizada (opcional)</h3>
+
+    <div class="calc-field">
+      <label for="nombre" class="sr-only">Nombre (opcional)</label>
+      <input type="text" id="nombre" name="nombre" placeholder="Tu nombre (opcional)" autocomplete="name">
+    </div>
+    <div class="calc-field">
+      <label for="telefono" class="sr-only">WhatsApp (opcional)</label>
+      <input type="tel" id="telefono" name="telefono" placeholder="WhatsApp (opcional)" autocomplete="tel" inputmode="tel">
+    </div>
+
+    <button type="submit">Ver mi resultado</button>
+  </form>
+
+  <div id="resultado" style="display:none;"></div>
+</section>
 
   <!-- CTA -->
   <section class="cta-final">
@@ -1738,6 +1981,138 @@
       sendBtn.addEventListener('click', sendMessage);
       input.addEventListener('keydown', function (e) { if (e.key === 'Enter') sendMessage(); });
     })();
+  
+  /* ========== Calculadora de sesiones ========== */
+  (function () {
+    const form = document.getElementById('calcForm');
+    if (!form) return;
+
+    // Fallback: forzar apertura del dropdown en navegadores/contextos donde
+    // el click nativo no lo dispara por sí solo (webviews embebidas, etc.).
+    form.querySelectorAll('select').forEach(function (sel) {
+      sel.addEventListener('mousedown', function (e) {
+        if (typeof sel.showPicker === 'function') {
+          try {
+            e.preventDefault();
+            sel.focus();
+            sel.showPicker();
+          } catch (_) { /* showPicker requiere gesto de usuario; si falla cae al nativo */ }
+        }
+      });
+    });
+
+    // Base de sesiones por zona (rango razonable para depilacion laser diodo)
+    const baseSesiones = {
+      axilas: 6,
+      bikini: 6,
+      piernas: 8,
+      brazos: 7,
+      rostro: 7,
+      espalda_pecho: 9,
+      cuerpo_completo: 10
+    };
+
+    const LABELS_ZONA = {
+      axilas: 'Axilas',
+      bikini: 'Bikini',
+      piernas: 'Piernas',
+      brazos: 'Brazos',
+      rostro: 'Rostro',
+      espalda_pecho: 'Espalda / Pecho',
+      cuerpo_completo: 'Cuerpo completo'
+    };
+
+    function calcularSesiones(zona, vello, rasurado, atencion) {
+      let base = baseSesiones[zona] || 6;
+      if (vello === 'medio')  base += 1;
+      if (vello === 'grueso') base += 2;
+      if (rasurado === 'cada_semana') base += 1;
+      if (rasurado === 'rara_vez')    base -= 1;
+      if (atencion === 'masculino')   base += 1;
+
+      const minimo = Math.max(4, base);
+      const maximo = minimo + 2;
+      return { minimo, maximo };
+    }
+
+    function esTelValido(t) {
+      if (!t) return true; // opcional
+      const digits = (t.match(/\d/g) || []).length;
+      return digits >= 10 && digits <= 15;
+    }
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const resultadoEl = document.getElementById('resultado');
+    let yaEnviado = false;
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      if (yaEnviado) return;
+
+      const zona     = document.getElementById('zona').value;
+      const vello    = document.getElementById('vello').value;
+      const rasurado = document.getElementById('rasurado').value;
+      const atencion = document.getElementById('atencion').value;
+      const nombre   = (document.getElementById('nombre').value || '').trim();
+      const telefono = (document.getElementById('telefono').value || '').trim();
+
+      if (!zona || !vello || !rasurado || !atencion) {
+        resultadoEl.style.display = 'block';
+        resultadoEl.innerHTML = '<p class="calc-error">Completa las 4 opciones para ver tu estimacion.</p>';
+        return;
+      }
+      if (!esTelValido(telefono)) {
+        resultadoEl.style.display = 'block';
+        resultadoEl.innerHTML = '<p class="calc-error">Revisa el WhatsApp: debe tener 10 a 15 digitos.</p>';
+        return;
+      }
+
+      const r = calcularSesiones(zona, vello, rasurado, atencion);
+      const zonaLabel = LABELS_ZONA[zona] || zona;
+
+      // WhatsApp pre-llenado con el contexto
+      const waMsg = encodeURIComponent(
+        'Hola, hice la calculadora del sitio. Zona: ' + zonaLabel +
+        '. Estimacion: ' + r.minimo + ' a ' + r.maximo + ' sesiones. ' +
+        (nombre ? 'Soy ' + nombre + '. ' : '') +
+        'Me gustaria cotizar.'
+      );
+
+      resultadoEl.style.display = 'block';
+      resultadoEl.innerHTML =
+        '<p>Para <strong>' + zonaLabel + '</strong> normalmente se requieren entre ' +
+        '<strong>' + r.minimo + ' y ' + r.maximo + ' sesiones</strong>.</p>' +
+        '<p>Este numero se confirma en una valoracion gratuita, donde analizamos tu piel, fototipo y densidad real del vello.</p>' +
+        '<a class="calc-cta" href="https://wa.me/525535433490?text=' + waMsg + '" target="_blank" rel="noopener">Cotizar por WhatsApp</a>';
+
+      // Enviar a backend (no bloquea el resultado)
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Enviando...';
+      try {
+        await fetch('/php/guardar_calculadora.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            zona: zona,
+            vello: vello,
+            rasurado: rasurado,
+            atencion: atencion,
+            nombre: nombre || null,
+            telefono: telefono || null,
+            sesiones_min: r.minimo,
+            sesiones_max: r.maximo,
+            url: window.location.href
+          })
+        });
+        yaEnviado = true;
+        submitBtn.textContent = 'Guardado ✓';
+      } catch (err) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Ver mi resultado';
+      }
+    });
+  })();
+
   </script>
 </body>
 
