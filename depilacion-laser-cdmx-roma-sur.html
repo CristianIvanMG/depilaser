@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es-MX">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,6 +7,7 @@
   <meta name="description" content="Depilación láser de diodo en Roma Sur CDMX ✅ Sucursal BellaNick Clinic. Resultados visibles desde la primera sesión. Valoración sin costo." />
   <meta name="keywords" content="depilación láser Roma Sur, depilación láser Roma CDMX, clínica depilación Roma Sur, depilación Cuauhtémoc CDMX, BellaNick Clinic Roma Sur" />
   <link rel="canonical" href="https://depilasermexico.com/depilacion-laser-cdmx-roma-sur.html" />
+   <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico">
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="BellaNick Clinic" />
   <meta property="og:locale" content="es_MX" />
@@ -1736,45 +1736,59 @@
       margin: 0 6px
     }
 
-    /* HERO SUCURSAL */
+        /* HERO SUCURSAL — gradiente morado estilo Querétaro */
     .hero-suc {
-      padding: 0;
+      background: linear-gradient(135deg, #1a0a2e 0%, #2d1052 60%, #9e1f4e 100%);
+      padding: 80px 20px 64px;
       position: relative;
-      overflow: hidden;
-      background: #0f0a14
+      overflow: hidden
     }
 
-    .hero-suc-img {
-      width: 100%;
-      height: 420px;
-      object-fit: cover;
-      opacity: .55
-    }
-
-    .hero-suc-overlay {
+    .hero-suc::before {
+      content: '';
       position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      padding: 0 40px
+      top: -80px;
+      right: -80px;
+      width: 560px;
+      height: 560px;
+      background: radial-gradient(circle, rgba(200, 56, 107, .2) 0%, transparent 70%);
+      pointer-events: none
     }
 
-    .hero-suc-content {
-      max-width: 700px
+    .hero-suc::after {
+      content: '';
+      position: absolute;
+      bottom: -60px;
+      left: -60px;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(255, 255, 255, .04) 0%, transparent 70%);
+      pointer-events: none
+    }
+
+    .hero-suc-grid {
+      max-width: 1140px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+      position: relative;
+      z-index: 1
     }
 
     .suc-badge {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: rgba(249, 212, 226, .2);
-      border: 1px solid rgba(249, 212, 226, .4);
+      background: var(--cp);
       color: #fff;
       border-radius: 50px;
-      padding: 6px 16px;
+      padding: 7px 18px;
       font-size: 13px;
-      font-weight: 600;
-      margin-bottom: 18px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      letter-spacing: .3px
     }
 
     .hero-suc h1 {
@@ -1783,7 +1797,7 @@
       font-weight: 700;
       color: #fff;
       line-height: 1.15;
-      margin-bottom: 16px
+      margin-bottom: 18px
     }
 
     .hero-suc h1 em {
@@ -1794,9 +1808,9 @@
     .hero-suc-desc {
       font-size: 17px;
       color: rgba(255, 255, 255, .85);
-      margin-bottom: 28px;
-      line-height: 1.7;
-      max-width: 560px
+      margin-bottom: 30px;
+      line-height: 1.75;
+      max-width: 520px
     }
 
     .hero-btns {
@@ -1805,6 +1819,52 @@
       flex-wrap: wrap
     }
 
+    /* Imagen hero — más pequeña, dentro del grid */
+    .hero-img-wrap {
+      position: relative
+    }
+
+    .hero-img-wrap img {
+      border-radius: var(--rl, 18px);
+      box-shadow: 0 8px 40px rgba(0, 0, 0, .4);
+      width: 100%;
+      object-fit: cover;
+      aspect-ratio: 4/3;
+      opacity: 1
+    }
+
+    .suc-tag {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: var(--cp);
+      color: #fff;
+      border-radius: 50px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 700
+    }
+
+    @media (max-width:900px) {
+      .hero-suc-grid {
+        grid-template-columns: 1fr;
+        gap: 36px
+      }
+
+      .hero-suc {
+        padding: 48px 14px
+      }
+
+      .hero-btns {
+        flex-direction: column
+      }
+
+      .hero-img-wrap img {
+        aspect-ratio: 16/10
+      }
+    }
+
+    /* BOTONES HERO (WhatsApp / secundario) */
     .btn-wa {
       display: inline-flex;
       align-items: center;
@@ -1824,13 +1884,13 @@
       transform: translateY(-2px)
     }
 
-    .btn-tel {
+    .btn-sec {
       display: inline-flex;
       align-items: center;
       gap: 8px;
       background: rgba(255, 255, 255, .15);
       color: #fff;
-      border: 2px solid rgba(255, 255, 255, .5);
+      border: 2px solid rgba(255, 255, 255, .4);
       padding: 13px 24px;
       border-radius: 50px;
       font-weight: 600;
@@ -1838,7 +1898,7 @@
       transition: var(--tr)
     }
 
-    .btn-tel:hover {
+    .btn-sec:hover {
       background: rgba(255, 255, 255, .25);
       border-color: #fff
     }
@@ -1853,16 +1913,17 @@
       max-width: 1140px;
       margin: 0 auto;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 0
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      padding: 28px 20px
     }
 
     .info-item {
-      padding: 24px 28px;
-      border-right: 1px solid var(--cgb);
       display: flex;
       align-items: flex-start;
-      gap: 14px
+      gap: 12px;
+      padding: 0 20px;
+      border-right: 1px solid var(--cgb)
     }
 
     .info-item:last-child {
@@ -1870,37 +1931,35 @@
     }
 
     .info-ico {
-      font-size: 26px;
-      flex-shrink: 0;
-      margin-top: 2px
+      font-size: 22px;
+      line-height: 1
     }
 
     .info-label {
       font-size: 11.5px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .8px;
       color: var(--ctc);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      font-weight: 700;
       margin-bottom: 4px
     }
 
     .info-val {
-      font-size: 14.5px;
-      font-weight: 600;
+      font-size: 14px;
       color: var(--ct);
+      font-weight: 600;
       line-height: 1.4
     }
 
     .info-val a {
-      color: var(--cp);
-      text-decoration: none
+      color: var(--cp)
     }
 
     .info-val a:hover {
       text-decoration: underline
     }
 
-    /* SECCIÓN GENERAL */
+    /* SECCIONES COMUNES */
     .sec {
       padding: 68px 20px
     }
@@ -2384,14 +2443,6 @@
         padding: 48px 14px
       }
 
-      .hero-suc-img {
-        height: 320px
-      }
-
-      .hero-suc-overlay {
-        padding: 0 20px
-      }
-
       .hero-btns {
         flex-direction: column
       }
@@ -2568,12 +2619,94 @@
                 </span>
               </a>
             </li>
+            <li role="menuitem">
+              <a href="https://depilasermexico.com/carboxiterapia.html">
+                <span class="bn-dropdown-icon">💨</span>
+                <span class="bn-dropdown-text">
+                  <span class="bn-dropdown-title">Carboxiterapia</span>
+                  <span class="bn-dropdown-sub">Oxigenación, rejuvenecimiento y drenaje</span>
+                </span>
+              </a>
+            </li>
+            <li role="menuitem">
+              <a href="https://depilasermexico.com/vacumterapia.html">
+                <span class="bn-dropdown-icon">🫧</span>
+                <span class="bn-dropdown-text">
+                  <span class="bn-dropdown-title">Vacumterapia</span>
+                  <span class="bn-dropdown-sub">Drenaje linfático y reafirmación corporal</span>
+                </span>
+              </a>
+            </li>
+            <li role="menuitem">
+              <a href="https://depilasermexico.com/copas-colombianas.html">
+                <span class="bn-dropdown-icon">🥂</span>
+                <span class="bn-dropdown-text">
+                  <span class="bn-dropdown-title">Copas Colombianas</span>
+                  <span class="bn-dropdown-sub">Moldeado corporal y reafirmación</span>
+                </span>
+              </a>
+            </li>
+            <li role="menuitem">
+              <a href="https://depilasermexico.com/holywood-peel.html">
+                <span class="bn-dropdown-icon">⭐</span>
+                <span class="bn-dropdown-text">
+                  <span class="bn-dropdown-title">Holywood Peel</span>
+                  <span class="bn-dropdown-sub">Limpieza profunda y luminosidad instantánea</span>
+                </span>
+              </a>
+            </li>
+            <li role="menuitem">
+              <a href="https://depilasermexico.com/microdermoabrasion.html">
+                <span class="bn-dropdown-icon">✴️</span>
+                <span class="bn-dropdown-text">
+                  <span class="bn-dropdown-title">Microdermoabrasión</span>
+                  <span class="bn-dropdown-sub">Exfolia y renueva la piel profundamente</span>
+                </span>
+              </a>
+            </li>
+            <li role="menuitem">
+              <a href="https://depilasermexico.com/hidrodermoabrasion.html">
+                <span class="bn-dropdown-icon">💧</span>
+                <span class="bn-dropdown-text">
+                  <span class="bn-dropdown-title">Hidrodermoabrasión</span>
+                  <span class="bn-dropdown-sub">Hidratación profunda y renovación celular</span>
+                </span>
+              </a>
+            </li>
+            <li role="menuitem">
+              <a href="https://depilasermexico.com/despigmentacion.html">
+                <span class="bn-dropdown-icon">🌸</span>
+                <span class="bn-dropdown-text">
+                  <span class="bn-dropdown-title">Despigmentación</span>
+                  <span class="bn-dropdown-sub">Elimina manchas y unifica el tono de piel</span>
+                </span>
+              </a>
+            </li>
+            <li role="menuitem">
+              <a href="https://depilasermexico.com/eliminacion-tatuaje.html">
+                <span class="bn-dropdown-icon">🎨</span>
+                <span class="bn-dropdown-text">
+                  <span class="bn-dropdown-title">Eliminación de Tatuaje</span>
+                  <span class="bn-dropdown-sub">Láser especializado · Resultados seguros</span>
+                </span>
+              </a>
+            </li>
+            <li class="bn-dropdown-sep" role="separator"></li>
+            <li role="menuitem">
+              <a href="https://depilasermexico.com/precios-servicios-esteticos.html">
+                <span class="bn-dropdown-icon">📋</span>
+                <span class="bn-dropdown-text">
+                  <span class="bn-dropdown-title">Precios Servicios Estéticos</span>
+                  <span class="bn-dropdown-sub">Corporales · Faciales · Todos los precios</span>
+                </span>
+              </a>
+            </li>
           </ul>
         </li>
 
         <li><a href="https://depilasermexico.com/blog.html">Blog</a></li>
-        <li><a href="#preguntas-frecuentes">FAQ</a></li>
-        <li><a href="#contacto">Contacto</a></li>
+        <!-- <li><a href="#preguntas-frecuentes">FAQ</a></li> -->
+        <!-- <li><a href="#contacto">Contacto</a></li>-->
         <li>
           <a href="https://wa.me/525535433490?text=Hola%2C%20me%20interesa%20una%20cita%20de%20valoraci%C3%B3n%20sin%20costo"
             class="nav-cta" target="_blank" rel="noopener noreferrer">
@@ -2629,11 +2762,20 @@
             class="mi">💫</span> Radiofrecuencia Tripolar</a>
         <a href="https://depilasermexico.com/electroestimulacion.html" class="bn-mobile-link"><span class="mi">⚡</span>
           Electroestimulación</a>
+        <a href="https://depilasermexico.com/carboxiterapia.html" class="bn-mobile-link"><span class="mi">💨</span> Carboxiterapia</a>
+        <a href="https://depilasermexico.com/vacumterapia.html" class="bn-mobile-link"><span class="mi">🫧</span> Vacumterapia</a>
+        <a href="https://depilasermexico.com/copas-colombianas.html" class="bn-mobile-link"><span class="mi">🥂</span> Copas Colombianas</a>
+        <a href="https://depilasermexico.com/holywood-peel.html" class="bn-mobile-link"><span class="mi">⭐</span> Holywood Peel</a>
+        <a href="https://depilasermexico.com/microdermoabrasion.html" class="bn-mobile-link"><span class="mi">✴️</span> Microdermoabrasión</a>
+        <a href="https://depilasermexico.com/hidrodermoabrasion.html" class="bn-mobile-link"><span class="mi">💧</span> Hidrodermoabrasión</a>
+        <a href="https://depilasermexico.com/despigmentacion.html" class="bn-mobile-link"><span class="mi">🌸</span> Despigmentación</a>
+        <a href="https://depilasermexico.com/eliminacion-tatuaje.html" class="bn-mobile-link"><span class="mi">🎨</span> Eliminación de Tatuaje</a>
+        <a href="https://depilasermexico.com/precios-servicios-esteticos.html" class="bn-mobile-link"><span class="mi">📋</span> <strong>Precios Estéticos</strong></a>
       </div>
       <div class="bn-mobile-sep"></div>
       <a href="https://depilasermexico.com/blog.html" class="bn-mobile-link"><span class="mi">📝</span> Blog</a>
-      <a href="#preguntas-frecuentes" class="bn-mobile-link"><span class="mi">❓</span> FAQ</a>
-      <a href="#contacto" class="bn-mobile-link"><span class="mi">📞</span> Contacto</a>
+      <!-- <a href="#preguntas-frecuentes" class="bn-mobile-link"><span class="mi">❓</span> FAQ</a> -->
+      <!-- <a href="#contacto" class="bn-mobile-link"><span class="mi">📞</span> Contacto</a> -->
       <a href="https://wa.me/525535433490?text=Hola%2C%20quiero%20agendar%20mi%20cita%20de%20valoraci%C3%B3n%20sin%20costo"
         class="bn-mobile-cta" target="_blank" rel="noopener noreferrer">
         💬 Agendar cita gratuita por WhatsApp
@@ -2650,25 +2792,25 @@
 
   <main>
     <!-- HERO -->
-    <section class="hero-suc" aria-labelledby="suc-titulo">
-      <img src="https://depilasermexico.com/assets/img/gallery/team1.webp"
-        alt="Interior BellaNick Clinic Roma Sur, Monterrey 325, CDMX" class="hero-suc-img" width="1400" height="420"
-        loading="eager" />
-      <div class="hero-suc-overlay">
-        <div class="hero-suc-content">
+        <section class="hero-suc" aria-labelledby="suc-titulo">
+      <div class="hero-suc-grid">
+        <div>
           <div class="suc-badge">📍 Sucursal Roma Sur · CDMX</div>
           <h1 id="suc-titulo"><em>BellaNick Clinic</em><br>Roma Sur</h1>
-          <p class="hero-suc-desc">Monterrey 325, Colonia Roma Sur, Cuauhtémoc, Ciudad de México. Atención
-            personalizada, tecnología de última generación y primera valoración sin costo.</p>
+          <p class="hero-suc-desc">Monterrey 325, Colonia Roma Sur, Cuauhtémoc, Ciudad de México. Atención personalizada, tecnología de última generación y primera valoración sin costo.</p>
           <div class="hero-btns">
             <a href="https://wa.me/525535433490?text=Hola%2C%20quiero%20agendar%20una%20cita%20en%20la%20sucursal%20Roma%20Sur"
               class="btn-wa" target="_blank" rel="noopener">💬 Agendar cita por WhatsApp</a>
             <a href="tel:+525535433490" class="btn-tel">📞 (55) 3543-3490</a>
           </div>
         </div>
+        <div class="hero-img-wrap">
+          <img src="https://depilasermexico.com/assets/img/gallery/team1.webp"
+            alt="Interior BellaNick Clinic Roma Sur, Monterrey 325, CDMX" width="560" height="420" loading="eager" />
+          <div class="suc-tag">📍 Roma Sur, CDMX</div>
+        </div>
       </div>
     </section>
-
     <!-- INFO RÁPIDA -->
     <div class="info-rapida">
       <div class="info-rapida-inner">
@@ -2908,8 +3050,7 @@
   <footer>
     <div class="foot-grid">
       <div>
-        <img src="https://depilasermexico.com/assets/img/logo/logo.webp" alt="BellaNick Clinic" class="foot-logo"
-          width="150" height="42" loading="lazy" />
+        <!-- <img src="https://depilasermexico.com/assets/img/logo/logo.webp" alt="BellaNick Clinic" class="foot-logo" width="150" height="42" loading="lazy" /> -->
         <p class="foot-desc">Especialistas en depilación láser y tratamientos estéticos. CDMX y Querétaro.</p>
         <div class="redes">
           <a href="https://www.instagram.com/bellanickclinic/" class="red" target="_blank" rel="noopener"
@@ -3098,7 +3239,6 @@
 
     })();
   </script>
-
 </body>
 
 </html>

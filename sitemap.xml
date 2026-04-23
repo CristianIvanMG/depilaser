@@ -7,10 +7,6 @@
     <lastmod>2026-04-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.00</priority>
-    <image:image>
-      <image:loc>https://depilasermexico.com/img/og-bellanick-clinic.jpg</image:loc>
-      <image:title>BellaNick Clinic - Depilacion Laser CDMX</image:title>
-    </image:image>
   </url>
   <url><loc>https://depilasermexico.com/depilacion-laser.html</loc><lastmod>2026-04-21</lastmod><changefreq>weekly</changefreq><priority>0.95</priority></url>
   <url><loc>https://depilasermexico.com/depilacion-laser-diodo.html</loc><lastmod>2026-04-21</lastmod><changefreq>weekly</changefreq><priority>0.95</priority></url>
@@ -22,6 +18,15 @@
   <url><loc>https://depilasermexico.com/cavitacion.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
   <url><loc>https://depilasermexico.com/radiofrecuencia-tripolar.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
   <url><loc>https://depilasermexico.com/electroestimulacion.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://depilasermexico.com/carboxiterapia.html</loc><lastmod>2026-04-22</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://depilasermexico.com/vacumterapia.html</loc><lastmod>2026-04-22</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://depilasermexico.com/copas-colombianas.html</loc><lastmod>2026-04-22</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://depilasermexico.com/holywood-peel.html</loc><lastmod>2026-04-22</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://depilasermexico.com/microdermoabrasion.html</loc><lastmod>2026-04-22</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://depilasermexico.com/hidrodermoabrasion.html</loc><lastmod>2026-04-22</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://depilasermexico.com/despigmentacion.html</loc><lastmod>2026-04-22</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://depilasermexico.com/eliminacion-tatuaje.html</loc><lastmod>2026-04-22</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://depilasermexico.com/precios-servicios-esteticos.html</loc><lastmod>2026-04-22</lastmod><changefreq>weekly</changefreq><priority>0.92</priority></url>
   <url><loc>https://depilasermexico.com/blog.html</loc><lastmod>2026-04-21</lastmod><changefreq>weekly</changefreq><priority>0.70</priority></url>
   <url><loc>https://depilasermexico.com/depilacion-laser-bigote.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.80</priority></url>
   <url><loc>https://depilasermexico.com/depilacion-laser-menton.html</loc><lastmod>2026-04-21</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>

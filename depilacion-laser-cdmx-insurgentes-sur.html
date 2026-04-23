@@ -5,15 +5,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Depilación Láser Insurgentes Sur CDMX | BellaNick Clinic ✅</title>
-  <meta name="description" content="Depilación láser de diodo en Insurgentes Sur CDMX ✅ Sucursal BellaNick Clinic, Monterrey 325. Valoración sin costo desde $99 MXN. Agenda hoy." />
-  <meta name="keywords" content="depilación láser Insurgentes Sur, depilación láser CDMX, depilación láser Monterrey 325, clínica depilación Insurgentes, BellaNick Clinic Insurgentes Sur" />
+  <meta name="description"
+    content="Depilación láser de diodo en Insurgentes Sur CDMX ✅ Sucursal BellaNick Clinic, Av. Insurgentes Sur 1799. Valoración sin costo desde $99 MXN. Agenda hoy." />
+  <meta name="keywords"
+    content="depilación láser Insurgentes Sur, depilación láser CDMX, depilación láser Av. Insurgentes Sur 1799, clínica depilación Insurgentes, BellaNick Clinic Insurgentes Sur" />
   <link rel="canonical" href="https://depilasermexico.com/depilacion-laser-cdmx-insurgentes-sur.html" />
+  <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico">
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="BellaNick Clinic" />
   <meta property="og:locale" content="es_MX" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Depilación Láser Insurgentes Sur CDMX | BellaNick Clinic ✅" />
-  <meta name="twitter:description" content="Depilación láser de diodo en Insurgentes Sur CDMX ✅ BellaNick Clinic Monterrey 325. Valoración gratis." />
+  <meta name="twitter:description"
+    content="Depilación láser de diodo en Insurgentes Sur CDMX ✅ BellaNick Clinic Av. Insurgentes Sur 1799. Valoración gratis." />
   <meta name="twitter:image" content="https://depilasermexico.com/img/og-bellanick-clinic.jpg" />
   <meta name="robots" content="index,follow,all,max-image-preview:large,max-snippet:-1" />
   <meta name="author" content="BellaNick Clinic" />
@@ -21,7 +25,8 @@
   <meta name="geo.region" content="MX-CMX" />
   <meta name="geo.placename" content="Ciudad de México" />
   <meta property="og:title" content="Depilación Láser Insurgentes Sur CDMX | BellaNick Clinic ✅" />
-  <meta property="og:description" content="Depilación láser de diodo en Insurgentes Sur CDMX ✅ BellaNick Clinic Monterrey 325. Valoración gratis." />
+  <meta property="og:description"
+    content="Depilación láser de diodo en Insurgentes Sur CDMX ✅ BellaNick Clinic Av. Insurgentes Sur 1799. Valoración gratis." />
   <meta property="og:image" content="https://depilasermexico.com/assets/img/gallery/BellaNickInsurgentesSur.webp" />
 
   <script type="application/ld+json">
@@ -38,7 +43,7 @@
     "priceRange": "$99 - $2999",
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "Monterrey 325",
+      "streetAddress": "Insurgentes Sur 1799",
       "addressLocality": "Insurgentes Sur",
       "addressRegion": "Ciudad de México",
       "postalCode": "01020",
@@ -1736,45 +1741,59 @@
       margin: 0 6px
     }
 
-    /* HERO SUCURSAL */
+    /* HERO SUCURSAL — gradiente morado estilo Querétaro */
     .hero-suc {
-      padding: 0;
+      background: linear-gradient(135deg, #1a0a2e 0%, #2d1052 60%, #9e1f4e 100%);
+      padding: 80px 20px 64px;
       position: relative;
-      overflow: hidden;
-      background: #0f0a14
+      overflow: hidden
     }
 
-    .hero-suc-img {
-      width: 100%;
-      height: 420px;
-      object-fit: cover;
-      opacity: .55
-    }
-
-    .hero-suc-overlay {
+    .hero-suc::before {
+      content: '';
       position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      padding: 0 40px
+      top: -80px;
+      right: -80px;
+      width: 560px;
+      height: 560px;
+      background: radial-gradient(circle, rgba(200, 56, 107, .2) 0%, transparent 70%);
+      pointer-events: none
     }
 
-    .hero-suc-content {
-      max-width: 700px
+    .hero-suc::after {
+      content: '';
+      position: absolute;
+      bottom: -60px;
+      left: -60px;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(255, 255, 255, .04) 0%, transparent 70%);
+      pointer-events: none
+    }
+
+    .hero-suc-grid {
+      max-width: 1140px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+      position: relative;
+      z-index: 1
     }
 
     .suc-badge {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: rgba(249, 212, 226, .2);
-      border: 1px solid rgba(249, 212, 226, .4);
+      background: var(--cp);
       color: #fff;
       border-radius: 50px;
-      padding: 6px 16px;
+      padding: 7px 18px;
       font-size: 13px;
-      font-weight: 600;
-      margin-bottom: 18px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      letter-spacing: .3px
     }
 
     .hero-suc h1 {
@@ -1783,7 +1802,7 @@
       font-weight: 700;
       color: #fff;
       line-height: 1.15;
-      margin-bottom: 16px
+      margin-bottom: 18px
     }
 
     .hero-suc h1 em {
@@ -1794,9 +1813,9 @@
     .hero-suc-desc {
       font-size: 17px;
       color: rgba(255, 255, 255, .85);
-      margin-bottom: 28px;
-      line-height: 1.7;
-      max-width: 560px
+      margin-bottom: 30px;
+      line-height: 1.75;
+      max-width: 520px
     }
 
     .hero-btns {
@@ -1805,6 +1824,52 @@
       flex-wrap: wrap
     }
 
+    /* Imagen hero — más pequeña, dentro del grid */
+    .hero-img-wrap {
+      position: relative
+    }
+
+    .hero-img-wrap img {
+      border-radius: var(--rl, 18px);
+      box-shadow: 0 8px 40px rgba(0, 0, 0, .4);
+      width: 100%;
+      object-fit: cover;
+      aspect-ratio: 4/3;
+      opacity: 1
+    }
+
+    .suc-tag {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: var(--cp);
+      color: #fff;
+      border-radius: 50px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 700
+    }
+
+    @media (max-width:900px) {
+      .hero-suc-grid {
+        grid-template-columns: 1fr;
+        gap: 36px
+      }
+
+      .hero-suc {
+        padding: 48px 14px
+      }
+
+      .hero-btns {
+        flex-direction: column
+      }
+
+      .hero-img-wrap img {
+        aspect-ratio: 16/10
+      }
+    }
+
+    /* BOTONES HERO (WhatsApp / secundario) */
     .btn-wa {
       display: inline-flex;
       align-items: center;
@@ -1824,13 +1889,13 @@
       transform: translateY(-2px)
     }
 
-    .btn-tel {
+    .btn-sec {
       display: inline-flex;
       align-items: center;
       gap: 8px;
       background: rgba(255, 255, 255, .15);
       color: #fff;
-      border: 2px solid rgba(255, 255, 255, .5);
+      border: 2px solid rgba(255, 255, 255, .4);
       padding: 13px 24px;
       border-radius: 50px;
       font-weight: 600;
@@ -1838,7 +1903,7 @@
       transition: var(--tr)
     }
 
-    .btn-tel:hover {
+    .btn-sec:hover {
       background: rgba(255, 255, 255, .25);
       border-color: #fff
     }
@@ -1853,16 +1918,17 @@
       max-width: 1140px;
       margin: 0 auto;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 0
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      padding: 28px 20px
     }
 
     .info-item {
-      padding: 24px 28px;
-      border-right: 1px solid var(--cgb);
       display: flex;
       align-items: flex-start;
-      gap: 14px
+      gap: 12px;
+      padding: 0 20px;
+      border-right: 1px solid var(--cgb)
     }
 
     .info-item:last-child {
@@ -1870,37 +1936,35 @@
     }
 
     .info-ico {
-      font-size: 26px;
-      flex-shrink: 0;
-      margin-top: 2px
+      font-size: 22px;
+      line-height: 1
     }
 
     .info-label {
       font-size: 11.5px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .8px;
       color: var(--ctc);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      font-weight: 700;
       margin-bottom: 4px
     }
 
     .info-val {
-      font-size: 14.5px;
-      font-weight: 600;
+      font-size: 14px;
       color: var(--ct);
+      font-weight: 600;
       line-height: 1.4
     }
 
     .info-val a {
-      color: var(--cp);
-      text-decoration: none
+      color: var(--cp)
     }
 
     .info-val a:hover {
       text-decoration: underline
     }
 
-    /* SECCIÓN GENERAL */
+    /* SECCIONES COMUNES */
     .sec {
       padding: 68px 20px
     }
@@ -2384,14 +2448,6 @@
         padding: 48px 14px
       }
 
-      .hero-suc-img {
-        height: 320px
-      }
-
-      .hero-suc-overlay {
-        padding: 0 20px
-      }
-
       .hero-btns {
         flex-direction: column
       }
@@ -2414,6 +2470,7 @@
         border-bottom: 1px solid var(--cgb)
       }
     }
+
     /* =====================================================
        FIX MOVIL: elimina espacio blanco lateral
        ===================================================== */
@@ -2449,7 +2506,6 @@
       max-width: 100vw;
       box-sizing: border-box;
     }
-
   </style>
 </head>
 
@@ -2568,12 +2624,94 @@
                 </span>
               </a>
             </li>
+            <li role="menuitem">
+              <a href="https://depilasermexico.com/carboxiterapia.html">
+                <span class="bn-dropdown-icon">💨</span>
+                <span class="bn-dropdown-text">
+                  <span class="bn-dropdown-title">Carboxiterapia</span>
+                  <span class="bn-dropdown-sub">Oxigenación, rejuvenecimiento y drenaje</span>
+                </span>
+              </a>
+            </li>
+            <li role="menuitem">
+              <a href="https://depilasermexico.com/vacumterapia.html">
+                <span class="bn-dropdown-icon">🫧</span>
+                <span class="bn-dropdown-text">
+                  <span class="bn-dropdown-title">Vacumterapia</span>
+                  <span class="bn-dropdown-sub">Drenaje linfático y reafirmación corporal</span>
+                </span>
+              </a>
+            </li>
+            <li role="menuitem">
+              <a href="https://depilasermexico.com/copas-colombianas.html">
+                <span class="bn-dropdown-icon">🥂</span>
+                <span class="bn-dropdown-text">
+                  <span class="bn-dropdown-title">Copas Colombianas</span>
+                  <span class="bn-dropdown-sub">Moldeado corporal y reafirmación</span>
+                </span>
+              </a>
+            </li>
+            <li role="menuitem">
+              <a href="https://depilasermexico.com/holywood-peel.html">
+                <span class="bn-dropdown-icon">⭐</span>
+                <span class="bn-dropdown-text">
+                  <span class="bn-dropdown-title">Holywood Peel</span>
+                  <span class="bn-dropdown-sub">Limpieza profunda y luminosidad instantánea</span>
+                </span>
+              </a>
+            </li>
+            <li role="menuitem">
+              <a href="https://depilasermexico.com/microdermoabrasion.html">
+                <span class="bn-dropdown-icon">✴️</span>
+                <span class="bn-dropdown-text">
+                  <span class="bn-dropdown-title">Microdermoabrasión</span>
+                  <span class="bn-dropdown-sub">Exfolia y renueva la piel profundamente</span>
+                </span>
+              </a>
+            </li>
+            <li role="menuitem">
+              <a href="https://depilasermexico.com/hidrodermoabrasion.html">
+                <span class="bn-dropdown-icon">💧</span>
+                <span class="bn-dropdown-text">
+                  <span class="bn-dropdown-title">Hidrodermoabrasión</span>
+                  <span class="bn-dropdown-sub">Hidratación profunda y renovación celular</span>
+                </span>
+              </a>
+            </li>
+            <li role="menuitem">
+              <a href="https://depilasermexico.com/despigmentacion.html">
+                <span class="bn-dropdown-icon">🌸</span>
+                <span class="bn-dropdown-text">
+                  <span class="bn-dropdown-title">Despigmentación</span>
+                  <span class="bn-dropdown-sub">Elimina manchas y unifica el tono de piel</span>
+                </span>
+              </a>
+            </li>
+            <li role="menuitem">
+              <a href="https://depilasermexico.com/eliminacion-tatuaje.html">
+                <span class="bn-dropdown-icon">🎨</span>
+                <span class="bn-dropdown-text">
+                  <span class="bn-dropdown-title">Eliminación de Tatuaje</span>
+                  <span class="bn-dropdown-sub">Láser especializado · Resultados seguros</span>
+                </span>
+              </a>
+            </li>
+            <li class="bn-dropdown-sep" role="separator"></li>
+            <li role="menuitem">
+              <a href="https://depilasermexico.com/precios-servicios-esteticos.html">
+                <span class="bn-dropdown-icon">📋</span>
+                <span class="bn-dropdown-text">
+                  <span class="bn-dropdown-title">Precios Servicios Estéticos</span>
+                  <span class="bn-dropdown-sub">Corporales · Faciales · Todos los precios</span>
+                </span>
+              </a>
+            </li>
           </ul>
         </li>
 
         <li><a href="https://depilasermexico.com/blog.html">Blog</a></li>
-        <li><a href="#preguntas-frecuentes">FAQ</a></li>
-        <li><a href="#contacto">Contacto</a></li>
+        <!-- <li><a href="#preguntas-frecuentes">FAQ</a></li> -->
+        <!-- <li><a href="#contacto">Contacto</a></li>-->
         <li>
           <a href="https://wa.me/525535433490?text=Hola%2C%20me%20interesa%20una%20cita%20de%20valoraci%C3%B3n%20sin%20costo"
             class="nav-cta" target="_blank" rel="noopener noreferrer">
@@ -2629,20 +2767,35 @@
             class="mi">💫</span> Radiofrecuencia Tripolar</a>
         <a href="https://depilasermexico.com/electroestimulacion.html" class="bn-mobile-link"><span class="mi">⚡</span>
           Electroestimulación</a>
+        <a href="https://depilasermexico.com/carboxiterapia.html" class="bn-mobile-link"><span class="mi">💨</span>
+          Carboxiterapia</a>
+        <a href="https://depilasermexico.com/vacumterapia.html" class="bn-mobile-link"><span class="mi">🫧</span>
+          Vacumterapia</a>
+        <a href="https://depilasermexico.com/copas-colombianas.html" class="bn-mobile-link"><span class="mi">🥂</span>
+          Copas Colombianas</a>
+        <a href="https://depilasermexico.com/holywood-peel.html" class="bn-mobile-link"><span class="mi">⭐</span>
+          Holywood Peel</a>
+        <a href="https://depilasermexico.com/microdermoabrasion.html" class="bn-mobile-link"><span class="mi">✴️</span>
+          Microdermoabrasión</a>
+        <a href="https://depilasermexico.com/hidrodermoabrasion.html" class="bn-mobile-link"><span class="mi">💧</span>
+          Hidrodermoabrasión</a>
+        <a href="https://depilasermexico.com/despigmentacion.html" class="bn-mobile-link"><span class="mi">🌸</span>
+          Despigmentación</a>
+        <a href="https://depilasermexico.com/eliminacion-tatuaje.html" class="bn-mobile-link"><span class="mi">🎨</span>
+          Eliminación de Tatuaje</a>
+        <a href="https://depilasermexico.com/precios-servicios-esteticos.html" class="bn-mobile-link"><span
+            class="mi">📋</span> <strong>Precios Estéticos</strong></a>
       </div>
       <div class="bn-mobile-sep"></div>
       <a href="https://depilasermexico.com/blog.html" class="bn-mobile-link"><span class="mi">📝</span> Blog</a>
-      <a href="#preguntas-frecuentes" class="bn-mobile-link"><span class="mi">❓</span> FAQ</a>
-      <a href="#contacto" class="bn-mobile-link"><span class="mi">📞</span> Contacto</a>
+      <!-- <a href="#preguntas-frecuentes" class="bn-mobile-link"><span class="mi">❓</span> FAQ</a> -->
+      <!-- <a href="#contacto" class="bn-mobile-link"><span class="mi">📞</span> Contacto</a> -->
       <a href="https://wa.me/525535433490?text=Hola%2C%20quiero%20agendar%20mi%20cita%20de%20valoraci%C3%B3n%20sin%20costo"
         class="bn-mobile-cta" target="_blank" rel="noopener noreferrer">
         💬 Agendar cita gratuita por WhatsApp
       </a>
     </div>
   </nav>
-
-
-
 
   <div class="breadcrumb" style="max-width:1140px;margin:0 auto;padding:12px 20px;font-size:13px;color:var(--ctc)">
     <a href="https://depilasermexico.com/">Inicio</a> <span>›</span> Sucursales <span>›</span> Insurgentes Sur
@@ -2651,24 +2804,25 @@
   <main>
     <!-- HERO -->
     <section class="hero-suc" aria-labelledby="suc-titulo">
-      <img src="https://depilasermexico.com/assets/img/gallery/BellaNickInsurgentesSur.webp"
-        alt="Interior BellaNick Clinic Insurgentes Sur, Monterrey 325, CDMX" class="hero-suc-img" width="1400"
-        height="420" loading="eager" />
-      <div class="hero-suc-overlay">
-        <div class="hero-suc-content">
+      <div class="hero-suc-grid">
+        <div>
           <div class="suc-badge">📍 Sucursal Insurgentes Sur · CDMX</div>
           <h1 id="suc-titulo"><em>BellaNick Clinic</em><br>Insurgentes Sur</h1>
-          <p class="hero-suc-desc">Monterrey 325, Colonia Insurgentes Sur, Cuauhtémoc, Ciudad de México. Atención
-            personalizada, tecnología de última generación y primera valoración sin costo.</p>
+          <p class="hero-suc-desc">Av. Insurgentes Sur, Colonia Del Valle, Benito Juárez, Ciudad de México. Atención
+            personalizada, tecnología láser diodo de última generación y primera valoración sin costo.</p>
           <div class="hero-btns">
-            <a href="https://wa.me/525556622079?text=Hola%2C%20quiero%20agendar%20una%20cita%20en%20la%20sucursal%20Roma%20Sur"
+            <a href="https://wa.me/525556622079?text=Hola%2C%20quiero%20agendar%20una%20cita%20en%20la%20sucursal%20Insurgentes%20Sur"
               class="btn-wa" target="_blank" rel="noopener">💬 Agendar cita por WhatsApp</a>
             <a href="tel:+525556622079" class="btn-tel">📞 (55) 5662-2079</a>
           </div>
         </div>
+        <div class="hero-img-wrap">
+          <img src="https://depilasermexico.com/assets/img/gallery/BellaNickInsurgentesSur.webp"
+            alt="Interior BellaNick Clinic Insurgentes Sur, CDMX" width="560" height="420" loading="eager" />
+          <div class="suc-tag">📍 Insurgentes Sur, CDMX</div>
+        </div>
       </div>
     </section>
-
     <!-- INFO RÁPIDA -->
     <div class="info-rapida">
       <div class="info-rapida-inner">
@@ -2676,7 +2830,7 @@
           <span class="info-ico">📍</span>
           <div>
             <div class="info-label">Dirección</div>
-            <div class="info-val">Monterrey 325, Insurgentes Sur,<br>Cuauhtémoc, CDMX 01020</div>
+            <div class="info-val">Av. Insurgentes Sur 1799, Guadalupe Inn,<br>Álvaro Obregón, CDMX 01020</div>
           </div>
         </div>
         <div class="info-item">
@@ -2708,18 +2862,19 @@
       <div class="sec-hdr">
         <span class="etq">Ubicación</span>
         <h2 class="sec-tit" id="mapa-tit">¿Cómo llegar a Insurgentes Sur?</h2>
-        <p class="sec-sub">Encuéntranos en Monterrey 325, colonia Insurgentes Sur, muy cerca del metro y con zonas de
+        <p class="sec-sub">Encuéntranos en Av. Insurgentes Sur 1799, Guadalupe Inn, Álvaro Obregón, 01020 Ciudad de
+          México, CDMX muy cerca del metro y con zonas de
           estacionamiento en la zona.</p>
       </div>
       <div class="mapa-wrap">
         <iframe
           src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3763.5!2d-99.1579!3d19.4183!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTnCsDI1JzA2LjAiTiA5OcKwMDknMjguNCJX!5e0!3m2!1ses!2smx!4v1700000000000!5m2!1ses!2smx"
-          title="Mapa BellaNick Clinic Insurgentes Sur — Monterrey 325, CDMX" loading="lazy" allowfullscreen
+          title="Mapa BellaNick Clinic Insurgentes Sur — Av. Insurgentes Sur 1799, CDMX" loading="lazy" allowfullscreen
           referrerpolicy="no-referrer-when-downgrade">
         </iframe>
       </div>
       <div style="text-align:center;margin-top:20px">
-        <a href="https://maps.google.com/?q=Monterrey+325+Roma+Sur+Cuauhtemoc+CDMX" target="_blank" rel="noopener"
+        <a href="https://maps.app.goo.gl/ascm3hQKkEth9Exx9" target="_blank" rel="noopener"
           style="display:inline-flex;align-items:center;gap:8px;background:var(--cp);color:#fff;padding:12px 28px;border-radius:50px;font-weight:700;font-size:14.5px;transition:var(--tr)">
           🗺️ Abrir en Google Maps
         </a>
@@ -2727,43 +2882,50 @@
     </section>
 
     <!-- CÓMO LLEGAR -->
+
     <section class="sec sec-alt" aria-labelledby="cl-tit">
       <div class="sec-hdr">
         <span class="etq">Cómo llegar</span>
         <h2 class="sec-tit" id="cl-tit">Medios de transporte</h2>
-        <p class="sec-sub">Estamos bien conectados para que llegues fácil desde cualquier parte de la ciudad.</p>
+        <p class="sec-sub">Estamos bien conectados para que llegues fácil a Av. Insurgentes Sur 1799 desde cualquier
+          parte de la ciudad.</p>
       </div>
       <div class="como-llegar-grid">
         <div class="cl-card">
           <h3 class="cl-titulo">🚇 Transporte público</h3>
           <div class="cl-item"><span class="ico">🔵</span>
-            <div><strong>Metro Barranca del Muerto (L7)</strong><br>A 10 minutos caminando por Sonora</div>
+            <div><strong>Metro Barranca del Muerto (L7)</strong><br>A 15 minutos caminando sobre Av. Insurgentes Sur en
+              dirección norte</div>
           </div>
           <div class="cl-item"><span class="ico">🟢</span>
-            <div><strong>Metro La Bombilla (L7)</strong><br>A 12 minutos por Cuauhtémoc</div>
+            <div><strong>Metro Mixcoac (L7)</strong><br>A 12 minutos caminando por Av. Insurgentes Sur hacia Guadalupe
+              Inn</div>
           </div>
           <div class="cl-item"><span class="ico">🚌</span>
-            <div><strong>Metrobús Barranca del Muerto (L7)</strong><br>Baja en la estación Barranca del Muerto</div>
+            <div><strong>Metrobús Insurgentes Sur (L1)</strong><br>Baja en la estación Río Mixcoac o Teatro Insurgentes
+            </div>
           </div>
           <div class="cl-item"><span class="ico">🚌</span>
-            <div><strong>Múltiples rutas de camión</strong><br>Por Sonora, Insurgentes y Monterrey</div>
+            <div><strong>Múltiples rutas de camión</strong><br>Circulan por Av. Insurgentes Sur y calles de Guadalupe
+              Inn</div>
           </div>
         </div>
         <div class="cl-card">
           <h3 class="cl-titulo">🚗 En automóvil</h3>
           <div class="cl-item"><span class="ico">🅿️</span>
-            <div><strong>Estacionamiento en la zona</strong><br>Hay zonas de parquímetro disponibles en Monterrey y
-              calles aledañas</div>
+            <div><strong>Estacionamiento en la zona</strong><br>Hay opciones de estacionamiento y parquímetro en Av.
+              Insurgentes Sur y calles cercanas</div>
           </div>
           <div class="cl-item"><span class="ico">📌</span>
-            <div><strong>Desde Insurgentes Sur:</strong><br>Toma Insurgentes hacia el sur hasta el número 1799</div>
+            <div><strong>Desde Insurgentes Sur:</strong><br>Circula por Av. Insurgentes Sur hasta el número 1799, en la
+              colonia Guadalupe Inn</div>
           </div>
           <div class="cl-item"><span class="ico">📌</span>
-            <div><strong>Desde Centro Histórico:</strong><br>Barranca del Muerto hacia el sur hasta cruzar Monterrey
-            </div>
+            <div><strong>Desde Periférico:</strong><br>Toma Periférico Sur y conecta con Av. Insurgentes Sur rumbo al
+              centro</div>
           </div>
           <div class="cl-item"><span class="ico">📱</span>
-            <div><strong>Navegación GPS:</strong><br>Busca "BellaNick Clinic Insurgentes Sur" en Google Maps o Waze
+            <div><strong>Navegación GPS:</strong><br>Busca "BellaNick Clinic Insurgentes Sur 1799" en Google Maps o Waze
             </div>
           </div>
         </div>
@@ -2883,7 +3045,8 @@
             <div class="otra-link">Ver sucursal →</div>
           </div>
         </a>
-        <a href="https://depilasermexico.com/depilacion-laser-queretaro-corregidora.html" class="card-otra" style="border-color:var(--cp)">
+        <a href="https://depilasermexico.com/depilacion-laser-queretaro-corregidora.html" class="card-otra"
+          style="border-color:var(--cp)">
           <span class="otra-ico">🌟</span>
           <div>
             <div class="otra-nom">Querétaro <span
@@ -2910,8 +3073,7 @@
   <footer>
     <div class="foot-grid">
       <div>
-        <img src="https://depilasermexico.com/assets/img/logo/logo.webp" alt="BellaNick Clinic" class="foot-logo"
-          width="150" height="42" loading="lazy" />
+        <!-- <img src="https://depilasermexico.com/assets/img/logo/logo.webp" alt="BellaNick Clinic" class="foot-logo" width="150" height="42" loading="lazy" /> -->
         <p class="foot-desc">Especialistas en depilación láser y tratamientos estéticos. CDMX y Querétaro.</p>
         <div class="redes">
           <a href="https://www.instagram.com/bellanickclinic/" class="red" target="_blank" rel="noopener"
@@ -2935,7 +3097,7 @@
         <ul class="foot-ul">
           <li><a href="tel:+525556622079">(55) 5662-2079</a></li>
           <li><a href="mailto:administracion@depilasermexico.com">administracion@depilasermexico.com</a></li>
-          <li><a href="https://maps.google.com/?q=Monterrey+325+Roma+Sur+CDMX" target="_blank" rel="noopener">Ver en
+          <li><a href="https://maps.app.goo.gl/ascm3hQKkEth9Exx9" target="_blank" rel="noopener">Ver en
               Google Maps</a></li>
         </ul>
       </div>
@@ -3100,7 +3262,5 @@
 
     })();
   </script>
-
 </body>
-
 </html>

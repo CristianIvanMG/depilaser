@@ -7,6 +7,12 @@
 # --- Desactivar firma del servidor ---
 ServerSignature Off
 
+# --- Forzar UTF-8 en todas las respuestas HTML (evita mojibake tipo QuerÃ©taro) ---
+AddDefaultCharset UTF-8
+<IfModule mod_mime.c>
+  AddCharset UTF-8 .html .htm .css .js .json .xml .svg
+</IfModule>
+
 # --- Desactivar listado de directorios ---
 Options -Indexes -MultiViews
 
