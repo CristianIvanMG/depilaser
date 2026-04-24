@@ -28,8 +28,99 @@
   <meta name="geo.placename" content="Ciudad de México" />
   <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico">
 
-  <script
-    type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Product", "name": "Depilación Láser Hombros (hombre)", "description": "Depilación láser de diodo en hombros (hombre) en CDMX y Querétaro ✅ Por cotizar. Valoración gratuita, tecnología de última generación y atención profesional en BellaNick Clinic.", "category": "Corporal / Depilación Láser Diodo", "brand": {"@type": "Brand", "name": "BellaNick Clinic"}, "image": "https://depilasermexico.com/assets/img/hero/h1_hero1.webp", "url": "https://depilasermexico.com/depilacion-laser-hombros-hombre.html"}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Inicio", "item": "https://depilasermexico.com/"}, {"@type": "ListItem", "position": 2, "name": "Precios por zona", "item": "https://depilasermexico.com/precios-depilacion-laser.html"}, {"@type": "ListItem", "position": 3, "name": "Hombros (hombre)", "item": "https://depilasermexico.com/depilacion-laser-hombros-hombre.html"}]}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Es necesario combinar con espalda?", "acceptedAnswer": {"@type": "Answer", "text": "No, hombros solos es una zona valida. Muchos clientes solo tratan hombros."}}, {"@type": "Question", "name": "Se nota la diferencia con una sola sesion?", "acceptedAnswer": {"@type": "Answer", "text": "Veras reduccion desde la segunda sesion; la primera prepara el foliculo."}}, {"@type": "Question", "name": "Me puedo poner camiseta sin manga despues?", "acceptedAnswer": {"@type": "Answer", "text": "Si, desde el dia siguiente. Solo evita sol directo 72h."}}]}]}</script>
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Service",
+      "@id": "https://depilasermexico.com/depilacion-laser-hombros-hombre.html#service",
+      "name": "Depilación Láser de Hombros para Hombre",
+      "description": "Depilación láser de diodo en hombros para hombre en CDMX y Querétaro. Tratamiento corporal focalizado para eliminar el vello de la zona de los hombros, mejorar la apariencia y evitar irritación, con valoración gratuita, tecnología de última generación y atención profesional en BellaNick Clinic.",
+      "url": "https://depilasermexico.com/depilacion-laser-hombros-hombre.html",
+      "category": "Depilación Láser Corporal Masculina",
+      "provider": {
+        "@type": "LocalBusiness",
+        "@id": "https://depilasermexico.com/#business",
+        "name": "BellaNick Clinic",
+        "url": "https://depilasermexico.com/",
+        "telephone": "+525535433490",
+        "image": "https://depilasermexico.com/assets/img/hero/h1_hero1.webp",
+        "areaServed": [
+          {
+            "@type": "AdministrativeArea",
+            "name": "Ciudad de México"
+          },
+          {
+            "@type": "AdministrativeArea",
+            "name": "Querétaro"
+          }
+        ]
+      },
+      "offers": {
+        "@type": "Offer",
+        "priceCurrency": "MXN",
+        "availability": "https://schema.org/InStock",
+        "url": "https://depilasermexico.com/depilacion-laser-hombros-hombre.html"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://depilasermexico.com/depilacion-laser-hombros-hombre.html#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "¿Es necesario combinar la depilación láser de hombros con la espalda?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Los hombros pueden tratarse como una zona independiente y muchos clientes eligen depilar únicamente esta área."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Se nota la diferencia con una sola sesión de depilación láser en hombros?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "La reducción del vello suele notarse a partir de la segunda sesión. La primera sesión prepara el folículo para obtener mejores resultados posteriores."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Puedo usar camiseta sin mangas después del tratamiento?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sí, desde el día siguiente. Solo se recomienda evitar la exposición directa al sol durante al menos 72 horas posteriores a la sesión."
+          }
+        }
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://depilasermexico.com/depilacion-laser-hombros-hombre.html#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Inicio",
+          "item": "https://depilasermexico.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Precios por zona",
+          "item": "https://depilasermexico.com/precios-depilacion-laser.html"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Depilación Láser de Hombros para Hombre",
+          "item": "https://depilasermexico.com/depilacion-laser-hombros-hombre.html"
+        }
+      ]
+    }
+  ]
+}
+</script>
 
   <style>
     :root {
@@ -1077,6 +1168,29 @@
       line-height: 1.65;
       font-size: 14.5px
     }
+
+    /* nav: scroll vertical en dropdown de servicios largo */
+    .bn-menu>li.open .bn-dropdown {
+      max-height: calc(100vh - 140px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: var(--cp) transparent;
+    }
+
+    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar {
+      width: 6px
+    }
+
+    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar-track {
+      background: transparent
+    }
+
+    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar-thumb {
+      background: var(--cp);
+      border-radius: 3px
+    }
   </style>
 </head>
 
@@ -1132,16 +1246,30 @@
             <li><a href="https://depilasermexico.com/electroestimulacion.html"><span
                   class="bn-dropdown-icon">⚡</span><span class="bn-dropdown-text"><span
                     class="bn-dropdown-title">Electroestimulación</span></span></a></li>
-            <li><a href="https://depilasermexico.com/carboxiterapia.html"><span class="bn-dropdown-icon">💨</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Carboxiterapia</span></span></a></li>
-            <li><a href="https://depilasermexico.com/vacumterapia.html"><span class="bn-dropdown-icon">🫧</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Vacumterapia</span></span></a></li>
-            <li><a href="https://depilasermexico.com/copas-colombianas.html"><span class="bn-dropdown-icon">🥂</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Copas Colombianas</span></span></a></li>
-            <li><a href="https://depilasermexico.com/holywood-peel.html"><span class="bn-dropdown-icon">⭐</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Holywood Peel</span></span></a></li>
-            <li><a href="https://depilasermexico.com/microdermoabrasion.html"><span class="bn-dropdown-icon">✴️</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Microdermoabrasión</span></span></a></li>
-            <li><a href="https://depilasermexico.com/hidrodermoabrasion.html"><span class="bn-dropdown-icon">💧</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Hidrodermoabrasión</span></span></a></li>
-            <li><a href="https://depilasermexico.com/despigmentacion.html"><span class="bn-dropdown-icon">🌸</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Despigmentación</span></span></a></li>
-            <li><a href="https://depilasermexico.com/eliminacion-tatuaje.html"><span class="bn-dropdown-icon">🎨</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Eliminación de Tatuaje</span></span></a></li>
+            <li><a href="https://depilasermexico.com/carboxiterapia.html"><span class="bn-dropdown-icon">💨</span><span
+                  class="bn-dropdown-text"><span class="bn-dropdown-title">Carboxiterapia</span></span></a></li>
+            <li><a href="https://depilasermexico.com/vacumterapia.html"><span class="bn-dropdown-icon">🫧</span><span
+                  class="bn-dropdown-text"><span class="bn-dropdown-title">Vacumterapia</span></span></a></li>
+            <li><a href="https://depilasermexico.com/copas-colombianas.html"><span
+                  class="bn-dropdown-icon">🥂</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Copas
+                    Colombianas</span></span></a></li>
+            <li><a href="https://depilasermexico.com/holywood-peel.html"><span class="bn-dropdown-icon">⭐</span><span
+                  class="bn-dropdown-text"><span class="bn-dropdown-title">Holywood Peel</span></span></a></li>
+            <li><a href="https://depilasermexico.com/microdermoabrasion.html"><span
+                  class="bn-dropdown-icon">✴️</span><span class="bn-dropdown-text"><span
+                    class="bn-dropdown-title">Microdermoabrasión</span></span></a></li>
+            <li><a href="https://depilasermexico.com/hidrodermoabrasion.html"><span
+                  class="bn-dropdown-icon">💧</span><span class="bn-dropdown-text"><span
+                    class="bn-dropdown-title">Hidrodermoabrasión</span></span></a></li>
+            <li><a href="https://depilasermexico.com/despigmentacion.html"><span class="bn-dropdown-icon">🌸</span><span
+                  class="bn-dropdown-text"><span class="bn-dropdown-title">Despigmentación</span></span></a></li>
+            <li><a href="https://depilasermexico.com/eliminacion-tatuaje.html"><span
+                  class="bn-dropdown-icon">🎨</span><span class="bn-dropdown-text"><span
+                    class="bn-dropdown-title">Eliminación de Tatuaje</span></span></a></li>
             <li class="bn-dropdown-sep" role="separator"></li>
-            <li><a href="https://depilasermexico.com/precios-servicios-esteticos.html"><span class="bn-dropdown-icon">📋</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Precios Estéticos</span></span></a></li>
+            <li><a href="https://depilasermexico.com/precios-servicios-esteticos.html"><span
+                  class="bn-dropdown-icon">📋</span><span class="bn-dropdown-text"><span
+                    class="bn-dropdown-title">Precios Estéticos</span></span></a></li>
           </ul>
         </li>
         <li><a href="https://depilasermexico.com/precios-depilacion-laser.html">Precios</a></li>

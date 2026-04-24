@@ -1695,6 +1695,29 @@
       overflow: hidden;
       max-width: 100vw;
     }
+
+    /* nav: scroll vertical en dropdown de servicios largo */
+    .bn-menu>li.open .bn-dropdown {
+      max-height: calc(100vh - 140px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: var(--cp) transparent;
+    }
+
+    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar {
+      width: 6px
+    }
+
+    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar-track {
+      background: transparent
+    }
+
+    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar-thumb {
+      background: var(--cp);
+      border-radius: 3px
+    }
   </style>
 </head>
 
@@ -1987,7 +2010,7 @@
       <div class="bn-mobile-sep"></div>
       <a href="https://depilasermexico.com/blog.html" class="bn-mobile-link"><span class="mi">📝</span> Blog</a>
       <a href="#preguntas-frecuentes" class="bn-mobile-link"><span class="mi">❓</span> FAQ</a>
-      <a href="#contacto" class="bn-mobile-link"><span class="mi">📞</span> Contacto</a> 
+      <a href="#contacto" class="bn-mobile-link"><span class="mi">📞</span> Contacto</a>
       <a href="https://wa.me/525535433490?text=Hola%2C%20quiero%20agendar%20mi%20cita%20de%20valoraci%C3%B3n%20sin%20costo"
         class="bn-mobile-cta" target="_blank" rel="noopener noreferrer">
         💬 Agendar cita gratuita por WhatsApp

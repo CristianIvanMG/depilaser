@@ -28,8 +28,99 @@
   <meta name="geo.placename" content="Ciudad de México" />
   <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico">
 
-  <script
-    type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Product", "name": "Depilación Láser Entrecejo", "description": "Depilación láser de diodo en entrecejo en CDMX y Querétaro ✅ Por cotizar. Valoración gratuita, tecnología de última generación y atención profesional en BellaNick Clinic.", "category": "Facial / Depilación Láser Diodo", "brand": {"@type": "Brand", "name": "BellaNick Clinic"}, "image": "https://depilasermexico.com/assets/img/hero/h1_hero1.webp", "url": "https://depilasermexico.com/depilacion-laser-entrecejo.html"}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Inicio", "item": "https://depilasermexico.com/"}, {"@type": "ListItem", "position": 2, "name": "Precios por zona", "item": "https://depilasermexico.com/precios-depilacion-laser.html"}, {"@type": "ListItem", "position": 3, "name": "Entrecejo", "item": "https://depilasermexico.com/depilacion-laser-entrecejo.html"}]}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Me puede afectar el laser a la piel tan fina del entrecejo?", "acceptedAnswer": {"@type": "Answer", "text": "No si se usa la potencia correcta. Usamos cabezal con proteccion ocular y ajuste especifico para piel facial delgada."}}, {"@type": "Question", "name": "Puedo depilarme entrecejo si me hago microblading?", "acceptedAnswer": {"@type": "Answer", "text": "Si, pero hay que esperar 4 semanas despues del microblading y cubrir la ceja pigmentada durante la sesion."}}, {"@type": "Question", "name": "Quedara linea recta o respetara mi forma de cejas?", "acceptedAnswer": {"@type": "Answer", "text": "Diseñamos la zona contigo antes de disparar. Solo tratamos lo que tu decidas eliminar."}}]}]}</script>
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Service",
+      "@id": "https://depilasermexico.com/depilacion-laser-entrecejo.html#service",
+      "name": "Depilación Láser de Entrecejo",
+      "description": "Depilación láser de diodo en el entrecejo en CDMX y Querétaro. Tratamiento seguro para piel facial delicada, con valoración gratuita y tecnología de última generación en BellaNick Clinic.",
+      "url": "https://depilasermexico.com/depilacion-laser-entrecejo.html",
+      "category": "Depilación Láser Facial",
+      "provider": {
+        "@type": "LocalBusiness",
+        "@id": "https://depilasermexico.com/#business",
+        "name": "BellaNick Clinic",
+        "url": "https://depilasermexico.com/",
+        "telephone": "+525535433490",
+        "image": "https://depilasermexico.com/assets/img/hero/h1_hero1.webp",
+        "areaServed": [
+          {
+            "@type": "AdministrativeArea",
+            "name": "Ciudad de México"
+          },
+          {
+            "@type": "AdministrativeArea",
+            "name": "Querétaro"
+          }
+        ]
+      },
+      "offers": {
+        "@type": "Offer",
+        "priceCurrency": "MXN",
+        "availability": "https://schema.org/InStock",
+        "url": "https://depilasermexico.com/depilacion-laser-entrecejo.html"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://depilasermexico.com/depilacion-laser-entrecejo.html#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "¿Puede afectar el láser a la piel tan delicada del entrecejo?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Utilizamos parámetros específicos para piel facial delicada, con protección ocular y ajuste preciso de energía para garantizar seguridad y efectividad."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Puedo depilarme el entrecejo si tengo microblading?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sí, pero se recomienda esperar al menos 4 semanas después del microblading y proteger la ceja pigmentada durante la sesión."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Se respeta la forma natural de mis cejas?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sí. Antes del tratamiento diseñamos contigo la zona a tratar y solo eliminamos el vello que tú decidas, respetando la forma natural de tus cejas."
+          }
+        }
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://depilasermexico.com/depilacion-laser-entrecejo.html#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Inicio",
+          "item": "https://depilasermexico.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Precios por zona",
+          "item": "https://depilasermexico.com/precios-depilacion-laser.html"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Depilación Láser de Entrecejo",
+          "item": "https://depilasermexico.com/depilacion-laser-entrecejo.html"
+        }
+      ]
+    }
+  ]
+}
+</script>
 
   <style>
     :root {
@@ -1077,6 +1168,29 @@
       line-height: 1.65;
       font-size: 14.5px
     }
+
+    /* nav: scroll vertical en dropdown de servicios largo */
+    .bn-menu>li.open .bn-dropdown {
+      max-height: calc(100vh - 140px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: var(--cp) transparent;
+    }
+
+    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar {
+      width: 6px
+    }
+
+    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar-track {
+      background: transparent
+    }
+
+    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar-thumb {
+      background: var(--cp);
+      border-radius: 3px
+    }
   </style>
 </head>
 
@@ -1132,16 +1246,30 @@
             <li><a href="https://depilasermexico.com/electroestimulacion.html"><span
                   class="bn-dropdown-icon">⚡</span><span class="bn-dropdown-text"><span
                     class="bn-dropdown-title">Electroestimulación</span></span></a></li>
-            <li><a href="https://depilasermexico.com/carboxiterapia.html"><span class="bn-dropdown-icon">💨</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Carboxiterapia</span></span></a></li>
-            <li><a href="https://depilasermexico.com/vacumterapia.html"><span class="bn-dropdown-icon">🫧</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Vacumterapia</span></span></a></li>
-            <li><a href="https://depilasermexico.com/copas-colombianas.html"><span class="bn-dropdown-icon">🥂</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Copas Colombianas</span></span></a></li>
-            <li><a href="https://depilasermexico.com/holywood-peel.html"><span class="bn-dropdown-icon">⭐</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Holywood Peel</span></span></a></li>
-            <li><a href="https://depilasermexico.com/microdermoabrasion.html"><span class="bn-dropdown-icon">✴️</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Microdermoabrasión</span></span></a></li>
-            <li><a href="https://depilasermexico.com/hidrodermoabrasion.html"><span class="bn-dropdown-icon">💧</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Hidrodermoabrasión</span></span></a></li>
-            <li><a href="https://depilasermexico.com/despigmentacion.html"><span class="bn-dropdown-icon">🌸</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Despigmentación</span></span></a></li>
-            <li><a href="https://depilasermexico.com/eliminacion-tatuaje.html"><span class="bn-dropdown-icon">🎨</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Eliminación de Tatuaje</span></span></a></li>
+            <li><a href="https://depilasermexico.com/carboxiterapia.html"><span class="bn-dropdown-icon">💨</span><span
+                  class="bn-dropdown-text"><span class="bn-dropdown-title">Carboxiterapia</span></span></a></li>
+            <li><a href="https://depilasermexico.com/vacumterapia.html"><span class="bn-dropdown-icon">🫧</span><span
+                  class="bn-dropdown-text"><span class="bn-dropdown-title">Vacumterapia</span></span></a></li>
+            <li><a href="https://depilasermexico.com/copas-colombianas.html"><span
+                  class="bn-dropdown-icon">🥂</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Copas
+                    Colombianas</span></span></a></li>
+            <li><a href="https://depilasermexico.com/holywood-peel.html"><span class="bn-dropdown-icon">⭐</span><span
+                  class="bn-dropdown-text"><span class="bn-dropdown-title">Holywood Peel</span></span></a></li>
+            <li><a href="https://depilasermexico.com/microdermoabrasion.html"><span
+                  class="bn-dropdown-icon">✴️</span><span class="bn-dropdown-text"><span
+                    class="bn-dropdown-title">Microdermoabrasión</span></span></a></li>
+            <li><a href="https://depilasermexico.com/hidrodermoabrasion.html"><span
+                  class="bn-dropdown-icon">💧</span><span class="bn-dropdown-text"><span
+                    class="bn-dropdown-title">Hidrodermoabrasión</span></span></a></li>
+            <li><a href="https://depilasermexico.com/despigmentacion.html"><span class="bn-dropdown-icon">🌸</span><span
+                  class="bn-dropdown-text"><span class="bn-dropdown-title">Despigmentación</span></span></a></li>
+            <li><a href="https://depilasermexico.com/eliminacion-tatuaje.html"><span
+                  class="bn-dropdown-icon">🎨</span><span class="bn-dropdown-text"><span
+                    class="bn-dropdown-title">Eliminación de Tatuaje</span></span></a></li>
             <li class="bn-dropdown-sep" role="separator"></li>
-            <li><a href="https://depilasermexico.com/precios-servicios-esteticos.html"><span class="bn-dropdown-icon">📋</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Precios Estéticos</span></span></a></li>
+            <li><a href="https://depilasermexico.com/precios-servicios-esteticos.html"><span
+                  class="bn-dropdown-icon">📋</span><span class="bn-dropdown-text"><span
+                    class="bn-dropdown-title">Precios Estéticos</span></span></a></li>
           </ul>
         </li>
         <li><a href="https://depilasermexico.com/precios-depilacion-laser.html">Precios</a></li>

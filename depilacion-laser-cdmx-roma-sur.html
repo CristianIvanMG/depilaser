@@ -2501,6 +2501,19 @@
       box-sizing: border-box;
     }
 
+  
+    /* nav: scroll vertical en dropdown de servicios largo */
+    .bn-menu>li.open .bn-dropdown {
+      max-height: calc(100vh - 140px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: var(--cp) transparent;
+    }
+    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar { width: 6px }
+    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar-track { background: transparent }
+    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar-thumb { background: var(--cp); border-radius: 3px }
   </style>
 </head>
 
@@ -3236,9 +3249,7 @@
       async function resetSession() {
         try { await fetch('/php/reset_session.php', { method: 'POST', credentials: 'same-origin', cache: 'no-store' }); } catch (e) { }
       }
-
     })();
   </script>
 </body>
-
 </html>

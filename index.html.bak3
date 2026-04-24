@@ -2,70 +2,94 @@
 <html lang="es-MX">
 
 <head>
-
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="author" content="Ing. Cristian Ivan Morales Garza">
+  <meta name="description"
+    content="Depilación láser en CDMX con atención de calidad y resultados visibles ✅ Agenda tu valoración sin costo y prueba de sensibilidad. Desde $99 en axilas hasta $299 en piernas. ¡Aprovecha!" />
+  <meta name="distribution" content="global" />
+  <meta http-equiv="Content-Language" content="es" />
+  <meta name="keywords"
+    content="depilacion, laser, depilacion laser, depilacion definitiva, insurgentes, roma, diodo, radiofrecuencia, copas colombianas, carboxiterapia">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="handheld" content="true" />
+  <meta name="Robots" content="index,follow,all" />
 
-  <title>Depilación Láser en Querétaro Corregidora | BellaNick Clinic ✅</title>
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Depilación láser y tratamientos estéticos CDMX ✅!!" />
+  <meta property="og:description"
+    content="Depilación láser en CDMX con excelente atención y tecnología segura. Resultados visibles desde las primeras sesiones ✅ Valoración sin costo. Desde $99." />
+  <meta property="og:image" content="https://depilasermexico.com/img/og-bellanick-clinic.jpg" />
+  <meta property="og:url" content="https://depilasermexico.com/" />
+  <meta property="og:site_name" content="BellaNick Clinic" />
 
-   <meta name="description"
-    content="Depilación láser en Querétaro, zona Corregidora ✅ Sucursal BellaNick Clinic con tecnología láser de diodo. Valoración sin costo y sesiones desde $99 MXN." />
-   <meta name="keywords"
-    content="depilación láser Querétaro, depilación láser Corregidora, depilación láser Qro, clínica de depilación láser en Querétaro, láser de diodo Querétaro, BellaNick Clinic Querétaro" />
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Depilación láser y estética en CDMX ✅">
+  <meta name="twitter:description"
+    content="Resultados visibles, atención de calidad y valoración sin costo. Desde $99.">
+  <meta name="twitter:image" content="https://depilasermexico.com/img/og-bellanick-clinic.jpg">
 
-   <link rel="canonical" href="https://depilasermexico.com/depilacion-laser-queretaro-corregidora.html" />
-   <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico">
-   <meta property="og:title" content="Depilación Láser en Querétaro Corregidora | BellaNick Clinic ✅" />
-   <meta property="og:description"
-    content="Depilación láser de diodo en Querétaro Corregidora ✅ BellaNick Clinic. Valoración gratuita y resultados visibles." />
-   <meta property="og:image" content="https://depilasermexico.com/assets/img/hero/h1_hero1.webp" />
-   <meta property="og:url" content="https://depilasermexico.com/depilacion-laser-queretaro-corregidora.html" />
-   <meta property="og:type" content="website" />
-   <meta property="og:site_name" content="BellaNick Clinic" />
-   <meta property="og:locale" content="es_MX" />
-
-   <meta name="twitter:card" content="summary_large_image" />
-   <meta name="twitter:title" content="Depilación Láser en Querétaro Corregidora | BellaNick Clinic ✅" />
-   <meta name="twitter:description"
-    content="Depilación láser de diodo en Querétaro Corregidora ✅ BellaNick Clinic. Valoración gratuita." />
-   <meta name="twitter:image" content="https://depilasermexico.com/assets/img/hero/h1_hero1.webp" />
-
-   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
-
-   <meta name="author" content="BellaNick Clinic" />
-   <meta http-equiv="Content-Language" content="es-MX" />
-
-   <meta name="geo.region" content="MX-QUE" />
-   <meta name="geo.placename" content="Querétaro" />
-
+  <link rel="canonical" href="https://depilasermexico.com/">
+  <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico">
+  <title>Depilación Láser CDMX | Resultados Visibles BellaNick Clinic ✅</title>
 
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "MedicalBusiness",
-    "name": "Depilación Laser BellaNick Clinic Qro.",
-    "url": "https://depilasermexico.com/sucursal-queretaro.html",
-    "logo": "https://depilasermexico.com/assets/img/logo/logo.webp",
-    "description": "Clinica especializada en depilación Laser diodo y tratamientos esteticos en Corregidora, Querétaro.",
-    "email": "administracion@depilasermexico.com",
-    "priceRange": "$99 - $2999",
-    "address": {
-      "@type": "PostalAddress",
-      "addressLocality": "Corregidora",
-      "addressRegion": "Querétaro",
-      "addressCountry": "MX"
-    },
-    "geo": {
-      "@type": "GeoCoordinates",
-      "latitude": 20.5535327,
-      "longitude": -100.4293315
-    },
-    "sameAs": [
-      "https://www.instagram.com/bellanickclinicqro/",
-      "https://www.facebook.com/61577831189576/"
+    "@graph": [
+      {
+        "@type": "LocalBusiness",
+        "@id": "https://depilasermexico.com/#localbusiness",
+        "name": "BellaNick Clinic",
+        "url": "https://depilasermexico.com/",
+        "sameAs": [
+          "https://www.instagram.com/bellanickclinic/",
+          "https://www.facebook.com/BellaNickClinic",
+          "https://www.tiktok.com/@bellanickclinic"
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://depilasermexico.com/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "¿Garantizan el servicio de depilación láser?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Sí, garantizamos nuestro servicio. Si no estás satisfecho con el resultado, trabajaremos contigo para encontrar una solución. Ofrecemos cita de valoración sin costo y prueba de sensibilidad gratuita."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "¿Cuánto duran las sesiones de depilación láser?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Las sesiones duran entre 20 minutos y 1 hora dependiendo del área a tratar. Axilas: 20 min. Piernas completas: 45-60 min. Bello labio: 10 min."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "¿Cuánto cuesta la depilación láser en BellaNick Clinic?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Los precios inician desde $99 MXN en axilas hasta $299 MXN en piernas. Contamos con paquetes y planes de pago. Solicita tu cotización personalizada por WhatsApp."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "¿Puedo tomar el tratamiento estando embarazada?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No recomendamos el tratamiento durante el embarazo o lactancia. Consulta con tu médico primero. Nuestro equipo te orientará en cada caso particular."
+            }
+          }
+        ]
+      }
     ]
   }
   </script>
+
   <style>
     /* =====================================================
        VARIABLES
@@ -90,7 +114,7 @@
     }
 
     /* =====================================================
-       RESET BASE
+       BASE
     ===================================================== */
     *,
     *::before,
@@ -124,7 +148,7 @@
     }
 
     /* =====================================================
-       BARRA CONFIANZA
+       BARRA 
     ===================================================== */
     .barra-confianza {
       background: var(--cp);
@@ -145,7 +169,7 @@
     }
 
     /* =====================================================
-       NAVEGACIÓN  — breakpoint único: 900px
+       NAVEGACIÓN 
     ===================================================== */
     nav {
       background: var(--cb);
@@ -249,6 +273,8 @@
       transform: translateY(-6px);
       transition: opacity .2s ease, transform .2s ease;
       pointer-events: none;
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
     }
 
     .bn-menu>li.open .bn-dropdown {
@@ -329,7 +355,7 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: var(--cp);
+      background: var(--cp) !important;
       color: #fff !important;
       padding: 10px 22px;
       border-radius: 50px;
@@ -345,7 +371,7 @@
       transform: translateY(-1px)
     }
 
-    /* ---- Hamburguesa (oculta en desktop) ---- */
+    /* ---- Hamburguesa  ---- */
     .bn-hamburger {
       display: none;
       flex-direction: column;
@@ -380,7 +406,7 @@
       transform: translateY(-7px) rotate(-45deg)
     }
 
-    /* Panel mobile (oculto por defecto) */
+    /* Panel mobile  */
     .bn-mobile-panel {
       display: none;
       background: var(--cb);
@@ -1405,6 +1431,7 @@
       background: #fff;
       border-radius: 16px;
       box-shadow: 0 20px 40px rgba(0, 0, 0, .25);
+      box-sizing: border-box;
       z-index: 9999;
       flex-direction: column;
     }
@@ -1487,15 +1514,17 @@
     }
 
     .chat-input input {
-      flex: 1;
+      flex: 1 1 auto;
       padding: 12px 14px;
       border-radius: 999px;
       border: 1px solid #e5e5e5;
-      font-size: 14px;
+      font-size: 16px;
       outline: none;
       background: #fff;
       color: #333;
       transition: all .25s;
+      min-width: 0;
+      box-sizing: border-box;
     }
 
     .chat-input input:focus {
@@ -1514,6 +1543,9 @@
       cursor: pointer;
       transition: all .25s;
       box-shadow: 0 6px 16px rgba(197, 59, 109, .35);
+      flex-shrink: 0;
+      /* No se comprime */
+      white-space: nowrap;
     }
 
     .chat-input button:hover {
@@ -1525,6 +1557,9 @@
        RESPONSIVE — breakpoint único en 900px
     ===================================================== */
     @media (max-width: 900px) {
+      .chat-input input {
+        font-size: 16px;
+      }
 
       /* Menú desktop oculto → hamburguesa visible */
       .bn-menu {
@@ -1594,961 +1629,34 @@
       .footer-grid {
         grid-template-columns: 1fr
       }
-    }
 
-    /* ═══════════════════════════════════════════════════════════
-       CSS PROPIO DE ESTA PÁGINA
-    ═══════════════════════════════════════════════════════════ */
-    :root {
-      --cp: #c8386b;
-      --cp-c: #e8547e;
-      --cp-o: #9e1f4e;
-      --ca: #f9d4e2;
-      --ct: #1a1a2e;
-      --ctc: #555566;
-      --cb: #ffffff;
-      --cg: #f8f5f7;
-      --cgb: #e8dde4;
-      --sombra: 0 4px 24px rgba(200, 56, 107, .10);
-      --sc: 0 2px 16px rgba(0, 0, 0, .08);
-      --r: 14px;
-      --rl: 24px;
-      --tr: all .3s ease;
-      --ft: 'Georgia', 'Times New Roman', serif;
-      --fb: 'Segoe UI', system-ui, -apple-system, sans-serif
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box
-    }
-
-    body {
-      font-family: var(--fb);
-      color: var(--ct);
-      background: var(--cb);
-      line-height: 1.6;
-      overflow-x: hidden
-    }
-
-    img {
-      max-width: 100%;
-      height: auto;
-      display: block
-    }
-
-    a {
-      text-decoration: none;
-      color: inherit
-    }
-
-    .barra {
-      background: var(--cp);
-      color: #fff;
-      text-align: center;
-      padding: 10px 20px;
-      font-size: 13.5px;
-      font-weight: 500
-    }
-
-    .barra span {
-      margin: 0 14px
-    }
-
-    .barra span::before {
-      content: "✓ "
-    }
-
-    nav {
-      background: #fff;
-      border-bottom: 1px solid var(--cgb);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      box-shadow: 0 2px 12px rgba(0, 0, 0, .06)
-    }
-
-    .nav-i {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 20px;
-      max-width: 1140px;
-      margin: 0 auto
-    }
-
-    .nav-i img {
-      height: 48px;
-      width: auto
-    }
-
-    .nav-m {
-      display: flex;
-      gap: 28px;
-      list-style: none;
-      align-items: center
-    }
-
-    .nav-m a {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--ct);
-      transition: var(--tr);
-      position: relative
-    }
-
-    .nav-m a::after {
-      content: '';
-      position: absolute;
-      bottom: -3px;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background: var(--cp);
-      transition: width .3s
-    }
-
-    .nav-m a:hover::after {
-      width: 100%
-    }
-
-    .nav-m a:hover {
-      color: var(--cp)
-    }
-
-    .nav-cta {
-      background: var(--cp) !important;
-      color: #fff !important;
-      padding: 10px 22px;
-      border-radius: 50px;
-      font-weight: 600 !important
-    }
-
-    .nav-cta:hover {
-      background: var(--cp-o) !important
-    }
-
-    .nav-cta::after {
-      display: none !important
-    }
-
-    .breadcrumb {
-      background: var(--cg);
-      padding: 12px 20px;
-      font-size: 13px;
-      color: var(--ctc);
-      border-bottom: 1px solid var(--cgb)
-    }
-
-    .breadcrumb a {
-      color: var(--cp);
-      font-weight: 500
-    }
-
-    .breadcrumb span {
-      margin: 0 6px
-    }
-
-    /* HERO ESPECIAL QUERÉTARO — gradiente diferente */
-    .hero-suc {
-      background: linear-gradient(135deg, #1a0a2e 0%, #2d1052 60%, #9e1f4e 100%);
-      padding: 80px 20px 64px;
-      position: relative;
-      overflow: hidden
-    }
-
-    .hero-suc::before {
-      content: '';
-      position: absolute;
-      top: -80px;
-      right: -80px;
-      width: 560px;
-      height: 560px;
-      background: radial-gradient(circle, rgba(200, 56, 107, .2) 0%, transparent 70%);
-      pointer-events: none
-    }
-
-    .hero-suc::after {
-      content: '';
-      position: absolute;
-      bottom: -60px;
-      left: -60px;
-      width: 400px;
-      height: 400px;
-      background: radial-gradient(circle, rgba(255, 255, 255, .04) 0%, transparent 70%);
-      pointer-events: none
-    }
-
-    .hero-suc-grid {
-      max-width: 1140px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 60px;
-      align-items: center;
-      position: relative;
-      z-index: 1
-    }
-
-    .suc-badge-nueva {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--cp);
-      color: #fff;
-      border-radius: 50px;
-      padding: 7px 18px;
-      font-size: 13px;
-      font-weight: 700;
-      margin-bottom: 20px;
-      letter-spacing: .3px
-    }
-
-    .suc-badge-nueva::before {
-      content: "✨"
-    }
-
-    .hero-suc h1 {
-      font-family: var(--ft);
-      font-size: clamp(28px, 5vw, 52px);
-      font-weight: 700;
-      color: #fff;
-      line-height: 1.15;
-      margin-bottom: 18px
-    }
-
-    .hero-suc h1 em {
-      font-style: normal;
-      color: var(--cp-c)
-    }
-
-    .hero-suc-desc {
-      font-size: 17px;
-      color: rgba(255, 255, 255, .85);
-      margin-bottom: 30px;
-      line-height: 1.75;
-      max-width: 520px
-    }
-
-    .hero-btns {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      margin-bottom: 32px
-    }
-
-    .btn-wa {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: #25D366;
-      color: #fff;
-      padding: 14px 28px;
-      border-radius: 50px;
-      font-weight: 700;
-      font-size: 15px;
-      transition: var(--tr);
-      box-shadow: 0 4px 20px rgba(37, 211, 102, .4)
-    }
-
-    .btn-wa:hover {
-      background: #1ebe5d;
-      transform: translateY(-2px)
-    }
-
-    .btn-sec {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(255, 255, 255, .15);
-      color: #fff;
-      border: 2px solid rgba(255, 255, 255, .4);
-      padding: 13px 24px;
-      border-radius: 50px;
-      font-weight: 600;
-      font-size: 15px;
-      transition: var(--tr)
-    }
-
-    .btn-sec:hover {
-      background: rgba(255, 255, 255, .25);
-      border-color: #fff
-    }
-
-    .hero-mini-stats {
-      display: flex;
-      gap: 28px;
-      flex-wrap: wrap
-    }
-
-    .hms-n {
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--cp-c);
-      line-height: 1
-    }
-
-    .hms-l {
-      font-size: 12.5px;
-      color: rgba(255, 255, 255, .7);
-      margin-top: 3px
-    }
-
-    /* Imagen hero */
-    .hero-img-wrap {
-      position: relative
-    }
-
-    .hero-img-wrap img {
-      border-radius: var(--rl);
-      box-shadow: 0 8px 40px rgba(0, 0, 0, .4);
-      width: 100%;
-      object-fit: cover;
-      aspect-ratio: 4/3
-    }
-
-    .qro-tag {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: var(--cp);
-      color: #fff;
-      border-radius: 50px;
-      padding: 8px 16px;
-      font-size: 13px;
-      font-weight: 700
-    }
-
-    /* INFO RÁPIDA */
-    .info-rapida {
-      background: var(--cb);
-      border-bottom: 1px solid var(--cgb)
-    }
-
-    .info-rapida-inner {
-      max-width: 1140px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 0
-    }
-
-    .info-item {
-      padding: 24px 28px;
-      border-right: 1px solid var(--cgb);
-      display: flex;
-      align-items: flex-start;
-      gap: 14px
-    }
-
-    .info-item:last-child {
-      border-right: none
-    }
-
-    .info-ico {
-      font-size: 26px;
-      flex-shrink: 0;
-      margin-top: 2px
-    }
-
-    .info-label {
-      font-size: 11.5px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .8px;
-      color: var(--ctc);
-      margin-bottom: 4px
-    }
-
-    .info-val {
-      font-size: 14.5px;
-      font-weight: 600;
-      color: var(--ct);
-      line-height: 1.4
-    }
-
-    .info-val a {
-      color: var(--cp)
-    }
-
-    .info-val a:hover {
-      text-decoration: underline
-    }
-
-    /* SECCIONES */
-    .sec {
-      padding: 68px 20px
-    }
-
-    .sec-alt {
-      background: var(--cg)
-    }
-
-    .sec-hdr {
-      text-align: center;
-      margin-bottom: 48px
-    }
-
-    .etq {
-      display: inline-block;
-      background: var(--ca);
-      color: var(--cp-o);
-      border-radius: 50px;
-      padding: 5px 18px;
-      font-size: 12px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 12px
-    }
-
-    .sec-tit {
-      font-family: var(--ft);
-      font-size: clamp(24px, 3vw, 36px);
-      font-weight: 700;
-      line-height: 1.25;
-      margin-bottom: 14px
-    }
-
-    .sec-sub {
-      font-size: 16px;
-      color: var(--ctc);
-      max-width: 600px;
-      margin: 0 auto;
-      line-height: 1.7
-    }
-
-    /* POR QUÉ QUERÉTARO */
-    .grid-ben {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 22px;
-      max-width: 1140px;
-      margin: 0 auto
-    }
-
-    .card-ben {
-      background: #fff;
-      border-radius: var(--rl);
-      padding: 28px;
-      border: 1px solid var(--cgb);
-      box-shadow: var(--sc);
-      transition: var(--tr)
-    }
-
-    .card-ben:hover {
-      border-color: var(--cp);
-      transform: translateY(-3px);
-      box-shadow: var(--sombra)
-    }
-
-    .ben-ico {
-      font-size: 34px;
-      margin-bottom: 14px;
-      display: block
-    }
-
-    .ben-tit {
-      font-size: 17px;
-      font-weight: 700;
-      color: var(--ct);
-      margin-bottom: 8px
-    }
-
-    .ben-desc {
-      font-size: 14px;
-      color: var(--ctc);
-      line-height: 1.65
-    }
-
-    /* MAPA */
-    .mapa-wrap {
-      max-width: 1140px;
-      margin: 0 auto;
-      border-radius: var(--rl);
-      overflow: hidden;
-      box-shadow: var(--sc);
-      border: 1px solid var(--cgb)
-    }
-
-    .mapa-wrap iframe {
-      width: 100%;
-      height: 420px;
-      border: none;
-      display: block
-    }
-
-    /* CÓMO LLEGAR */
-    .cl-card {
-      background: #fff;
-      border-radius: var(--rl);
-      padding: 32px;
-      border: 1px solid var(--cgb);
-      box-shadow: var(--sc)
-    }
-
-    .cl-titulo {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--ct);
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px
-    }
-
-    .cl-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      margin-bottom: 16px;
-      font-size: 14.5px;
-      color: var(--ctc);
-      line-height: 1.55
-    }
-
-    .cl-item .ico {
-      font-size: 20px;
-      flex-shrink: 0;
-      margin-top: 1px
-    }
-
-    .cl-item strong {
-      color: var(--ct)
-    }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 28px;
-      max-width: 1140px;
-      margin: 0 auto
-    }
-
-    /* SERVICIOS */
-    .grid-srv {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 18px;
-      max-width: 1140px;
-      margin: 0 auto
-    }
-
-    .card-srv {
-      background: #fff;
-      border-radius: var(--rl);
-      padding: 24px;
-      border: 1px solid var(--cgb);
-      box-shadow: var(--sc);
-      transition: var(--tr);
-      text-align: center
-    }
-
-    .card-srv:hover {
-      border-color: var(--cp);
-      transform: translateY(-3px);
-      box-shadow: var(--sombra)
-    }
-
-    .srv-ico {
-      font-size: 32px;
-      margin-bottom: 10px
-    }
-
-    .srv-nom {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--ct);
-      margin-bottom: 6px
-    }
-
-    .srv-desc {
-      font-size: 12.5px;
-      color: var(--ctc);
-      line-height: 1.5;
-      margin-bottom: 14px
-    }
-
-    .chip {
-      display: inline-block;
-      background: var(--ca);
-      color: var(--cp-o);
-      border-radius: 50px;
-      padding: 4px 12px;
-      font-size: 12px;
-      font-weight: 600
-    }
-
-    .btn-srv {
-      display: block;
-      margin-top: 12px;
-      background: var(--cp);
-      color: #fff;
-      border-radius: var(--r);
-      padding: 9px;
-      font-size: 13.5px;
-      font-weight: 600;
-      transition: var(--tr)
-    }
-
-    .btn-srv:hover {
-      background: var(--cp-o)
-    }
-
-    /* HORARIOS */
-    .horario-tabla {
-      width: 100%;
-      border-collapse: collapse
-    }
-
-    .horario-tabla td {
-      padding: 10px 0;
-      font-size: 14px;
-      border-bottom: 1px solid var(--cgb)
-    }
-
-    .horario-tabla tr:last-child td {
-      border-bottom: none
-    }
-
-    .horario-tabla .dia {
-      color: var(--ctc);
-      width: 55%
-    }
-
-    .horario-tabla .hora {
-      font-weight: 700;
-      color: var(--ct);
-      text-align: right
-    }
-
-    .horario-tabla .cerrado {
-      color: #dc2626
-    }
-
-    /* OTRAS SUCURSALES */
-    .grid-otras {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 20px;
-      max-width: 900px;
-      margin: 0 auto
-    }
-
-    .card-otra {
-      background: #fff;
-      border-radius: var(--rl);
-      padding: 24px;
-      border: 1px solid var(--cgb);
-      box-shadow: var(--sc);
-      display: flex;
-      gap: 16px;
-      align-items: flex-start;
-      transition: var(--tr)
-    }
-
-    .card-otra:hover {
-      border-color: var(--cp);
-      transform: translateY(-2px);
-      box-shadow: var(--sombra)
-    }
-
-    .otra-nom {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--ct);
-      margin-bottom: 4px
-    }
-
-    .otra-dir {
-      font-size: 13px;
-      color: var(--ctc);
-      margin-bottom: 10px;
-      line-height: 1.4
-    }
-
-    .otra-link {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--cp)
-    }
-
-    /* REDES QRO */
-    .redes-qro {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-top: 24px
-    }
-
-    .red-qro {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--cg);
-      border: 1px solid var(--cgb);
-      color: var(--ct);
-      padding: 10px 20px;
-      border-radius: 50px;
-      font-size: 14px;
-      font-weight: 600;
-      transition: var(--tr)
-    }
-
-    .red-qro:hover {
-      background: var(--cp);
-      color: #fff;
-      border-color: var(--cp)
-    }
-
-    /* CTA */
-    .cta-ban {
-      background: linear-gradient(135deg, #1a0a2e, var(--cp));
-      padding: 72px 20px;
-      text-align: center;
-      position: relative;
-      overflow: hidden
-    }
-
-    .cta-ban h2 {
-      font-family: var(--ft);
-      font-size: clamp(24px, 4vw, 38px);
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 14px;
-      max-width: 680px;
-      margin-left: auto;
-      margin-right: auto
-    }
-
-    .cta-ban p {
-      font-size: 17px;
-      color: rgba(255, 255, 255, .85);
-      max-width: 520px;
-      margin: 0 auto 32px;
-      line-height: 1.7
-    }
-
-    .cta-bts {
-      display: flex;
-      gap: 14px;
-      justify-content: center;
-      flex-wrap: wrap
-    }
-
-    .btn-wa-lg {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      background: #25D366;
-      color: #fff;
-      padding: 16px 34px;
-      border-radius: 50px;
-      font-weight: 700;
-      font-size: 16px;
-      transition: var(--tr);
-      box-shadow: 0 6px 24px rgba(37, 211, 102, .4)
-    }
-
-    .btn-wa-lg:hover {
-      background: #1ebe5d;
-      transform: translateY(-3px)
-    }
-
-    .btn-otras-suc {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: rgba(255, 255, 255, .15);
-      color: #fff;
-      border: 2px solid rgba(255, 255, 255, .5);
-      padding: 15px 28px;
-      border-radius: 50px;
-      font-weight: 600;
-      font-size: 15px;
-      transition: var(--tr)
-    }
-
-    .btn-otras-suc:hover {
-      background: rgba(255, 255, 255, .25);
-      border-color: #fff
-    }
-
-    footer {
-      background: #0f0a14;
-      color: rgba(255, 255, 255, .7);
-      padding: 52px 20px 26px
-    }
-
-    .foot-grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr 1fr;
-      gap: 40px;
-      max-width: 1140px;
-      margin: 0 auto;
-      padding-bottom: 36px;
-      border-bottom: 1px solid rgba(255, 255, 255, .1)
-    }
-
-    .foot-logo {
-      height: 42px;
-      width: auto;
-      margin-bottom: 14px;
-      filter: brightness(10)
-    }
-
-    .foot-desc {
-      font-size: 13.5px;
-      line-height: 1.7;
-      margin-bottom: 18px;
-      color: rgba(255, 255, 255, .55)
-    }
-
-    .redes {
-      display: flex;
-      gap: 10px
-    }
-
-    .red {
-      width: 38px;
-      height: 38px;
-      background: rgba(255, 255, 255, .08);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 15px;
-      transition: var(--tr);
-      color: rgba(255, 255, 255, .85)
-    }
-
-    .red:hover {
-      background: var(--cp);
-      transform: translateY(-2px)
-    }
-
-    .foot-tit {
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: rgba(255, 255, 255, .9);
-      margin-bottom: 18px
-    }
-
-    .foot-ul {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 9px
-    }
-
-    .foot-ul a {
-      font-size: 13.5px;
-      color: rgba(255, 255, 255, .55);
-      transition: color .2s
-    }
-
-    .foot-ul a:hover {
-      color: var(--cp-c)
-    }
-
-    .foot-bottom {
-      text-align: center;
-      padding-top: 22px;
-      font-size: 12.5px;
-      color: rgba(255, 255, 255, .35);
-      max-width: 1140px;
-      margin: 0 auto
-    }
-
-    .wa-float {
-      position: fixed;
-      bottom: 26px;
-      right: 26px;
-      width: 58px;
-      height: 58px;
-      background: #25D366;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 26px;
-      box-shadow: 0 4px 20px rgba(37, 211, 102, .5);
-      z-index: 9999;
-      transition: var(--tr)
-    }
-
-    .wa-float:hover {
-      transform: scale(1.1)
-    }
-
-    @media(max-width:900px) {
-      .hero-suc-grid {
-        grid-template-columns: 1fr
+      .chat-input input {
+        font-size: 17px;
       }
 
-      .hero-img-wrap {
-        display: none
-      }
-
-      .grid-2 {
-        grid-template-columns: 1fr
-      }
-
-      .foot-grid {
-        grid-template-columns: 1fr 1fr
-      }
-    }
-
-    @media(max-width:640px) {
-      .nav-m {
-        display: none
-      }
-
-      .sec {
-        padding: 48px 14px
-      }
-
-      .hero-suc {
-        padding: 52px 14px 44px
-      }
-
-      .hero-btns {
-        flex-direction: column
-      }
-
-      .cta-bts {
-        flex-direction: column;
-        align-items: center
-      }
-
-      .foot-grid {
-        grid-template-columns: 1fr
-      }
-
-      .info-rapida-inner {
-        grid-template-columns: 1fr 1fr
-      }
-
-      .info-item {
-        border-right: none;
-        border-bottom: 1px solid var(--cgb)
-      }
     }
 
     /* =====================================================
        FIX MOVIL: elimina espacio blanco lateral
        ===================================================== */
-    html,
+    html {
+      width: 100%;
+      max-width: 100%;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      overscroll-behavior-x: none;
+      position: relative;
+    }
+
     body {
       width: 100%;
       max-width: 100%;
       margin: 0;
       padding: 0;
       overflow-x: hidden;
+      overscroll-behavior-x: none;
+      position: relative;
     }
 
     body>* {
@@ -2565,7 +1673,6 @@
     }
 
     /* Forzar que cualquier seccion principal respete el viewport */
-    nav,
     main,
     section,
     header,
@@ -2573,6 +1680,20 @@
     .barra-confianza {
       max-width: 100vw;
       box-sizing: border-box;
+      overflow-x: hidden;
+    }
+
+    /* nav: sin overflow-x:hidden (corta dropdown verticalmente por quirk CSS) */
+    nav {
+      max-width: 100vw;
+      box-sizing: border-box;
+    }
+
+    /* Contener decoraciones ::before que desbordan en movil */
+    .hero,
+    .cta-seccion {
+      overflow: hidden;
+      max-width: 100vw;
     }
   
     /* nav: scroll vertical en dropdown de servicios largo */
@@ -2592,7 +1713,7 @@
 
 <body>
 
-  <!-- BARRA CONFIANZA -->
+  <!-- BARRA  -->
   <div class="barra-confianza">
     <span>3 Sucursales</span>
     <span>Cita de valoración SIN COSTO</span>
@@ -2622,7 +1743,7 @@
           </button>
           <ul class="bn-dropdown" role="menu">
             <li role="menuitem">
-              <a href="https://depilasermexico.com/sucursal-roma-sur.html">
+              <a href="https://depilasermexico.com/depilacion-laser-cdmx-roma-sur.html">
                 <span class="bn-dropdown-icon">📍</span>
                 <span class="bn-dropdown-text">
                   <span class="bn-dropdown-title">Roma Sur</span>
@@ -2631,7 +1752,7 @@
               </a>
             </li>
             <li role="menuitem">
-              <a href="https://depilasermexico.com/sucursal-insurgentes-sur.html">
+              <a href="https://depilasermexico.com/depilacion-laser-cdmx-insurgentes-sur.html">
                 <span class="bn-dropdown-icon">📍</span>
                 <span class="bn-dropdown-text">
                   <span class="bn-dropdown-title">Insurgentes Sur</span>
@@ -2641,7 +1762,7 @@
             </li>
             <li class="bn-dropdown-sep" role="separator"></li>
             <li role="menuitem">
-              <a href="https://depilasermexico.com/sucursal-queretaro.html">
+              <a href="https://depilasermexico.com/depilacion-laser-queretaro-corregidora.html">
                 <span class="bn-dropdown-icon">🌟</span>
                 <span class="bn-dropdown-text">
                   <span class="bn-dropdown-title">Querétaro <span class="bn-badge">Nueva</span></span>
@@ -2659,16 +1780,26 @@
                 <polyline points="6 9 12 15 18 9" />
               </svg></span>
           </button>
-          <ul class="bn-dropdown" role="menu" style="min-width:260px">
+          <ul class="bn-dropdown" role="menu" style="min-width:280px">
             <li role="menuitem">
-              <a href="https://depilasermexico.com/depilacion-laser-diodo.html">
+              <a href="https://depilasermexico.com/depilacion-laser.html">
                 <span class="bn-dropdown-icon">✨</span>
                 <span class="bn-dropdown-text">
-                  <span class="bn-dropdown-title">Depilación Láser Diodo</span>
+                  <span class="bn-dropdown-title">Depilación Láser</span>
                   <span class="bn-dropdown-sub">Desde $99 MXN · Resultados desde la 1ª sesión</span>
                 </span>
               </a>
             </li>
+            <li role="menuitem">
+              <a href="https://depilasermexico.com/precios-depilacion-laser.html">
+                <span class="bn-dropdown-icon">💰</span>
+                <span class="bn-dropdown-text">
+                  <span class="bn-dropdown-title">Precios y Paquetes <span class="bn-badge">Nuevo</span></span>
+                  <span class="bn-dropdown-sub">Catálogo completo · 33 zonas del cuerpo</span>
+                </span>
+              </a>
+            </li>
+            <li class="bn-dropdown-sep" role="separator"></li>
             <li role="menuitem">
               <a href="https://depilasermexico.com/lipolisis-laser.html">
                 <span class="bn-dropdown-icon">🔥</span>
@@ -2705,7 +1836,6 @@
                 </span>
               </a>
             </li>
-            <li class="bn-dropdown-sep" role="separator"></li>
             <li role="menuitem">
               <a href="https://depilasermexico.com/carboxiterapia.html">
                 <span class="bn-dropdown-icon">💨</span>
@@ -2717,37 +1847,37 @@
             </li>
             <li role="menuitem">
               <a href="https://depilasermexico.com/vacumterapia.html">
-                <span class="bn-dropdown-icon">🫁</span>
+                <span class="bn-dropdown-icon">🫧</span>
                 <span class="bn-dropdown-text">
                   <span class="bn-dropdown-title">Vacumterapia</span>
-                  <span class="bn-dropdown-sub">Moldea y reduce celulitis eficazmente</span>
+                  <span class="bn-dropdown-sub">Drenaje linfático y reafirmación corporal</span>
                 </span>
               </a>
             </li>
             <li role="menuitem">
               <a href="https://depilasermexico.com/copas-colombianas.html">
-                <span class="bn-dropdown-icon">🏆</span>
+                <span class="bn-dropdown-icon">🥂</span>
                 <span class="bn-dropdown-text">
                   <span class="bn-dropdown-title">Copas Colombianas</span>
-                  <span class="bn-dropdown-sub">Terapia de ventosas para modelar el cuerpo</span>
+                  <span class="bn-dropdown-sub">Moldeado corporal y reafirmación</span>
                 </span>
               </a>
             </li>
             <li role="menuitem">
               <a href="https://depilasermexico.com/holywood-peel.html">
-                <span class="bn-dropdown-icon">✨</span>
+                <span class="bn-dropdown-icon">⭐</span>
                 <span class="bn-dropdown-text">
                   <span class="bn-dropdown-title">Holywood Peel</span>
-                  <span class="bn-dropdown-sub">Peeling de carbón para piel luminosa</span>
+                  <span class="bn-dropdown-sub">Limpieza profunda y luminosidad instantánea</span>
                 </span>
               </a>
             </li>
             <li role="menuitem">
               <a href="https://depilasermexico.com/microdermoabrasion.html">
-                <span class="bn-dropdown-icon">💎</span>
+                <span class="bn-dropdown-icon">✴️</span>
                 <span class="bn-dropdown-text">
                   <span class="bn-dropdown-title">Microdermoabrasión</span>
-                  <span class="bn-dropdown-sub">Exfoliación profunda y renovación celular</span>
+                  <span class="bn-dropdown-sub">Exfolia y renueva la piel profundamente</span>
                 </span>
               </a>
             </li>
@@ -2756,25 +1886,25 @@
                 <span class="bn-dropdown-icon">💧</span>
                 <span class="bn-dropdown-text">
                   <span class="bn-dropdown-title">Hidrodermoabrasión</span>
-                  <span class="bn-dropdown-sub">Limpieza facial profunda con hidrátacin</span>
+                  <span class="bn-dropdown-sub">Hidratación profunda y renovación celular</span>
                 </span>
               </a>
             </li>
             <li role="menuitem">
               <a href="https://depilasermexico.com/despigmentacion.html">
-                <span class="bn-dropdown-icon">🌟</span>
+                <span class="bn-dropdown-icon">🌸</span>
                 <span class="bn-dropdown-text">
                   <span class="bn-dropdown-title">Despigmentación</span>
-                  <span class="bn-dropdown-sub">Reduce manchas y unifica el tono de piel</span>
+                  <span class="bn-dropdown-sub">Elimina manchas y unifica el tono de piel</span>
                 </span>
               </a>
             </li>
             <li role="menuitem">
               <a href="https://depilasermexico.com/eliminacion-tatuaje.html">
-                <span class="bn-dropdown-icon">🖊️</span>
+                <span class="bn-dropdown-icon">🎨</span>
                 <span class="bn-dropdown-text">
                   <span class="bn-dropdown-title">Eliminación de Tatuaje</span>
-                  <span class="bn-dropdown-sub">Láser especializado para borrar tatuajes</span>
+                  <span class="bn-dropdown-sub">Láser especializado · Resultados seguros</span>
                 </span>
               </a>
             </li>
@@ -2790,10 +1920,9 @@
             </li>
           </ul>
         </li>
-
         <li><a href="https://depilasermexico.com/blog.html">Blog</a></li>
-        <!-- <li><a href="#preguntas-frecuentes">FAQ</a></li> -->
-        <!-- <li><a href="#contacto">Contacto</a></li>-->
+        <li><a href="#preguntas-frecuentes">FAQ</a></li>
+        <li><a href="#contacto">Contacto</a></li>
         <li>
           <a href="https://wa.me/525535433490?text=Hola%2C%20me%20interesa%20una%20cita%20de%20valoraci%C3%B3n%20sin%20costo"
             class="nav-cta" target="_blank" rel="noopener noreferrer">
@@ -2819,17 +1948,17 @@
       </div>
       <div class="bn-mobile-section">
         <div class="bn-mobile-section-title">Sucursales</div>
-        <a href="https://depilasermexico.com/sucursal-roma-sur.html" class="bn-mobile-link">
+        <a href="https://depilasermexico.com/depilacion-laser-cdmx-roma-sur.html" class="bn-mobile-link">
           <span class="mi">📍</span>
           <span><strong style="display:block;font-size:14px">Roma Sur</strong><small
               style="color:var(--ctc);font-size:12px">Monterrey 325, CDMX</small></span>
         </a>
-        <a href="https://depilasermexico.com/sucursal-insurgentes-sur.html" class="bn-mobile-link">
+        <a href="https://depilasermexico.com/depilacion-laser-cdmx-insurgentes-sur.html" class="bn-mobile-link">
           <span class="mi">📍</span>
           <span><strong style="display:block;font-size:14px">Insurgentes Sur</strong><small
               style="color:var(--ctc);font-size:12px">Insurgentes Sur #1799, CDMX</small></span>
         </a>
-        <a href="https://depilasermexico.com/sucursal-queretaro.html" class="bn-mobile-link">
+        <a href="https://depilasermexico.com/depilacion-laser-queretaro-corregidora.html" class="bn-mobile-link">
           <span class="mi">🌟</span>
           <span><strong style="display:block;font-size:14px">Querétaro <span
                 class="bn-badge">Nueva</span></strong><small style="color:var(--ctc);font-size:12px">Corregidora,
@@ -2839,22 +1968,39 @@
       <div class="bn-mobile-sep"></div>
       <div class="bn-mobile-section">
         <div class="bn-mobile-section-title">Servicios</div>
-        <a href="https://depilasermexico.com/depilacion-laser-diodo.html" class="bn-mobile-link"><span
-            class="mi">✨</span> Depilación Láser Diodo</a>
+        <a href="https://depilasermexico.com/depilacion-laser.html" class="bn-mobile-link"><span class="mi">✨</span>
+          Depilación Láser Diodo</a>
         <a href="https://depilasermexico.com/lipolisis-laser.html" class="bn-mobile-link"><span class="mi">🔥</span>
           Lipólisis Láser</a>
         <a href="https://depilasermexico.com/cavitacion.html" class="bn-mobile-link"><span class="mi">🌊</span>
           Cavitación Ultrasónica</a>
         <a href="https://depilasermexico.com/radiofrecuencia-tripolar.html" class="bn-mobile-link"><span
             class="mi">💫</span> Radiofrecuencia Tripolar</a>
-        <a href="https://depilasermexico.com/electroestimulacion.html" class="bn-mobile-link"><span
-            class="mi">⚡</span>
+        <a href="https://depilasermexico.com/electroestimulacion.html" class="bn-mobile-link"><span class="mi">⚡</span>
           Electroestimulación</a>
+        <a href="https://depilasermexico.com/carboxiterapia.html" class="bn-mobile-link"><span class="mi">💨</span>
+          Carboxiterapia</a>
+        <a href="https://depilasermexico.com/vacumterapia.html" class="bn-mobile-link"><span class="mi">🫧</span>
+          Vacumterapia</a>
+        <a href="https://depilasermexico.com/copas-colombianas.html" class="bn-mobile-link"><span class="mi">🥂</span>
+          Copas Colombianas</a>
+        <a href="https://depilasermexico.com/holywood-peel.html" class="bn-mobile-link"><span class="mi">⭐</span>
+          Holywood Peel</a>
+        <a href="https://depilasermexico.com/microdermoabrasion.html" class="bn-mobile-link"><span class="mi">✴️</span>
+          Microdermoabrasión</a>
+        <a href="https://depilasermexico.com/hidrodermoabrasion.html" class="bn-mobile-link"><span class="mi">💧</span>
+          Hidrodermoabrasión</a>
+        <a href="https://depilasermexico.com/despigmentacion.html" class="bn-mobile-link"><span class="mi">🌸</span>
+          Despigmentación</a>
+        <a href="https://depilasermexico.com/eliminacion-tatuaje.html" class="bn-mobile-link"><span class="mi">🎨</span>
+          Eliminación de Tatuaje</a>
+        <a href="https://depilasermexico.com/precios-servicios-esteticos.html" class="bn-mobile-link"><span
+            class="mi">📋</span> <strong>Precios Estéticos</strong></a>
       </div>
       <div class="bn-mobile-sep"></div>
       <a href="https://depilasermexico.com/blog.html" class="bn-mobile-link"><span class="mi">📝</span> Blog</a>
-      <!-- <a href="#preguntas-frecuentes" class="bn-mobile-link"><span class="mi">❓</span> FAQ</a> -->
-      <!-- <a href="#contacto" class="bn-mobile-link"><span class="mi">📞</span> Contacto</a> -->
+      <a href="#preguntas-frecuentes" class="bn-mobile-link"><span class="mi">❓</span> FAQ</a>
+      <a href="#contacto" class="bn-mobile-link"><span class="mi">📞</span> Contacto</a> 
       <a href="https://wa.me/525535433490?text=Hola%2C%20quiero%20agendar%20mi%20cita%20de%20valoraci%C3%B3n%20sin%20costo"
         class="bn-mobile-cta" target="_blank" rel="noopener noreferrer">
         💬 Agendar cita gratuita por WhatsApp
@@ -2862,399 +2008,497 @@
     </div>
   </nav>
 
-  <div class="breadcrumb" style="max-width:1140px;margin:0 auto;padding:12px 20px;font-size:13px;color:var(--ctc)">
-    <a href="https://depilasermexico.com/">Inicio</a> <span>›</span> Sucursales <span>›</span> Querétaro
-  </div>
-
+  <!-- ============================================================
+       MAIN
+  ============================================================ -->
   <main>
+
     <!-- HERO -->
-    <section class="hero-suc">
-      <div class="hero-suc-grid">
-        <div>
-          <div class="suc-badge-nueva">Nueva sucursal Querétaro</div>
-          <h1><em>BellaNick Clinic</em><br>Querétaro</h1>
-          <p class="hero-suc-desc">La misma calidad y tecnología de nuestras clínicas de CDMX ahora disponible en
-            Corregidora, Querétaro. Depilación láser diodo, tratamientos reductivos y más. Primera valoración sin
-            costo.
+    <section class="hero" aria-labelledby="hero-titulo">
+      <div class="hero-grid">
+        <div class="hero-contenido">
+          <div class="hero-badge">Especialistas en Depilación Láser en CDMX</div>
+          <h1 id="hero-titulo">
+            Di adiós al vello con<br>
+            <em>Depilación Láser</em><br>
+            en BellaNick Clinic
+          </h1>
+          <p class="hero-desc">
+            Resultados visibles desde las primeras sesiones. Tecnología láser diodo de última generación,
+            atención personalizada en nuestras sucursales de Ciudad de México y Querétaro.
+            <strong>Primera valoración sin costo.</strong>
           </p>
-          <div class="hero-btns">
-            <a href="https://wa.me/525535433490?text=Hola%2C%20quiero%20agendar%20una%20cita%20en%20BellaNick%20Clinic%20Quer%C3%A9taro"
-              class="btn-wa" target="_blank" rel="noopener">💬 Agendar cita · Querétaro</a>
-            <a href="https://maps.app.goo.gl/JwEiXMSwZGZmfFkC9" target="_blank" rel="noopener" class="btn-sec">🗺️
-              Ver
-              en Google Maps</a>
+          <div class="hero-ctas">
+            <a href="https://wa.me/525535433490?text=Hola%2C%20quiero%20agendar%20mi%20cita%20de%20valoraci%C3%B3n%20sin%20costo"
+              class="btn-principal" target="_blank" rel="noopener noreferrer">
+              💬 Agendar cita gratis por WhatsApp
+            </a>
+            <a href="https://depilasermexico.com/precios-depilacion-laser.html" class="btn-secundario">Ver precios y
+              servicios →</a>
           </div>
-          <div class="hero-mini-stats">
-            <div>
-              <div class="hms-n">3ª</div>
-              <div class="hms-l">Sucursal BellaNick</div>
-            </div>
-            <div>
-              <div class="hms-n">$99</div>
-              <div class="hms-l">Desde (MXN)</div>
-            </div>
-            <div>
-              <div class="hms-n">0</div>
-              <div class="hms-l">Costo valoración</div>
-            </div>
+          <div class="hero-confianza" role="list" aria-label="Estadísticas de confianza">
+            <div class="hero-confianza-item" role="listitem"><span class="numero">300+</span><span
+                class="etiqueta">Clientes satisfechos</span></div>
+            <div class="hero-confianza-item" role="listitem"><span class="numero">98%</span><span class="etiqueta">Tasa
+                de éxito</span></div>
+            <div class="hero-confianza-item" role="listitem"><span class="numero">3</span><span
+                class="etiqueta">Sucursales</span></div>
+            <div class="hero-confianza-item" role="listitem"><span class="numero">5★</span><span class="etiqueta">En
+                Google Reviews</span></div>
           </div>
         </div>
-        <div class="hero-img-wrap">
+        <div class="hero-imagen">
           <img src="https://depilasermexico.com/assets/img/hero/h1_hero1.webp"
-            alt="BellaNick Clinic Querétaro — Depilación láser en Corregidora, Qro." width="560" height="420"
+            alt="Depilación láser diodo en BellaNick Clinic Roma Sur, Ciudad de México" width="600" height="500"
             loading="eager" />
-          <div class="qro-tag">📍 Corregidora, Qro.</div>
+          <div class="hero-oferta-flotante">
+            <div class="titulo-oferta">Precio desde</div>
+            <div class="precio-oferta">$99 MXN</div>
+            <div class="desc-oferta">Axilas · Sin compromiso</div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- INFO RÁPIDA -->
-    <div class="info-rapida">
-      <div class="info-rapida-inner">
-        <div class="info-item">
-          <span class="info-ico">📍</span>
-          <div>
-            <div class="info-label">Ubicación</div>
-            <div class="info-val">Municipio de Corregidora,<br>Querétaro</div>
-          </div>
-        </div>
-        <div class="info-item">
-          <span class="info-ico">💬</span>
-          <div>
-            <div class="info-label">WhatsApp</div>
-            <div class="info-val"><a href="https://wa.me/525535433490">Agendar por WhatsApp</a></div>
-          </div>
-        </div>
-        <div class="info-item">
-          <span class="info-ico">🕙</span>
-          <div>
-            <div class="info-label">Horarios</div>
-            <div class="info-val">Lun–Vie: 10:00–20:00<br>Sábado: 10:00–18:00</div>
-          </div>
-        </div>
-        <div class="info-item">
-          <span class="info-ico">🌐</span>
-          <div>
-            <div class="info-label">Redes sociales</div>
-            <div class="info-val"><a href="https://www.instagram.com/bellanickclinicqro/" target="_blank"
-                rel="noopener">@bellanickclinicqro</a></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- POR QUÉ ELEGIR QUERÉTARO -->
-    <section class="sec sec-alt" aria-labelledby="porq-tit">
-      <div class="sec-hdr">
-        <span class="etq">¿Por qué BellaNick en Qro.?</span>
-        <h2 class="sec-tit" id="porq-tit">La calidad de CDMX ahora en Querétaro</h2>
-        <p class="sec-sub">BellaNick Clinic llega a Querétaro para que no tengas que viajar a la Ciudad de México para
-          acceder a los mejores tratamientos estéticos.</p>
-      </div>
-      <div class="grid-ben">
-        <div class="card-ben"><span class="ben-ico">🏆</span>
-          <h3 class="ben-tit">Misma tecnología que CDMX</h3>
-          <p class="ben-desc">Trabajamos con los mismos equipos láser diodo de última generación que en nuestras
-            sucursales de la Ciudad de México. Sin diferencias en calidad.</p>
-        </div>
-        <div class="card-ben"><span class="ben-ico">👩‍⚕️</span>
-          <h3 class="ben-tit">Equipo capacitado</h3>
-          <p class="ben-desc">Personal certificado y entrenado bajo los mismos estándares de BellaNick Clinic.
-            Atención
-            profesional y personalizada en cada visita.</p>
-        </div>
-        <div class="card-ben"><span class="ben-ico">💰</span>
-          <h3 class="ben-tit">Precios accesibles</h3>
-          <p class="ben-desc">Los mismos precios que en CDMX. Depilación desde $99 MXN en axilas. Planes de pago y
-            paquetes disponibles.</p>
-        </div>
-        <div class="card-ben"><span class="ben-ico">📍</span>
-          <h3 class="ben-tit">Ubicación estratégica</h3>
-          <p class="ben-desc">En Corregidora, una de las zonas de mayor crecimiento de Querétaro. Fácil acceso desde
-            diferentes puntos de la ciudad.</p>
-        </div>
-        <div class="card-ben"><span class="ben-ico">✅</span>
-          <h3 class="ben-tit">Garantía BellaNick</h3>
-          <p class="ben-desc">La misma garantía de resultados que ofrecemos en CDMX. Si no estás satisfecha,
-            trabajamos
-            contigo para encontrar la solución.</p>
-        </div>
-        <div class="card-ben"><span class="ben-ico">🎁</span>
-          <h3 class="ben-tit">Valoración sin costo</h3>
-          <p class="ben-desc">Primera cita de valoración completamente gratuita. Sin compromiso. Conoce nuestras
-            instalaciones y al equipo antes de decidir.</p>
-        </div>
+    <!-- PRUEBA SOCIAL -->
+    <section class="prueba-social" aria-label="Señales de confianza">
+      <div class="prueba-social-inner">
+        <div class="trust-item"><span class="icono">🏥</span> Equipos certificados</div>
+        <div class="trust-item"><span class="icono">👩‍⚕️</span> Personal especializado</div>
+        <div class="trust-item"><span class="icono">🔒</span> Tratamientos 100% seguros</div>
+        <div class="trust-item"><span class="icono">⭐</span> Valorados en Google Maps</div>
+        <div class="trust-item"><span class="icono">💳</span> Aceptamos tarjeta</div>
       </div>
     </section>
 
-    <!-- MAPA -->
-    <section class="sec" aria-labelledby="mapa-tit">
-      <div class="sec-hdr">
-        <span class="etq">Ubicación</span>
-        <h2 class="sec-tit" id="mapa-tit">¿Dónde estamos en Querétaro?</h2>
-        <p class="sec-sub">Ubicados en Plaza Lugo, Cam. a Vanegas 28-local #29, 76900 Corregidora, Qro. Abre el mapa para ver la ruta exacta desde tu ubicación
-          actual.</p>
-      </div>
-      <div class="mapa-wrap">
-        <iframe
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d942.7!2d-100.4293315!3d20.5535327!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85d3454010c1d82b%3A0x74d1ddfdd73d2ace!2sDepilaci%C3%B3n%20L%C3%A1ser%20BellaNick%20Clinic%20Qro.!5e0!3m2!1ses!2smx!4v1700000000001!5m2!1ses!2smx"
-          title="Mapa BellaNick Clinic Querétaro — Corregidora, Qro." loading="lazy" allowfullscreen
-          referrerpolicy="no-referrer-when-downgrade">
-        </iframe>
-      </div>
-      <div style="text-align:center;margin-top:20px">
-        <a href="https://maps.app.goo.gl/JwEiXMSwZGZmfFkC9" target="_blank" rel="noopener"
-          style="display:inline-flex;align-items:center;gap:8px;background:var(--cp);color:#fff;padding:12px 28px;border-radius:50px;font-weight:700;font-size:14.5px;transition:var(--tr)">
-          🗺️ Abrir en Google Maps
-        </a>
-      </div>
-    </section>
-
-    <!-- CÓMO LLEGAR -->
-    <section class="sec sec-alt" aria-labelledby="cl-tit">
-      <div class="sec-hdr">
-        <span class="etq">Cómo llegar</span>
-        <h2 class="sec-tit" id="cl-tit">Accesos a la sucursal Querétaro</h2>
-        <p class="sec-sub">Corregidora está perfectamente conectada con el resto de la zona metropolitana de
-          Querétaro.
-        </p>
+    <!-- SUCURSALES -->
+    <section class="section" id="sucursales" aria-labelledby="sucursales-titulo">
+      <div class="section-header">
+        <span class="section-etiqueta">Nuestras Clínicas</span>
+        <h2 class="section-titulo" id="sucursales-titulo">Encuéntranos en CDMX y Querétaro</h2>
+        <p class="section-subtitulo">Contamos con tres sucursales estratégicamente ubicadas para que siempre tengas una
+          clínica cerca
+          de ti.</p>
       </div>
       <div class="grid-2">
-        <div class="cl-card">
-          <h3 class="cl-titulo">🚌 Transporte público</h3>
-          <div class="cl-item"><span class="ico">🚌</span>
-            <div><strong>Rutas urbanas de Querétaro</strong><br>Diversas rutas pasan por Corregidora. Busca rutas hacia
-              la zona de El Pueblito o Corregidora centro.</div>
-          </div>
-          <div class="cl-item"><span class="ico">🚖</span>
-            <div><strong>Taxi / Uber / DiDi</strong><br>Disponibles en toda la zona metropolitana de Querétaro. Indica
-              "BellaNick Clinic Querétaro" al conductor.</div>
-          </div>
-          <div class="cl-item"><span class="ico">📱</span>
-            <div><strong>Google Maps / Waze</strong><br>Busca "BellaNick Clinic Querétaro" o usa las coordenadas del
-              mapa de Google para llegar exactamente.</div>
-          </div>
-        </div>
-        <div class="cl-card">
-          <h3 class="cl-titulo">🚗 En automóvil</h3>
-          <div class="cl-item"><span class="ico">📌</span>
-            <div><strong>Desde el centro de Querétaro:</strong><br>Toma Constituyentes hacia el sur hasta Corregidora,
-              aproximadamente 15-20 minutos.</div>
-          </div>
-          <div class="cl-item"><span class="ico">📌</span>
-            <div><strong>Desde Juriquilla / Norte:</strong><br>Boulevard Bernardo Quintana hacia el sur, conecta con la
-              zona de Corregidora.</div>
-          </div>
-          <div class="cl-item"><span class="ico">🅿️</span>
-            <div><strong>Estacionamiento</strong><br>Zona con disponibilidad de estacionamiento. Consulta por WhatsApp
-              la referencia exacta para llegar.</div>
-          </div>
-          <div class="cl-item"><span class="ico">💬</span>
-            <div><strong>¿Necesitas indicaciones?</strong><br><a
-                href="https://wa.me/525535433490?text=Hola%2C%20%C2%BFme%20pueden%20dar%20indicaciones%20para%20llegar%20a%20la%20sucursal%20Quer%C3%A9taro%3F"
-                target="_blank" rel="noopener" style="color:var(--cp);font-weight:600">Escríbenos por WhatsApp →</a>
+        <article class="card-sucursal">
+          <img src="https://depilasermexico.com/assets/img/gallery/team1.webp"
+            alt="Interior de BellaNick Clinic Roma Sur, Cuauhtémoc CDMX" width="560" height="240" loading="lazy" />
+          <div class="card-sucursal-cuerpo">
+            <h3 class="card-sucursal-nombre">BellaNick Clinic Roma Sur</h3>
+            <p class="card-sucursal-dir">Monterrey 325, Roma Sur, Cuauhtémoc, CDMX 06760</p>
+            <div class="horarios">
+              <strong>📅 Horarios de atención</strong>
+              Lunes a Sábado: 10:00 am – 8:00 pm<br>
+              <a href="tel:+525535433490" style="color:var(--cp);font-weight:600">📞 (55) 3543-3490</a>
             </div>
+            <a href="https://maps.google.com/?q=Monterrey+325+Roma+Sur+CDMX" target="_blank" rel="noopener noreferrer"
+              class="btn-mapa">
+              🗺️ Ver en Google Maps
+            </a>
           </div>
-        </div>
+        </article>
+        <article class="card-sucursal">
+          <img src="https://depilasermexico.com/assets/img/gallery/BellaNickInsurgentesSur.webp"
+            alt="Interior de BellaNick Clinic Insurgentes Sur, Álvaro Obregón CDMX" width="560" height="240"
+            loading="lazy" />
+          <div class="card-sucursal-cuerpo">
+            <h3 class="card-sucursal-nombre">BellaNick Clinic Insurgentes Sur</h3>
+            <p class="card-sucursal-dir">Insurgentes Sur #1799, Guadalupe Inn, Álvaro Obregón, CDMX 01020</p>
+            <div class="horarios">
+              <strong>📅 Horarios de atención</strong>
+              Lunes a Sábado: 10:00 am – 8:00 pm<br>
+              <a href="tel:+525556622079" style="color:var(--cp);font-weight:600">📞 (55) 5662-2079</a>
+            </div>
+            <a href="https://maps.google.com/?q=Insurgentes+Sur+1799+Guadalupe+Inn+CDMX" target="_blank"
+              rel="noopener noreferrer" class="btn-mapa">
+              🗺️ Ver en Google Maps
+            </a>
+          </div>
+        </article>
+        <article class="card-sucursal">
+          <img src="https://depilasermexico.com/assets/img/gallery/BellaNickClinicQro.webp"
+            alt="Interior de BellaNick Clinic Corregidora, Queretaro" width="560" height="240" loading="lazy" />
+          <div class="card-sucursal-cuerpo">
+            <h3 class="card-sucursal-nombre">BellaNick Clinic Querétaro</h3>
+            <p class="card-sucursal-dir">Plaza Lugo, Cam. a Vanegas 28 local 29, 76900 Corregidora, Qro.</p>
+            <div class="horarios">
+              <strong>📅 Horarios de atención</strong>
+              Lunes a Sábado: 10:00 am – 8:00 pm<br>
+              <a href="tel:+524422218227" style="color:var(--cp);font-weight:600">📞 (44)2221-8227</a>
+            </div>
+            <a href="https://maps.app.goo.gl/3rybbB5mbptqJgrv5" target="_blank" rel="noopener noreferrer"
+              class="btn-mapa">
+              🗺️ Ver en Google Maps
+            </a>
+          </div>
+        </article>
       </div>
     </section>
 
     <!-- SERVICIOS -->
-    <section class="sec" aria-labelledby="srv-tit">
-      <div class="sec-hdr">
-        <span class="etq">Servicios disponibles</span>
-        <h2 class="sec-tit" id="srv-tit">Tratamientos en Querétaro</h2>
-        <p class="sec-sub">Todos nuestros tratamientos disponibles en la sucursal de Corregidora. Agenda tu cita por
-          WhatsApp.</p>
+    <section class="section servicios" id="servicios" aria-labelledby="servicios-titulo">
+      <div class="section-header">
+        <span class="section-etiqueta">Tratamientos</span>
+        <h2 class="section-titulo" id="servicios-titulo">Nuestros Servicios Estéticos</h2>
+        <p class="section-subtitulo">Tecnología de última generación para resultados reales. Cotiza por WhatsApp y obtén
+          tu precio personalizado.</p>
       </div>
-      <div class="grid-srv">
-        <div class="card-srv">
-          <div class="srv-ico">✨</div>
-          <div class="srv-nom">Depilación Láser Diodo</div>
-          <div class="srv-desc">Elimina el vello definitivamente. Resultados desde la primera sesión.</div><span
-            class="chip">Desde $99 MXN</span><a href="https://depilasermexico.com/depilacion-laser-diodo.html"
-            class="btn-srv">Ver tratamiento →</a>
-        </div>
-        <div class="card-srv">
-          <div class="srv-ico">🔥</div>
-          <div class="srv-nom">Lipólisis Láser</div>
-          <div class="srv-desc">Reduce grasa localizada sin cirugía ni tiempo de recuperación.</div><span
-            class="chip">Consultar precio</span><a href="https://depilasermexico.com/lipolisis-laser.html"
-            class="btn-srv">Ver tratamiento →</a>
-        </div>
-        <div class="card-srv">
-          <div class="srv-ico">🌊</div>
-          <div class="srv-nom">Cavitación</div>
-          <div class="srv-desc">Elimina celulitis y reduce medidas con ultrasonido.</div><span class="chip">Consultar
-            precio</span><a href="https://depilasermexico.com/cavitacion.html" class="btn-srv">Ver tratamiento →</a>
-        </div>
-        <div class="card-srv">
-          <div class="srv-ico">💫</div>
-          <div class="srv-nom">Radiofrecuencia Tripolar</div>
-          <div class="srv-desc">Reafirma y tonifica piel estimulando el colágeno.</div><span class="chip">Consultar
-            precio</span><a href="https://depilasermexico.com/radiofrecuencia-tripolar.html" class="btn-srv">Ver
-            tratamiento →</a>
-        </div>
-        <div class="card-srv">
-          <div class="srv-ico">⚡</div>
-          <div class="srv-nom">Electroestimulación</div>
-          <div class="srv-desc">Tonifica músculos sin esfuerzo físico.</div><span class="chip">Consultar
-            precio</span><a href="https://depilasermexico.com/electroestimulacion.html" class="btn-srv">Ver tratamiento
-            →</a>
-        </div>
-      </div>
-    </section>
-
-    <!-- HORARIOS -->
-    <section class="sec sec-alt" aria-labelledby="hor-tit">
-      <div class="sec-hdr">
-        <span class="etq">Horarios Querétaro</span>
-        <h2 class="sec-tit" id="hor-tit">Horarios de atención en Qro.</h2>
-        <p class="sec-sub">Te recomendamos agendar cita previa por WhatsApp para garantizar tu atención.</p>
-      </div>
-      <div
-        style="max-width:480px;margin:0 auto;background:#fff;border-radius:var(--rl);padding:32px;box-shadow:var(--sc);border:1px solid var(--cgb)">
-        <table class="horario-tabla">
-          <tr>
-            <td class="dia">Lunes</td>
-            <td class="hora">10:00 – 20:00</td>
-          </tr>
-          <tr>
-            <td class="dia">Martes</td>
-            <td class="hora">10:00 – 20:00</td>
-          </tr>
-          <tr>
-            <td class="dia">Miércoles</td>
-            <td class="hora">10:00 – 20:00</td>
-          </tr>
-          <tr>
-            <td class="dia">Jueves</td>
-            <td class="hora">10:00 – 20:00</td>
-          </tr>
-          <tr>
-            <td class="dia">Viernes</td>
-            <td class="hora">10:00 – 20:00</td>
-          </tr>
-          <tr>
-            <td class="dia">Sábado</td>
-            <td class="hora">10:00 – 18:00</td>
-          </tr>
-          <tr>
-            <td class="dia">Domingo</td>
-            <td class="hora cerrado">Cerrado</td>
-          </tr>
-        </table>
-        <p style="font-size:12.5px;color:var(--ctc);margin-top:16px;text-align:center">⚠️ Te recomendamos confirmar
-          horarios por WhatsApp antes de tu visita</p>
-        <div style="margin-top:16px;text-align:center">
-          <a href="https://wa.me/525535433490?text=Hola%2C%20quiero%20agendar%20cita%20en%20Quer%C3%A9taro"
-            style="display:inline-flex;align-items:center;gap:8px;background:#25D366;color:#fff;padding:12px 24px;border-radius:50px;font-weight:700;font-size:14px"
-            target="_blank" rel="noopener">
-            💬 Agendar cita Querétaro
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <!-- REDES SOCIALES QRO -->
-    <section class="sec" aria-labelledby="redes-tit">
-      <div class="sec-hdr">
-        <span class="etq">Redes sociales</span>
-        <h2 class="sec-tit" id="redes-tit">Síguenos en Querétaro</h2>
-        <p class="sec-sub">Sigue la cuenta exclusiva de nuestra sucursal Querétaro para ver las últimas novedades,
-          promociones y resultados.</p>
-      </div>
-      <div class="redes-qro">
-        <a href="https://www.instagram.com/bellanickclinicqro/" target="_blank" rel="noopener" class="red-qro">📸
-          Instagram Qro. · @bellanickclinicqro</a>
-        <a href="https://www.facebook.com/61577831189576/" target="_blank" rel="noopener" class="red-qro">👍 Facebook
-          ·
-          BellaNick Clinic Querétaro</a>
-        <a href="https://maps.app.goo.gl/JwEiXMSwZGZmfFkC9" target="_blank" rel="noopener" class="red-qro">⭐ Déjanos
-          tu
-          reseña en Google</a>
-      </div>
-    </section>
-
-    <!-- OTRAS SUCURSALES -->
-    <section class="sec sec-alt" aria-labelledby="otras-tit">
-      <div class="sec-hdr">
-        <span class="etq">Red BellaNick</span>
-        <h2 class="sec-tit" id="otras-tit">También estamos en CDMX</h2>
-        <p class="sec-sub">Si visitas la Ciudad de México, encuéntranos en nuestras dos sucursales.</p>
-      </div>
-      <div class="grid-otras">
-        <a href="https://depilasermexico.com/sucursal-roma-sur.html" class="card-otra">
-          <span style="font-size:28px;flex-shrink:0">📍</span>
-          <div>
-            <div class="otra-nom">Roma Sur · CDMX</div>
-            <div class="otra-dir">Monterrey 325, Roma Sur, Cuauhtémoc, CDMX 06760</div>
-            <div class="otra-link">Ver sucursal →</div>
+      <div class="grid-servicios">
+        <article class="card-servicio">
+          <img src="https://depilasermexico.com/assets/img/gallery/blogs4.webp"
+            alt="Depilación láser diodo en BellaNick Clinic CDMX" width="260" height="180" loading="lazy" />
+          <div class="card-servicio-cuerpo">
+            <h3 class="card-servicio-nombre">Depilación Láser Diodo</h3>
+            <p class="card-servicio-desc">Elimina el vello de forma definitiva con tecnología diodo. Resultados visibles
+              desde las primeras sesiones.</p>
+            <span class="chip-precio">Desde $99 MXN</span>
+            <a href="https://wa.me/525535433490?text=Hola%2C%20me%20interesa%20cotizar%20depilaci%C3%B3n%20l%C3%A1ser%20diodo"
+              class="btn-cotizar" target="_blank" rel="noopener noreferrer">💬 Cotizar ahora</a>
           </div>
-        </a>
-        <a href="https://depilasermexico.com/sucursal-insurgentes-sur.html" class="card-otra">
-          <span style="font-size:28px;flex-shrink:0">📍</span>
-          <div>
-            <div class="otra-nom">Insurgentes Sur · CDMX</div>
-            <div class="otra-dir">Insurgentes Sur #1799, Guadalupe Inn, Álvaro Obregón, CDMX 01020</div>
-            <div class="otra-link">Ver sucursal →</div>
+        </article>
+        <article class="card-servicio">
+          <img src="https://depilasermexico.com/assets/img/gallery/blogs1.webp"
+            alt="Lipólisis láser corporal en BellaNick Clinic CDMX" width="260" height="180" loading="lazy" />
+          <div class="card-servicio-cuerpo">
+            <h3 class="card-servicio-nombre">Lipólisis Láser</h3>
+            <p class="card-servicio-desc">Reduce la grasa localizada de forma no invasiva. Ideal para abdomen, brazos y
+              flancos.</p>
+            <span class="chip-precio">Consultar precio</span>
+            <a href="https://wa.me/525535433490?text=Hola%2C%20me%20interesa%20cotizar%20lip%C3%B3lisis%20l%C3%A1ser"
+              class="btn-cotizar" target="_blank" rel="noopener noreferrer">💬 Cotizar ahora</a>
           </div>
+        </article>
+        <article class="card-servicio">
+          <img src="https://depilasermexico.com/assets/img/gallery/blogs2.webp"
+            alt="Cavitación ultrasónica reductiva en BellaNick Clinic CDMX" width="260" height="180" loading="lazy" />
+          <div class="card-servicio-cuerpo">
+            <h3 class="card-servicio-nombre">Cavitación</h3>
+            <p class="card-servicio-desc">Ultrasonido de alta frecuencia para eliminar celulitis y afinar la silueta
+              corporal.</p>
+            <span class="chip-precio">Consultar precio</span>
+            <a href="https://wa.me/525535433490?text=Hola%2C%20me%20interesa%20cotizar%20cavitaci%C3%B3n"
+              class="btn-cotizar" target="_blank" rel="noopener noreferrer">💬 Cotizar ahora</a>
+          </div>
+        </article>
+        <article class="card-servicio">
+          <img src="https://depilasermexico.com/assets/img/gallery/blogs3.webp"
+            alt="Radiofrecuencia tripolar reafirmante en BellaNick Clinic CDMX" width="260" height="180"
+            loading="lazy" />
+          <div class="card-servicio-cuerpo">
+            <h3 class="card-servicio-nombre">Radiofrecuencia Tripolar</h3>
+            <p class="card-servicio-desc">Reafirma y tonifica la piel estimulando el colágeno de forma profunda y sin
+              dolor.</p>
+            <span class="chip-precio">Consultar precio</span>
+            <a href="https://wa.me/525535433490?text=Hola%2C%20me%20interesa%20cotizar%20radiofrecuencia%20tripolar"
+              class="btn-cotizar" target="_blank" rel="noopener noreferrer">💬 Cotizar ahora</a>
+          </div>
+        </article>
+        <article class="card-servicio">
+          <img src="https://depilasermexico.com/assets/img/gallery/blogs5.webp"
+            alt="Electroestimulación muscular en BellaNick Clinic CDMX" width="260" height="180" loading="lazy" />
+          <div class="card-servicio-cuerpo">
+            <h3 class="card-servicio-nombre">Electroestimulación</h3>
+            <p class="card-servicio-desc">Tonifica y define músculos con corrientes eléctricas de baja frecuencia. Sin
+              esfuerzo físico.</p>
+            <span class="chip-precio">Consultar precio</span>
+            <a href="https://wa.me/525535433490?text=Hola%2C%20me%20interesa%20cotizar%20electroestimulaci%C3%B3n"
+              class="btn-cotizar" target="_blank" rel="noopener noreferrer">💬 Cotizar ahora</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ¿POR QUÉ ELEGIRNOS? -->
+    <section class="section" aria-labelledby="razones-titulo">
+      <div class="section-header">
+        <span class="section-etiqueta">Ventajas BellaNick</span>
+        <h2 class="section-titulo" id="razones-titulo">¿Por qué elegir BellaNick Clinic?</h2>
+        <p class="section-subtitulo">Más de 300 clientes confían en nosotros. Aquí te contamos por qué.</p>
+      </div>
+      <div class="grid-razones">
+        <div class="card-razon"><span class="razon-icono">🔬</span>
+          <h3 class="razon-titulo">Tecnología láser diodo de última generación</h3>
+          <p class="razon-desc">Trabajamos con equipos de grado médico que garantizan mayor efectividad, seguridad y
+            comfort en cada sesión.</p>
+        </div>
+        <div class="card-razon"><span class="razon-icono">👩‍⚕️</span>
+          <h3 class="razon-titulo">Especialistas certificados</h3>
+          <p class="razon-desc">Nuestro equipo tiene formación profesional en estética avanzada y se actualiza
+            constantemente con las últimas técnicas.</p>
+        </div>
+        <div class="card-razon"><span class="razon-icono">🎯</span>
+          <h3 class="razon-titulo">Resultados desde la primera sesión</h3>
+          <p class="razon-desc">El 98% de nuestros clientes nota una reducción significativa del vello desde el primer
+            tratamiento realizado.</p>
+        </div>
+        <div class="card-razon"><span class="razon-icono">💰</span>
+          <h3 class="razon-titulo">Precios accesibles y planes de pago</h3>
+          <p class="razon-desc">Desde $99 MXN en axilas. Contamos con paquetes de sesiones y facilidades de pago
+            adaptadas a tu presupuesto.</p>
+        </div>
+        <div class="card-razon"><span class="razon-icono">📍</span>
+          <h3 class="razon-titulo">3 sucursales</h3>
+          <p class="razon-desc">Bien ubicadas, de fácil acceso y con estacionamiento disponible en la zona.</p>
+        </div>
+        <div class="card-razon"><span class="razon-icono">✅</span>
+          <h3 class="razon-titulo">Garantía de servicio</h3>
+          <p class="razon-desc">Si no estás satisfecho con tu resultado, trabajamos contigo hasta lograrlo. Tu
+            satisfacción es nuestra prioridad.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROCESO -->
+    <section class="section proceso" aria-labelledby="proceso-titulo">
+      <div class="section-header">
+        <span class="section-etiqueta">¿Cómo funciona?</span>
+        <h2 class="section-titulo" id="proceso-titulo">Tu tratamiento en 4 sencillos pasos</h2>
+        <p class="section-subtitulo">Comenzar es fácil. En menos de 24 horas puedes tener tu primera cita agendada.</p>
+      </div>
+      <div class="proceso-steps">
+        <div class="proceso-step">
+          <div class="step-numero">1</div>
+          <h3 class="step-titulo">Escríbenos por WhatsApp</h3>
+          <p class="step-desc">Contáctanos y cuéntanos qué área te interesa tratar. Resolvemos todas tus dudas al
+            instante.</p>
+        </div>
+        <div class="proceso-step">
+          <div class="step-numero">2</div>
+          <h3 class="step-titulo">Cita de valoración gratis</h3>
+          <p class="step-desc">Agendamos tu consulta sin costo. Analizamos tu tipo de piel y diseñamos tu plan
+            personalizado.</p>
+        </div>
+        <div class="proceso-step">
+          <div class="step-numero">3</div>
+          <h3 class="step-titulo">Inicia tu tratamiento</h3>
+          <p class="step-desc">Sesiones rápidas de 20 a 60 minutos. Procedimiento indoloro con tecnología de punta.</p>
+        </div>
+        <div class="proceso-step">
+          <div class="step-numero">4</div>
+          <h3 class="step-titulo">Disfruta los resultados</h3>
+          <p class="step-desc">Resultados visibles desde la 1ª sesión. Seguimiento personalizado en cada etapa de tu
+            tratamiento.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ESTADÍSTICAS -->
+    <section class="estadisticas" aria-label="Estadísticas de BellaNick Clinic">
+      <div class="grid-stats">
+        <div>
+          <div class="stat-numero">300+</div>
+          <div class="stat-etiqueta">Clientes satisfechos</div>
+        </div>
+        <div>
+          <div class="stat-numero">98%</div>
+          <div class="stat-etiqueta">Tasa de éxito en tratamientos</div>
+        </div>
+        <div>
+          <div class="stat-numero">5★</div>
+          <div class="stat-etiqueta">Calificación en Google</div>
+        </div>
+        <div>
+          <div class="stat-numero">3</div>
+          <div class="stat-etiqueta">Sucursales</div>
+        </div>
+        <div>
+          <div class="stat-numero">$99</div>
+          <div class="stat-etiqueta">Precio desde (MXN)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TESTIMONIOS -->
+    <section class="section" aria-labelledby="testimonios-titulo">
+      <div class="section-header">
+        <span class="section-etiqueta">Lo que dicen de nosotros</span>
+        <h2 class="section-titulo" id="testimonios-titulo">Opiniones reales de nuestros clientes</h2>
+        <p class="section-subtitulo">Lee lo que dicen quienes ya se atendieron en BellaNick Clinic. Puedes verificar las
+          reseñas directamente en Google.</p>
+      </div>
+      <div class="grid-testimonios">
+        <article class="card-testimonio">
+          <div class="estrellas">★★★★★</div>
+          <p class="testimonio-texto">"Excelente servicio de carboxiterapia y depilación. Excelente atención e
+            instalaciones, siempre son puntuales en atenderte."</p>
+          <div class="testimonio-autor">
+            <div class="autor-avatar">A</div>
+            <div>
+              <div class="autor-nombre">Alejandra M.</div>
+              <div class="autor-fuente"><span class="badge-google">Google</span> Reseña verificada</div>
+            </div>
+          </div>
+        </article>
+        <article class="card-testimonio">
+          <div class="estrellas">★★★★★</div>
+          <p class="testimonio-texto">"Me han ayudado a reducir las estrías de cadera de manera increíble. El equipo es
+            muy profesional y amable. ¡Totalmente recomendable!"</p>
+          <div class="testimonio-autor">
+            <div class="autor-avatar">M</div>
+            <div>
+              <div class="autor-nombre">María G.</div>
+              <div class="autor-fuente"><span class="badge-google">Google</span> Reseña verificada</div>
+            </div>
+          </div>
+        </article>
+        <article class="card-testimonio">
+          <div class="estrellas">★★★★★</div>
+          <p class="testimonio-texto">"Vine a la sucursal de Insurgentes Sur y quedé encantada. El ambiente es muy
+            profesional, los precios son accesibles y los resultados hablan solos."</p>
+          <div class="testimonio-autor">
+            <div class="autor-avatar">L</div>
+            <div>
+              <div class="autor-nombre">Laura S.</div>
+              <div class="autor-fuente"><span class="badge-google">Google</span> Reseña verificada</div>
+            </div>
+          </div>
+        </article>
+      </div>
+      <div style="text-align:center;margin-top:32px">
+        <a href="https://www.google.com/search?q=bellanick+clinic" target="_blank" rel="noopener noreferrer"
+          style="display:inline-flex;align-items:center;gap:8px;color:var(--cp);font-weight:600;font-size:15px;text-decoration:underline;text-underline-offset:3px">
+          Ver todas las opiniones en Google Maps →
         </a>
       </div>
     </section>
 
-    <section class="cta-ban">
-      <h2>¿Eres de Querétaro?<br>Tu primera valoración es <em style="font-style:normal;color:var(--cp-c)">sin
-          costo</em>
-      </h2>
-      <p>Agenda hoy mismo y descubre por qué cientos de clientes en CDMX confían en BellaNick Clinic. Ahora también
-        en
-        Querétaro.</p>
-      <div class="cta-bts">
-        <a href="https://wa.me/525535433490?text=Hola%2C%20quiero%20agendar%20mi%20valoraci%C3%B3n%20gratuita%20en%20BellaNick%20Clinic%20Quer%C3%A9taro"
-          class="btn-wa-lg" target="_blank" rel="noopener">💬 Agendar en Querétaro</a>
-        <a href="https://depilasermexico.com/index.html#servicios" class="btn-otras-suc">Ver todos los servicios</a>
+    <!-- FAQ -->
+    <section class="section" id="preguntas-frecuentes" style="background:var(--cg)" aria-labelledby="faq-titulo">
+      <div class="section-header">
+        <span class="section-etiqueta">FAQ</span>
+        <h2 class="section-titulo" id="faq-titulo">Preguntas frecuentes</h2>
+        <p class="section-subtitulo">¿Tienes dudas? Aquí resolvemos las más comunes. Para más información, escríbenos
+          por WhatsApp.</p>
+      </div>
+      <div class="faq-lista">
+        <details class="faq-item">
+          <summary class="faq-pregunta">¿Garantizan el servicio de depilación láser?<span class="faq-icono">+</span>
+          </summary>
+          <div class="faq-respuesta">Sí, garantizamos nuestro servicio al 100%. Si no estás satisfecho, trabajamos
+            contigo para encontrar una solución. Además, ofrecemos cita de valoración y prueba de sensibilidad sin
+            costo.</div>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-pregunta">¿Cuántas sesiones necesito para ver resultados?<span class="faq-icono">+</span>
+          </summary>
+          <div class="faq-respuesta">La mayoría nota reducción desde la primera sesión. Para resultados definitivos
+            recomendamos 6 a 8 sesiones cada 4-6 semanas. En tu valoración gratuita te damos el plan exacto.</div>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-pregunta">¿Cuánto duran las sesiones?<span class="faq-icono">+</span></summary>
+          <div class="faq-respuesta">Depende del área: axilas y bello labio de 10 a 20 min; bikini y espalda de 30 a 45
+            min; piernas completas de 45 a 60 min.</div>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-pregunta">¿Puedo tomar el tratamiento estando embarazada o lactando?<span
+              class="faq-icono">+</span></summary>
+          <div class="faq-respuesta">No recomendamos el tratamiento durante el embarazo o lactancia por precaución.
+            Espera a que concluya este período. Nuestro equipo te orientará sobre el mejor momento.</div>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-pregunta">¿Puedo broncearme antes o después del tratamiento?<span
+              class="faq-icono">+</span></summary>
+          <div class="faq-respuesta">Evita la exposición solar al menos 2 semanas antes y después de cada sesión. En
+            días de sol usa protector solar SPF 50+ en las áreas tratadas.</div>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-pregunta">¿Cuáles son los precios de la depilación láser?<span class="faq-icono">+</span>
+          </summary>
+          <div class="faq-respuesta">Desde $99 MXN en axilas hasta $350 MXN en piernas completas. Ofrecemos paquetes y
+            planes de pago. Escríbenos por WhatsApp o consulta nuestra <a
+              href="https://depilasermexico.com/precios-depilacion-laser.html"
+              style="color:var(--cp);font-weight:600">página de precios
+              2026</a>.</div>
+        </details>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-seccion" aria-labelledby="cta-titulo">
+      <h2 class="cta-titulo" id="cta-titulo">¿Lista para transformar tu piel?<br>Tu primera valoración es <strong>sin
+          costo</strong></h2>
+      <p class="cta-desc">Contáctanos hoy mismo, agenda tu cita de valoración gratuita y descubre cómo la depilación
+        láser puede cambiar tu rutina para siempre.</p>
+      <div class="cta-botones">
+        <a href="https://wa.me/525535433490?text=Hola%2C%20quiero%20agendar%20mi%20cita%20de%20valoraci%C3%B3n%20sin%20costo%20en%20BellaNick%20Clinic"
+          class="btn-whatsapp-grande" target="_blank" rel="noopener noreferrer">
+          💬 Agendar cita gratuita por WhatsApp
+        </a>
+        <a href="tel:+525535433490" class="btn-tel">📞 (55) 3543-3490</a>
       </div>
     </section>
   </main>
-
-  <footer>
-    <div class="foot-grid">
+  <!-- FOOTER -->
+  <footer id="contacto" role="contentinfo">
+    <div class="footer-grid">
       <div>
-        <!-- <img src="https://depilasermexico.com/assets/img/logo/logo.webp" alt="BellaNick Clinic" class="foot-logo" width="150" height="42" loading="lazy" /> -->
-        <p class="foot-desc">Especialistas en depilación láser y tratamientos estéticos. CDMX y Querétaro.</p>
-        <div class="redes">
-          <a href="https://www.instagram.com/bellanickclinicqro/" class="red" target="_blank" rel="noopener"
-            aria-label="Instagram Qro">📸</a>
-          <a href="https://www.facebook.com/61577831189576/" class="red" target="_blank" rel="noopener"
-            aria-label="Facebook Qro">👍</a>
-          <a href="https://www.tiktok.com/@bellanickclinic" class="red" target="_blank" rel="noopener"
+        <!-- <img src="https://depilasermexico.com/assets/img/logo/logo.webp" alt="Logo BellaNick Clinic" class="footer-logo"
+          width="180" height="68" /> -->
+        <p class="footer-desc">Especialistas en depilación láser y tratamientos estéticos. Tres sucursales a tu servicio
+          con tecnología de última generación.</p>
+        <div class="redes-sociales" aria-label="Redes sociales de BellaNick Clinic">
+          <a href="https://www.instagram.com/bellanickclinic/" target="_blank" rel="noopener noreferrer"
+            class="red-social" aria-label="Instagram">📸</a>
+          <a href="https://www.facebook.com/BellaNickClinic" target="_blank" rel="noopener noreferrer"
+            class="red-social" aria-label="Facebook">👍</a>
+          <a href="https://www.tiktok.com/@bellanickclinic" target="_blank" rel="noopener noreferrer" class="red-social"
             aria-label="TikTok">🎵</a>
         </div>
       </div>
       <div>
-        <div class="foot-tit">Sucursales</div>
-        <ul class="foot-ul">
-          <li><a href="sucursal-roma-sur.html">Roma Sur · CDMX</a></li>
-          <li><a href="sucursal-insurgentes-sur.html">Insurgentes Sur · CDMX</a></li>
-          <li><a href="sucursal-queretaro.html">Corregidora · Querétaro</a></li>
+        <h3 class="footer-titulo-col">Servicios</h3>
+        <ul class="footer-lista">
+          <li><a href="https://depilasermexico.com/depilacion-laser.html">Depilación Láser Diodo</a></li>
+          <li><a href="https://depilasermexico.com/lipolisis-laser.html">Lipólisis Láser</a></li>
+          <li><a href="https://depilasermexico.com/cavitacion.html">Cavitación</a></li>
+          <li><a href="https://depilasermexico.com/radiofrecuencia-tripolar.html">Radiofrecuencia Tripolar</a></li>
+          <li><a href="https://depilasermexico.com/electroestimulacion.html">Electroestimulación</a></li>
+          <li><a href="https://depilasermexico.com/carboxiterapia.html">Carboxiterapia</a></li>
+          <li><a href="https://depilasermexico.com/vacumterapia.html">Vacumterapia</a></li>
+          <li><a href="https://depilasermexico.com/copas-colombianas.html">Copas Colombianas</a></li>
+          <li><a href="https://depilasermexico.com/holywood-peel.html">Holywood Peel</a></li>
+          <li><a href="https://depilasermexico.com/microdermoabrasion.html">Microdermoabrasión</a></li>
+          <li><a href="https://depilasermexico.com/hidrodermoabrasion.html">Hidrodermoabrasión</a></li>
+          <li><a href="https://depilasermexico.com/despigmentacion.html">Despigmentación</a></li>
+          <li><a href="https://depilasermexico.com/eliminacion-tatuaje.html">Eliminación de Tatuaje</a></li>
         </ul>
       </div>
       <div>
-        <div class="foot-tit">Contacto</div>
-        <ul class="foot-ul">
-          <li><a href="https://wa.me/525535433490" target="_blank" rel="noopener">WhatsApp (CDMX y Qro.)</a></li>
-          <li><a href="mailto:administracion@depilasermexico.com">administracion@depilasermexico.com</a></li>
-          <li><a href="https://maps.app.goo.gl/JwEiXMSwZGZmfFkC9" target="_blank" rel="noopener">Google Maps
-              Querétaro</a></li>
+        <h3 class="footer-titulo-col">Navegación</h3>
+        <ul class="footer-lista">
+          <li><a href="https://depilasermexico.com/index.html">Inicio</a></li>
+          <li><a href="#sucursales">Sucursales</a></li>
+          <li><a href="https://depilasermexico.com/precios-depilacion-laser.html">Precios 2026</a></li>
+          <li><a href="https://depilasermexico.com/blog.html">Blog</a></li>
+          <li><a href="#preguntas-frecuentes">FAQ</a></li>
         </ul>
       </div>
+      <div>
+        <h3 class="footer-titulo-col">Contacto</h3>
+        <address>
+          <div class="contacto-item"><span>📧</span><a href="mailto:administracion@depilasermexico.com"
+              style="color:rgba(255,255,255,.65)">administracion@depilasermexico.com</a></div>
+          <div class="contacto-item"><span>📍</span><span>Monterrey 325, Roma Sur, CDMX 06760</span></div>
+          <div class="contacto-item"><span>📞</span><a href="tel:+525535433490" style="color:rgba(255,255,255,.65)">(55)
+              3543-3490</a></div>
+          <div class="contacto-item"><span>📍</span><span>Insurgentes Sur #1799, Guadalupe Inn, CDMX 01020</span></div>
+          <div class="contacto-item"><span>📞</span><a href="tel:+525556622079" style="color:rgba(255,255,255,.65)">(55)
+              5662-2079</a></div>
+          <div class="contacto-item"><span>📍</span><span>Plaza Lugo, Cam. a Vanegas 28 local 29, 76900 Corregidora,
+              Qro.</span></div>
+          <div class="contacto-item"><span>📞</span><a href="tel:+524422218227"
+              style="color:rgba(255,255,255,.65)">(442) 221-8227</a></div>
+        </address>
+      </div>
     </div>
-    <div class="foot-bottom">Copyright © 2025 BellaNick Clinic · <a href="https://www.linkedin.com/in/cimoralesg"
-        target="_blank" rel="noopener" style="color:rgba(255,255,255,.4);text-decoration:underline">Diseño:
-        Cmorales</a>
+    <div class="footer-bottom">
+      Copyright © 2025 BellaNick Clinic · Todos los derechos reservados ·
+      Diseño web por <a href="https://www.linkedin.com/in/cimoralesg" target="_blank" rel="noopener noreferrer"
+        style="color:rgba(255,255,255,.5);text-decoration:underline">Cmorales</a>
     </div>
   </footer>
+
   <!-- BOTÓN FLOTANTE / CHAT -->
   <button id="chatToggle" class="whatsapp-flotante" aria-label="Abrir chat">💬</button>
 
@@ -3266,6 +2510,10 @@
       <button id="sendBtn">Enviar</button>
     </div>
   </div>
+
+  <!-- ============================================================
+       SCRIPT 
+  ============================================================ -->
   <script>
     (function () {
 
@@ -3344,6 +2592,9 @@
         if (!messages.innerHTML) {
           addMessage('bella', '👋 Bienvenida a BellaNick Clinic. ¿Te ayudo a agendar una cita o resolver una duda?');
         }
+        setTimeout(function () {
+          input.focus();
+        }, 100);
       }
 
       function closeChat() {
@@ -3401,11 +2652,4 @@
       sendBtn.addEventListener('click', sendMessage);
       input.addEventListener('keypress', function (e) { if (e.key === 'Enter') sendMessage(); });
 
-      async function resetSession() {
-        try { await fetch('/php/reset_session.php', { method: 'POST', credentials: 'same-origin', cache: 'no-store' }); } catch (e) { }
-      }
-
-    })();
-  </script>
-</body>
-</html>
+      async function resetSession(

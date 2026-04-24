@@ -27,10 +27,99 @@
   <meta name="geo.region" content="MX-CMX" />
   <meta name="geo.placename" content="Ciudad de México" />
   <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico">
-
-  <script
-    type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Product", "name": "Depilación Láser Patillas", "description": "Depilación láser de diodo en patillas en CDMX y Querétaro ✅ Por cotizar. Valoración gratuita, tecnología de última generación y atención profesional en BellaNick Clinic.", "category": "Facial / Depilación Láser Diodo", "brand": {"@type": "Brand", "name": "BellaNick Clinic"}, "image": "https://depilasermexico.com/assets/img/hero/h1_hero1.webp", "url": "https://depilasermexico.com/depilacion-laser-patillas.html"}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Inicio", "item": "https://depilasermexico.com/"}, {"@type": "ListItem", "position": 2, "name": "Precios por zona", "item": "https://depilasermexico.com/precios-depilacion-laser.html"}, {"@type": "ListItem", "position": 3, "name": "Patillas", "item": "https://depilasermexico.com/depilacion-laser-patillas.html"}]}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Las patillas se pueden oscurecer con el laser?", "acceptedAnswer": {"@type": "Answer", "text": "No. El laser no mancha la piel; al contrario, al evitar cera y pinzas la piel se aclara con el tiempo."}}, {"@type": "Question", "name": "Puedo seguir peinandome con cabello recogido despues del tratamiento?", "acceptedAnswer": {"@type": "Answer", "text": "Si, y de hecho es una de las principales razones por las que se trata: lucir las patillas limpias."}}, {"@type": "Question", "name": "Sirve el laser si solo quiero reducir el vello de las patillas, no eliminarlo?", "acceptedAnswer": {"@type": "Answer", "text": "Si. Podemos planear menos sesiones enfocadas en reduccion (3-4) en lugar del plan completo."}}]}]}</script>
-
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Service",
+      "@id": "https://depilasermexico.com/depilacion-laser-patillas.html#service",
+      "name": "Depilación Láser de Patillas",
+      "description": "Depilación láser de diodo en patillas en CDMX y Querétaro. Tratamiento facial preciso para eliminar o reducir el vello de las patillas, definir el contorno del rostro y mejorar la apariencia de la piel, con valoración gratuita y tecnología de última generación en BellaNick Clinic.",
+      "url": "https://depilasermexico.com/depilacion-laser-patillas.html",
+      "category": "Depilación Láser Facial",
+      "provider": {
+        "@type": "LocalBusiness",
+        "@id": "https://depilasermexico.com/#business",
+        "name": "BellaNick Clinic",
+        "url": "https://depilasermexico.com/",
+        "telephone": "+525535433490",
+        "image": "https://depilasermexico.com/assets/img/hero/h1_hero1.webp",
+        "areaServed": [
+          {
+            "@type": "AdministrativeArea",
+            "name": "Ciudad de México"
+          },
+          {
+            "@type": "AdministrativeArea",
+            "name": "Querétaro"
+          }
+        ]
+      },
+      "offers": {
+        "@type": "Offer",
+        "priceCurrency": "MXN",
+        "availability": "https://schema.org/InStock",
+        "url": "https://depilasermexico.com/depilacion-laser-patillas.html"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://depilasermexico.com/depilacion-laser-patillas.html#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "¿La depilación láser puede oscurecer la piel de las patillas?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. La depilación láser no mancha la piel. Al evitar métodos como la cera o las pinzas, la piel suele verse más clara y uniforme con el tiempo."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Puedo llevar el cabello recogido después del tratamiento de patillas?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sí. De hecho, una de las principales razones para tratar las patillas es poder lucir el cabello recogido con un contorno limpio y definido."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Sirve el láser si solo quiero reducir el vello de las patillas y no eliminarlo por completo?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sí. Se puede planear un número menor de sesiones enfocado únicamente en la reducción del vello, generalmente entre 3 y 4 sesiones, en lugar de un plan completo."
+          }
+        }
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://depilasermexico.com/depilacion-laser-patillas.html#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Inicio",
+          "item": "https://depilasermexico.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Precios por zona",
+          "item": "https://depilasermexico.com/precios-depilacion-laser.html"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Depilación Láser de Patillas",
+          "item": "https://depilasermexico.com/depilacion-laser-patillas.html"
+        }
+      ]
+    }
+  ]
+}
+</script>
   <style>
     :root {
       --cp: #c8386b;
@@ -1077,6 +1166,29 @@
       line-height: 1.65;
       font-size: 14.5px
     }
+
+    /* nav: scroll vertical en dropdown de servicios largo */
+    .bn-menu>li.open .bn-dropdown {
+      max-height: calc(100vh - 140px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: var(--cp) transparent;
+    }
+
+    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar {
+      width: 6px
+    }
+
+    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar-track {
+      background: transparent
+    }
+
+    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar-thumb {
+      background: var(--cp);
+      border-radius: 3px
+    }
   </style>
 </head>
 
@@ -1132,16 +1244,30 @@
             <li><a href="https://depilasermexico.com/electroestimulacion.html"><span
                   class="bn-dropdown-icon">⚡</span><span class="bn-dropdown-text"><span
                     class="bn-dropdown-title">Electroestimulación</span></span></a></li>
-            <li><a href="https://depilasermexico.com/carboxiterapia.html"><span class="bn-dropdown-icon">💨</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Carboxiterapia</span></span></a></li>
-            <li><a href="https://depilasermexico.com/vacumterapia.html"><span class="bn-dropdown-icon">🫧</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Vacumterapia</span></span></a></li>
-            <li><a href="https://depilasermexico.com/copas-colombianas.html"><span class="bn-dropdown-icon">🥂</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Copas Colombianas</span></span></a></li>
-            <li><a href="https://depilasermexico.com/holywood-peel.html"><span class="bn-dropdown-icon">⭐</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Holywood Peel</span></span></a></li>
-            <li><a href="https://depilasermexico.com/microdermoabrasion.html"><span class="bn-dropdown-icon">✴️</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Microdermoabrasión</span></span></a></li>
-            <li><a href="https://depilasermexico.com/hidrodermoabrasion.html"><span class="bn-dropdown-icon">💧</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Hidrodermoabrasión</span></span></a></li>
-            <li><a href="https://depilasermexico.com/despigmentacion.html"><span class="bn-dropdown-icon">🌸</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Despigmentación</span></span></a></li>
-            <li><a href="https://depilasermexico.com/eliminacion-tatuaje.html"><span class="bn-dropdown-icon">🎨</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Eliminación de Tatuaje</span></span></a></li>
+            <li><a href="https://depilasermexico.com/carboxiterapia.html"><span class="bn-dropdown-icon">💨</span><span
+                  class="bn-dropdown-text"><span class="bn-dropdown-title">Carboxiterapia</span></span></a></li>
+            <li><a href="https://depilasermexico.com/vacumterapia.html"><span class="bn-dropdown-icon">🫧</span><span
+                  class="bn-dropdown-text"><span class="bn-dropdown-title">Vacumterapia</span></span></a></li>
+            <li><a href="https://depilasermexico.com/copas-colombianas.html"><span
+                  class="bn-dropdown-icon">🥂</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Copas
+                    Colombianas</span></span></a></li>
+            <li><a href="https://depilasermexico.com/holywood-peel.html"><span class="bn-dropdown-icon">⭐</span><span
+                  class="bn-dropdown-text"><span class="bn-dropdown-title">Holywood Peel</span></span></a></li>
+            <li><a href="https://depilasermexico.com/microdermoabrasion.html"><span
+                  class="bn-dropdown-icon">✴️</span><span class="bn-dropdown-text"><span
+                    class="bn-dropdown-title">Microdermoabrasión</span></span></a></li>
+            <li><a href="https://depilasermexico.com/hidrodermoabrasion.html"><span
+                  class="bn-dropdown-icon">💧</span><span class="bn-dropdown-text"><span
+                    class="bn-dropdown-title">Hidrodermoabrasión</span></span></a></li>
+            <li><a href="https://depilasermexico.com/despigmentacion.html"><span class="bn-dropdown-icon">🌸</span><span
+                  class="bn-dropdown-text"><span class="bn-dropdown-title">Despigmentación</span></span></a></li>
+            <li><a href="https://depilasermexico.com/eliminacion-tatuaje.html"><span
+                  class="bn-dropdown-icon">🎨</span><span class="bn-dropdown-text"><span
+                    class="bn-dropdown-title">Eliminación de Tatuaje</span></span></a></li>
             <li class="bn-dropdown-sep" role="separator"></li>
-            <li><a href="https://depilasermexico.com/precios-servicios-esteticos.html"><span class="bn-dropdown-icon">📋</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Precios Estéticos</span></span></a></li>
+            <li><a href="https://depilasermexico.com/precios-servicios-esteticos.html"><span
+                  class="bn-dropdown-icon">📋</span><span class="bn-dropdown-text"><span
+                    class="bn-dropdown-title">Precios Estéticos</span></span></a></li>
           </ul>
         </li>
         <li><a href="https://depilasermexico.com/precios-depilacion-laser.html">Precios</a></li>

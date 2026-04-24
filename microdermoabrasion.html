@@ -29,15 +29,13 @@
   <meta http-equiv="Content-Language" content="es" />
   <meta name="geo.region" content="MX-CMX" />
   <meta name="geo.placename" content="Ciudad de México" />
-
-
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@graph": [
     {
       "@type": "Service",
-      "@id": "https://depilasermexico.com/microdermoabrasion.html#service",
+      "@id": "https://depilasermexico.com/microdermoabrasion.html",
       "name": "Microdermoabrasión",
       "description": "Tratamiento estético de exfoliación mecánica que elimina células muertas, mejora manchas superficiales y renueva la piel, aportando una textura más uniforme y luminosa.",
       "url": "https://depilasermexico.com/microdermoabrasion.html",
@@ -1045,7 +1043,7 @@
         flex-direction: column
       }
     }
-  
+
     /* BN-DROPDOWN-SCROLL-FIX: evitar que el dropdown de Servicios se corte */
     .bn-menu>li.open .bn-dropdown {
       display: block;
@@ -1056,10 +1054,19 @@
       scrollbar-width: thin;
       scrollbar-color: var(--cp) transparent;
     }
-    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar { width:6px }
-    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar-track { background:transparent }
-    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar-thumb { background:var(--cp); border-radius:3px }
 
+    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar {
+      width: 6px
+    }
+
+    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar-track {
+      background: transparent
+    }
+
+    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar-thumb {
+      background: var(--cp);
+      border-radius: 3px
+    }
   </style>
 </head>
 
@@ -1501,14 +1508,16 @@
           <div class="faq-a">Para resultados óptimos, entre 4 y 6 sesiones con 2-4 semanas de separación. El
             mantenimiento mensual prolonga los efectos.</div>
         </div>
-        </div>
+      </div>
       </div>
     </section>
 
     <section class="sec-cta" id="contacto">
       <h2>¿Lista para renovar tu piel?</h2>
-      <p>Agenda tu cita de valoración <strong>sin costo</strong> y descubre cómo la Microdermoabrasión transforma tu piel.</p>
-      <a href="https://wa.me/525535433490?text=Hola%2C%20quisiera%20información%20sobre%20microdermoabrasi%C3%B3n%20en%20BellaNick%20Clinic" class="btn-cta-wa" target="_blank" rel="noopener">
+      <p>Agenda tu cita de valoración <strong>sin costo</strong> y descubre cómo la Microdermoabrasión transforma tu
+        piel.</p>
+      <a href="https://wa.me/525535433490?text=Hola%2C%20quisiera%20información%20sobre%20microdermoabrasi%C3%B3n%20en%20BellaNick%20Clinic"
+        class="btn-cta-wa" target="_blank" rel="noopener">
         &#128172; Agendar cita por WhatsApp
       </a>
     </section>
@@ -1520,9 +1529,12 @@
         <!-- <img src="https://depilasermexico.com/assets/img/logo/logo.webp" alt="BellaNick Clinic" class="foot-logo" width="150" height="42" loading="lazy" /> -->
         <p class="foot-desc">Especialistas en tratamientos estéticos en CDMX. Roma Sur, Insurgentes Sur y Querétaro.</p>
         <div class="redes">
-          <a href="https://www.instagram.com/bellanickclinic/" class="red" target="_blank" rel="noopener" aria-label="Instagram">📸</a>
-          <a href="https://www.facebook.com/BellaNickClinic" class="red" target="_blank" rel="noopener" aria-label="Facebook">👍</a>
-          <a href="https://www.tiktok.com/@bellanickclinic" class="red" target="_blank" rel="noopener" aria-label="TikTok">🎵</a>
+          <a href="https://www.instagram.com/bellanickclinic/" class="red" target="_blank" rel="noopener"
+            aria-label="Instagram">📸</a>
+          <a href="https://www.facebook.com/BellaNickClinic" class="red" target="_blank" rel="noopener"
+            aria-label="Facebook">👍</a>
+          <a href="https://www.tiktok.com/@bellanickclinic" class="red" target="_blank" rel="noopener"
+            aria-label="TikTok">🎵</a>
         </div>
       </div>
       <div>
@@ -1554,7 +1566,9 @@
         </ul>
       </div>
     </div>
-    <div class="foot-bottom">Copyright © 2025 BellaNick Clinic · <a href="https://www.linkedin.com/in/cimoralesg" target="_blank" rel="noopener" style="color:rgba(255,255,255,.4);text-decoration:underline">Diseño: Cmorales</a></div>
+    <div class="foot-bottom">Copyright © 2025 BellaNick Clinic · <a href="https://www.linkedin.com/in/cimoralesg"
+        target="_blank" rel="noopener" style="color:rgba(255,255,255,.4);text-decoration:underline">Diseño: Cmorales</a>
+    </div>
   </footer>
 
   <button class="whatsapp-flotante" id="wa-flotante" aria-label="Contactar por WhatsApp">&#128172;</button>
@@ -1620,6 +1634,7 @@
           window.open('https://wa.me/525535433490?text=Hola%2C%20quisiera%20información%20sobre%20microdermoabrasi%C3%B3n%20en%20BellaNick%20Clinic', '_blank');
         });
       }
+
     })();
   </script>
 </body>

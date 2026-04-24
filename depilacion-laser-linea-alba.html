@@ -28,8 +28,99 @@
   <meta name="geo.placename" content="Ciudad de México" />
   <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico">
 
-  <script
-    type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Product", "name": "Depilación Láser Línea Alba (abdomen)", "description": "Depilación láser de diodo en línea alba (abdomen) en CDMX y Querétaro ✅ Por cotizar. Valoración gratuita, tecnología de última generación y atención profesional en BellaNick Clinic.", "category": "Corporal / Depilación Láser Diodo", "brand": {"@type": "Brand", "name": "BellaNick Clinic"}, "image": "https://depilasermexico.com/assets/img/hero/h1_hero1.webp", "url": "https://depilasermexico.com/depilacion-laser-linea-alba.html"}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Inicio", "item": "https://depilasermexico.com/"}, {"@type": "ListItem", "position": 2, "name": "Precios por zona", "item": "https://depilasermexico.com/precios-depilacion-laser.html"}, {"@type": "ListItem", "position": 3, "name": "Línea Alba (abdomen)", "item": "https://depilasermexico.com/depilacion-laser-linea-alba.html"}]}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Se puede hacer durante el embarazo?", "acceptedAnswer": {"@type": "Answer", "text": "No. El embarazo es contraindicacion absoluta; reanudas el tratamiento despues del post-parto."}}, {"@type": "Question", "name": "La linea alba se mancha con el laser?", "acceptedAnswer": {"@type": "Answer", "text": "No. Al contrario, si ya hay mancha por rasurado, esta se aclara con el tiempo al no raspar la zona."}}, {"@type": "Question", "name": "Puedo combinarla con abdomen?", "acceptedAnswer": {"@type": "Answer", "text": "Si, es el combo mas solicitado: linea alba y abdomen completo en la misma sesion."}}]}]}</script>
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Service",
+      "@id": "https://depilasermexico.com/depilacion-laser-linea-alba.html#service",
+      "name": "Depilación Láser de Línea Alba (Abdomen)",
+      "description": "Depilación láser de diodo en línea alba del abdomen en CDMX y Querétaro. Tratamiento corporal preciso para eliminar el vello de la franja central del abdomen, mejorar la apariencia de la piel y reducir irritación por rasurado, con valoración gratuita y tecnología de última generación en BellaNick Clinic.",
+      "url": "https://depilasermexico.com/depilacion-laser-linea-alba.html",
+      "category": "Depilación Láser Corporal",
+      "provider": {
+        "@type": "LocalBusiness",
+        "@id": "https://depilasermexico.com/#business",
+        "name": "BellaNick Clinic",
+        "url": "https://depilasermexico.com/",
+        "telephone": "+525535433490",
+        "image": "https://depilasermexico.com/assets/img/hero/h1_hero1.webp",
+        "areaServed": [
+          {
+            "@type": "AdministrativeArea",
+            "name": "Ciudad de México"
+          },
+          {
+            "@type": "AdministrativeArea",
+            "name": "Querétaro"
+          }
+        ]
+      },
+      "offers": {
+        "@type": "Offer",
+        "priceCurrency": "MXN",
+        "availability": "https://schema.org/InStock",
+        "url": "https://depilasermexico.com/depilacion-laser-linea-alba.html"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://depilasermexico.com/depilacion-laser-linea-alba.html#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "¿Se puede realizar la depilación láser en la línea alba durante el embarazo?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. El embarazo es una contraindicación para la depilación láser. El tratamiento puede retomarse de forma segura después del postparto."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿La depilación láser puede manchar la línea alba?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Al contrario, si existe hiperpigmentación causada por el rasurado, esta suele mejorar con el tiempo al dejar de irritar la zona."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Puedo combinar la depilación láser de línea alba con abdomen completo?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sí. Es uno de los combos más solicitados, ya que permite tratar la línea alba y el abdomen completo en una sola sesión."
+          }
+        }
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://depilasermexico.com/depilacion-laser-linea-alba.html#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Inicio",
+          "item": "https://depilasermexico.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Precios por zona",
+          "item": "https://depilasermexico.com/precios-depilacion-laser.html"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Depilación Láser de Línea Alba (Abdomen)",
+          "item": "https://depilasermexico.com/depilacion-laser-linea-alba.html"
+        }
+      ]
+    }
+  ]
+}
+</script>
 
   <style>
     :root {
@@ -1077,6 +1168,29 @@
       line-height: 1.65;
       font-size: 14.5px
     }
+
+    /* nav: scroll vertical en dropdown de servicios largo */
+    .bn-menu>li.open .bn-dropdown {
+      max-height: calc(100vh - 140px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: var(--cp) transparent;
+    }
+
+    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar {
+      width: 6px
+    }
+
+    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar-track {
+      background: transparent
+    }
+
+    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar-thumb {
+      background: var(--cp);
+      border-radius: 3px
+    }
   </style>
 </head>
 
@@ -1132,16 +1246,30 @@
             <li><a href="https://depilasermexico.com/electroestimulacion.html"><span
                   class="bn-dropdown-icon">⚡</span><span class="bn-dropdown-text"><span
                     class="bn-dropdown-title">Electroestimulación</span></span></a></li>
-            <li><a href="https://depilasermexico.com/carboxiterapia.html"><span class="bn-dropdown-icon">💨</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Carboxiterapia</span></span></a></li>
-            <li><a href="https://depilasermexico.com/vacumterapia.html"><span class="bn-dropdown-icon">🫧</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Vacumterapia</span></span></a></li>
-            <li><a href="https://depilasermexico.com/copas-colombianas.html"><span class="bn-dropdown-icon">🥂</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Copas Colombianas</span></span></a></li>
-            <li><a href="https://depilasermexico.com/holywood-peel.html"><span class="bn-dropdown-icon">⭐</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Holywood Peel</span></span></a></li>
-            <li><a href="https://depilasermexico.com/microdermoabrasion.html"><span class="bn-dropdown-icon">✴️</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Microdermoabrasión</span></span></a></li>
-            <li><a href="https://depilasermexico.com/hidrodermoabrasion.html"><span class="bn-dropdown-icon">💧</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Hidrodermoabrasión</span></span></a></li>
-            <li><a href="https://depilasermexico.com/despigmentacion.html"><span class="bn-dropdown-icon">🌸</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Despigmentación</span></span></a></li>
-            <li><a href="https://depilasermexico.com/eliminacion-tatuaje.html"><span class="bn-dropdown-icon">🎨</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Eliminación de Tatuaje</span></span></a></li>
+            <li><a href="https://depilasermexico.com/carboxiterapia.html"><span class="bn-dropdown-icon">💨</span><span
+                  class="bn-dropdown-text"><span class="bn-dropdown-title">Carboxiterapia</span></span></a></li>
+            <li><a href="https://depilasermexico.com/vacumterapia.html"><span class="bn-dropdown-icon">🫧</span><span
+                  class="bn-dropdown-text"><span class="bn-dropdown-title">Vacumterapia</span></span></a></li>
+            <li><a href="https://depilasermexico.com/copas-colombianas.html"><span
+                  class="bn-dropdown-icon">🥂</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Copas
+                    Colombianas</span></span></a></li>
+            <li><a href="https://depilasermexico.com/holywood-peel.html"><span class="bn-dropdown-icon">⭐</span><span
+                  class="bn-dropdown-text"><span class="bn-dropdown-title">Holywood Peel</span></span></a></li>
+            <li><a href="https://depilasermexico.com/microdermoabrasion.html"><span
+                  class="bn-dropdown-icon">✴️</span><span class="bn-dropdown-text"><span
+                    class="bn-dropdown-title">Microdermoabrasión</span></span></a></li>
+            <li><a href="https://depilasermexico.com/hidrodermoabrasion.html"><span
+                  class="bn-dropdown-icon">💧</span><span class="bn-dropdown-text"><span
+                    class="bn-dropdown-title">Hidrodermoabrasión</span></span></a></li>
+            <li><a href="https://depilasermexico.com/despigmentacion.html"><span class="bn-dropdown-icon">🌸</span><span
+                  class="bn-dropdown-text"><span class="bn-dropdown-title">Despigmentación</span></span></a></li>
+            <li><a href="https://depilasermexico.com/eliminacion-tatuaje.html"><span
+                  class="bn-dropdown-icon">🎨</span><span class="bn-dropdown-text"><span
+                    class="bn-dropdown-title">Eliminación de Tatuaje</span></span></a></li>
             <li class="bn-dropdown-sep" role="separator"></li>
-            <li><a href="https://depilasermexico.com/precios-servicios-esteticos.html"><span class="bn-dropdown-icon">📋</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Precios Estéticos</span></span></a></li>
+            <li><a href="https://depilasermexico.com/precios-servicios-esteticos.html"><span
+                  class="bn-dropdown-icon">📋</span><span class="bn-dropdown-text"><span
+                    class="bn-dropdown-title">Precios Estéticos</span></span></a></li>
           </ul>
         </li>
         <li><a href="https://depilasermexico.com/precios-depilacion-laser.html">Precios</a></li>

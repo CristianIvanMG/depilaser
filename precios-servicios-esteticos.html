@@ -30,7 +30,6 @@
   <meta name="geo.region" content="MX-CMX" />
   <meta name="geo.placename" content="Ciudad de M&#233;xico" />
 
-
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -1450,7 +1449,7 @@
         padding: 12px 14px;
       }
     }
-  
+
     /* BN-DROPDOWN-SCROLL-FIX: evitar que el dropdown de Servicios se corte */
     .bn-menu>li.open .bn-dropdown {
       display: block;
@@ -1461,10 +1460,19 @@
       scrollbar-width: thin;
       scrollbar-color: var(--cp) transparent;
     }
-    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar { width:6px }
-    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar-track { background:transparent }
-    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar-thumb { background:var(--cp); border-radius:3px }
 
+    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar {
+      width: 6px
+    }
+
+    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar-track {
+      background: transparent
+    }
+
+    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar-thumb {
+      background: var(--cp);
+      border-radius: 3px
+    }
   </style>
 </head>
 
@@ -1688,80 +1696,80 @@
       </ul>
 
       <!-- HAMBURGUESA -->
-        <button class="bn-hamburger" id="bn-hamburger" aria-label="Abrir menú" aria-expanded="false"
-          onclick="toggleMobile()">
-          <span></span><span></span><span></span>
-        </button>
+      <button class="bn-hamburger" id="bn-hamburger" aria-label="Abrir menú" aria-expanded="false"
+        onclick="toggleMobile()">
+        <span></span><span></span><span></span>
+      </button>
 
     </div>
 
     <!-- PANEL MOBILE -->
-      <div class="bn-mobile-panel" id="bn-mobile-panel" aria-hidden="true">
-        <div class="bn-mobile-section">
-          <a href="https://depilasermexico.com/index.html" class="bn-mobile-link">
-            <span class="mi">🏠</span> Inicio
-          </a>
-        </div>
-        <div class="bn-mobile-section">
-          <div class="bn-mobile-section-title">Sucursales</div>
-          <a href="https://depilasermexico.com/depilacion-laser-cdmx-roma-sur.html" class="bn-mobile-link">
-            <span class="mi">📍</span>
-            <span><strong style="display:block;font-size:14px">Roma Sur</strong><small
-                style="color:var(--ctc);font-size:12px">Monterrey 325, CDMX</small></span>
-          </a>
-          <a href="https://depilasermexico.com/depilacion-laser-cdmx-insurgentes-sur.html" class="bn-mobile-link">
-            <span class="mi">📍</span>
-            <span><strong style="display:block;font-size:14px">Insurgentes Sur</strong><small
-                style="color:var(--ctc);font-size:12px">Insurgentes Sur #1799, CDMX</small></span>
-          </a>
-          <a href="https://depilasermexico.com/depilacion-laser-queretaro-corregidora.html" class="bn-mobile-link">
-            <span class="mi">🌟</span>
-            <span><strong style="display:block;font-size:14px">Querétaro <span
-                  class="bn-badge">Nueva</span></strong><small style="color:var(--ctc);font-size:12px">Corregidora,
-                Qro.</small></span>
-          </a>
-        </div>
-        <div class="bn-mobile-sep"></div>
-        <div class="bn-mobile-section">
-          <div class="bn-mobile-section-title">Servicios</div>
-          <a href="https://depilasermexico.com/depilacion-laser.html" class="bn-mobile-link"><span class="mi">✨</span>
-            Depilación Láser Diodo</a>
-          <a href="https://depilasermexico.com/lipolisis-laser.html" class="bn-mobile-link"><span class="mi">🔥</span>
-            Lipólisis Láser</a>
-          <a href="https://depilasermexico.com/cavitacion.html" class="bn-mobile-link"><span class="mi">🌊</span>
-            Cavitación Ultrasónica</a>
-          <a href="https://depilasermexico.com/radiofrecuencia-tripolar.html" class="bn-mobile-link"><span
-              class="mi">💫</span> Radiofrecuencia Tripolar</a>
-          <a href="https://depilasermexico.com/electroestimulacion.html" class="bn-mobile-link"><span
-              class="mi">⚡</span> Electroestimulación</a>
-          <a href="https://depilasermexico.com/carboxiterapia.html" class="bn-mobile-link"><span class="mi">💨</span>
-            Carboxiterapia</a>
-          <a href="https://depilasermexico.com/vacumterapia.html" class="bn-mobile-link"><span class="mi">🫧</span>
-            Vacumterapia</a>
-          <a href="https://depilasermexico.com/copas-colombianas.html" class="bn-mobile-link"><span class="mi">🥂</span>
-            Copas Colombianas</a>
-          <a href="https://depilasermexico.com/holywood-peel.html" class="bn-mobile-link"><span class="mi">⭐</span>
-            Holywood Peel</a>
-          <a href="https://depilasermexico.com/microdermoabrasion.html" class="bn-mobile-link"><span
-              class="mi">✴️</span> Microdermoabrasión</a>
-          <a href="https://depilasermexico.com/hidrodermoabrasion.html" class="bn-mobile-link"><span
-              class="mi">💧</span> Hidrodermoabrasión</a>
-          <a href="https://depilasermexico.com/despigmentacion.html" class="bn-mobile-link"><span class="mi">🌸</span>
-            Despigmentación</a>
-          <a href="https://depilasermexico.com/eliminacion-tatuaje.html" class="bn-mobile-link"><span
-              class="mi">🎨</span> Eliminación de Tatuaje</a>
-          <a href="https://depilasermexico.com/precios-servicios-esteticos.html" class="bn-mobile-link"><span
-              class="mi">📋</span> <strong>Precios Estéticos</strong></a>
-        </div>
-        <div class="bn-mobile-sep"></div>
-        <a href="https://depilasermexico.com/blog.html" class="bn-mobile-link"><span class="mi">📝</span> Blog</a>
-        <!-- <a href="#preguntas-frecuentes" class="bn-mobile-link"><span class="mi">❓</span> FAQ</a> -->
-        <!-- <a href="#contacto" class="bn-mobile-link"><span class="mi">📞</span> Contacto</a> -->
-        <a href="https://wa.me/525535433490?text=Hola%2C%20quiero%20agendar%20mi%20cita%20de%20valoraci%C3%B3n%20sin%20costo"
-          class="bn-mobile-cta" target="_blank" rel="noopener noreferrer">
-          💬 Agendar cita gratuita por WhatsApp
+    <div class="bn-mobile-panel" id="bn-mobile-panel" aria-hidden="true">
+      <div class="bn-mobile-section">
+        <a href="https://depilasermexico.com/index.html" class="bn-mobile-link">
+          <span class="mi">🏠</span> Inicio
         </a>
       </div>
+      <div class="bn-mobile-section">
+        <div class="bn-mobile-section-title">Sucursales</div>
+        <a href="https://depilasermexico.com/depilacion-laser-cdmx-roma-sur.html" class="bn-mobile-link">
+          <span class="mi">📍</span>
+          <span><strong style="display:block;font-size:14px">Roma Sur</strong><small
+              style="color:var(--ctc);font-size:12px">Monterrey 325, CDMX</small></span>
+        </a>
+        <a href="https://depilasermexico.com/depilacion-laser-cdmx-insurgentes-sur.html" class="bn-mobile-link">
+          <span class="mi">📍</span>
+          <span><strong style="display:block;font-size:14px">Insurgentes Sur</strong><small
+              style="color:var(--ctc);font-size:12px">Insurgentes Sur #1799, CDMX</small></span>
+        </a>
+        <a href="https://depilasermexico.com/depilacion-laser-queretaro-corregidora.html" class="bn-mobile-link">
+          <span class="mi">🌟</span>
+          <span><strong style="display:block;font-size:14px">Querétaro <span
+                class="bn-badge">Nueva</span></strong><small style="color:var(--ctc);font-size:12px">Corregidora,
+              Qro.</small></span>
+        </a>
+      </div>
+      <div class="bn-mobile-sep"></div>
+      <div class="bn-mobile-section">
+        <div class="bn-mobile-section-title">Servicios</div>
+        <a href="https://depilasermexico.com/depilacion-laser.html" class="bn-mobile-link"><span class="mi">✨</span>
+          Depilación Láser Diodo</a>
+        <a href="https://depilasermexico.com/lipolisis-laser.html" class="bn-mobile-link"><span class="mi">🔥</span>
+          Lipólisis Láser</a>
+        <a href="https://depilasermexico.com/cavitacion.html" class="bn-mobile-link"><span class="mi">🌊</span>
+          Cavitación Ultrasónica</a>
+        <a href="https://depilasermexico.com/radiofrecuencia-tripolar.html" class="bn-mobile-link"><span
+            class="mi">💫</span> Radiofrecuencia Tripolar</a>
+        <a href="https://depilasermexico.com/electroestimulacion.html" class="bn-mobile-link"><span class="mi">⚡</span>
+          Electroestimulación</a>
+        <a href="https://depilasermexico.com/carboxiterapia.html" class="bn-mobile-link"><span class="mi">💨</span>
+          Carboxiterapia</a>
+        <a href="https://depilasermexico.com/vacumterapia.html" class="bn-mobile-link"><span class="mi">🫧</span>
+          Vacumterapia</a>
+        <a href="https://depilasermexico.com/copas-colombianas.html" class="bn-mobile-link"><span class="mi">🥂</span>
+          Copas Colombianas</a>
+        <a href="https://depilasermexico.com/holywood-peel.html" class="bn-mobile-link"><span class="mi">⭐</span>
+          Holywood Peel</a>
+        <a href="https://depilasermexico.com/microdermoabrasion.html" class="bn-mobile-link"><span class="mi">✴️</span>
+          Microdermoabrasión</a>
+        <a href="https://depilasermexico.com/hidrodermoabrasion.html" class="bn-mobile-link"><span class="mi">💧</span>
+          Hidrodermoabrasión</a>
+        <a href="https://depilasermexico.com/despigmentacion.html" class="bn-mobile-link"><span class="mi">🌸</span>
+          Despigmentación</a>
+        <a href="https://depilasermexico.com/eliminacion-tatuaje.html" class="bn-mobile-link"><span class="mi">🎨</span>
+          Eliminación de Tatuaje</a>
+        <a href="https://depilasermexico.com/precios-servicios-esteticos.html" class="bn-mobile-link"><span
+            class="mi">📋</span> <strong>Precios Estéticos</strong></a>
+      </div>
+      <div class="bn-mobile-sep"></div>
+      <a href="https://depilasermexico.com/blog.html" class="bn-mobile-link"><span class="mi">📝</span> Blog</a>
+      <!-- <a href="#preguntas-frecuentes" class="bn-mobile-link"><span class="mi">❓</span> FAQ</a> -->
+      <!-- <a href="#contacto" class="bn-mobile-link"><span class="mi">📞</span> Contacto</a> -->
+      <a href="https://wa.me/525535433490?text=Hola%2C%20quiero%20agendar%20mi%20cita%20de%20valoraci%C3%B3n%20sin%20costo"
+        class="bn-mobile-cta" target="_blank" rel="noopener noreferrer">
+        💬 Agendar cita gratuita por WhatsApp
+      </a>
+    </div>
   </nav>
 
   <div class="breadcrumb">
@@ -1943,7 +1951,8 @@
         <!-- PANEL FACIALES -->
         <div class="tab-panel" id="tab-faciales">
           <span class="cat-label">&#127802; Faciales y Despigmentantes</span>
-          <p class="cat-note">Tratamientos faciales para rostro, cuello y escote. Aptos para mujeres y hombres (Girls and Boys). Costos por sesi&#243;n.</p>
+          <p class="cat-note">Tratamientos faciales para rostro, cuello y escote. Aptos para mujeres y hombres (Girls
+            and Boys). Costos por sesi&#243;n.</p>
           <div style="overflow-x:auto;">
             <table class="price-table" role="table" aria-label="Precios tratamientos faciales">
               <thead>
@@ -1958,7 +1967,8 @@
                 <tr>
                   <td>
                     <div class="srv-name"><span class="srv-icon">&#11088;</span>
-                      <div>Holywood Peel<span class="srv-sub">Limpieza profunda &#183; Luminosidad inmediata</span></div>
+                      <div>Holywood Peel<span class="srv-sub">Limpieza profunda &#183; Luminosidad inmediata</span>
+                      </div>
                     </div>
                   </td>
                   <td><span class="precio">$450 MXN</span></td>
@@ -1968,7 +1978,8 @@
                 <tr>
                   <td>
                     <div class="srv-name"><span class="srv-icon">&#10052;&#65039;</span>
-                      <div>Microdermoabrasi&#243;n<span class="srv-sub">Exfoliaci&#243;n mec&#225;nica &#183; Renovaci&#243;n celular</span></div>
+                      <div>Microdermoabrasi&#243;n<span class="srv-sub">Exfoliaci&#243;n mec&#225;nica &#183;
+                          Renovaci&#243;n celular</span></div>
                     </div>
                   </td>
                   <td><span class="precio">$450 MXN</span></td>
@@ -1978,7 +1989,8 @@
                 <tr>
                   <td>
                     <div class="srv-name"><span class="srv-icon">&#128167;</span>
-                      <div>Hidrodermoabrasi&#243;n<span class="srv-sub">Hidrataci&#243;n profunda &#183; Limpieza</span></div>
+                      <div>Hidrodermoabrasi&#243;n<span class="srv-sub">Hidrataci&#243;n profunda &#183; Limpieza</span>
+                      </div>
                     </div>
                   </td>
                   <td><span class="precio">$550 MXN</span></td>
@@ -1998,7 +2010,8 @@
                 <tr>
                   <td>
                     <div class="srv-name"><span class="srv-icon">&#127912;</span>
-                      <div>Eliminaci&#243;n de Tatuaje<span class="srv-sub">L&#225;ser Q-switched &#183; Resultado seguro</span></div>
+                      <div>Eliminaci&#243;n de Tatuaje<span class="srv-sub">L&#225;ser Q-switched &#183; Resultado
+                          seguro</span></div>
                     </div>
                   </td>
                   <td><span class="precio">Desde $450 MXN</span></td>
@@ -2016,8 +2029,10 @@
     <!-- CTA FINAL -->
     <section class="sec-cta" id="contacto">
       <h2>&#191;Lista para tu tratamiento est&#233;tico?</h2>
-      <p>Agenda tu cita de valoraci&#243;n <strong>sin costo</strong> en BellaNick Clinic. Te asesoramos para encontrar el tratamiento ideal seg&#250;n tu objetivo y presupuesto.</p>
-      <a href="https://wa.me/525535433490?text=Hola%2C%20quisiera%20informaci%C3%B3n%20sobre%20sus%20servicios%20est%C3%A9ticos%20en%20BellaNick%20Clinic" class="btn-cta-wa" target="_blank" rel="noopener">
+      <p>Agenda tu cita de valoraci&#243;n <strong>sin costo</strong> en BellaNick Clinic. Te asesoramos para encontrar
+        el tratamiento ideal seg&#250;n tu objetivo y presupuesto.</p>
+      <a href="https://wa.me/525535433490?text=Hola%2C%20quisiera%20informaci%C3%B3n%20sobre%20sus%20servicios%20est%C3%A9ticos%20en%20BellaNick%20Clinic"
+        class="btn-cta-wa" target="_blank" rel="noopener">
         &#128172; Agendar cita por WhatsApp
       </a>
     </section>
@@ -2027,11 +2042,15 @@
     <div class="foot-grid">
       <div>
         <!-- <img src="https://depilasermexico.com/assets/img/logo/logo.webp" alt="BellaNick Clinic" class="foot-logo" width="150" height="42" loading="lazy" /> -->
-        <p class="foot-desc">Especialistas en tratamientos est&#233;ticos en CDMX. Roma Sur, Insurgentes Sur y Quer&#233;taro.</p>
+        <p class="foot-desc">Especialistas en tratamientos est&#233;ticos en CDMX. Roma Sur, Insurgentes Sur y
+          Quer&#233;taro.</p>
         <div class="redes">
-          <a href="https://www.instagram.com/bellanickclinic/" class="red" target="_blank" rel="noopener" aria-label="Instagram">&#128248;</a>
-          <a href="https://www.facebook.com/BellaNickClinic" class="red" target="_blank" rel="noopener" aria-label="Facebook">&#128077;</a>
-          <a href="https://www.tiktok.com/@bellanickclinic" class="red" target="_blank" rel="noopener" aria-label="TikTok">&#127925;</a>
+          <a href="https://www.instagram.com/bellanickclinic/" class="red" target="_blank" rel="noopener"
+            aria-label="Instagram">&#128248;</a>
+          <a href="https://www.facebook.com/BellaNickClinic" class="red" target="_blank" rel="noopener"
+            aria-label="Facebook">&#128077;</a>
+          <a href="https://www.tiktok.com/@bellanickclinic" class="red" target="_blank" rel="noopener"
+            aria-label="TikTok">&#127925;</a>
         </div>
       </div>
       <div>
@@ -2063,7 +2082,9 @@
         </ul>
       </div>
     </div>
-    <div class="foot-bottom">Copyright &#169; 2025 BellaNick Clinic &#183; <a href="https://www.linkedin.com/in/cimoralesg" target="_blank" rel="noopener" style="color:rgba(255,255,255,.4);text-decoration:underline">Dise&#241;o: Cmorales</a></div>
+    <div class="foot-bottom">Copyright &#169; 2025 BellaNick Clinic &#183; <a
+        href="https://www.linkedin.com/in/cimoralesg" target="_blank" rel="noopener"
+        style="color:rgba(255,255,255,.4);text-decoration:underline">Dise&#241;o: Cmorales</a></div>
   </footer>
 
   <button class="whatsapp-flotante" id="wa-flotante" aria-label="Contactar por WhatsApp">&#128172;</button>
@@ -2129,6 +2150,7 @@
           window.open('https://wa.me/525535433490?text=Hola%2C%20quisiera%20informaci%C3%B3n%20sobre%20sus%20servicios%20est%C3%A9ticos', '_blank');
         });
       }
+
     })();
   </script>
 </body>

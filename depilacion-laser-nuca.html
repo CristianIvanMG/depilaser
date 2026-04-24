@@ -27,10 +27,99 @@
   <meta name="geo.region" content="MX-CMX" />
   <meta name="geo.placename" content="Ciudad de México" />
   <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico">
-
-  <script
-    type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Product", "name": "Depilación Láser Nuca", "description": "Depilación láser de diodo en nuca en CDMX y Querétaro ✅ Por cotizar. Valoración gratuita, tecnología de última generación y atención profesional en BellaNick Clinic.", "category": "Facial / Depilación Láser Diodo", "brand": {"@type": "Brand", "name": "BellaNick Clinic"}, "image": "https://depilasermexico.com/assets/img/hero/h1_hero1.webp", "url": "https://depilasermexico.com/depilacion-laser-nuca.html"}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Inicio", "item": "https://depilasermexico.com/"}, {"@type": "ListItem", "position": 2, "name": "Precios por zona", "item": "https://depilasermexico.com/precios-depilacion-laser.html"}, {"@type": "ListItem", "position": 3, "name": "Nuca", "item": "https://depilasermexico.com/depilacion-laser-nuca.html"}]}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Puede el laser tocar mi cabello?", "acceptedAnswer": {"@type": "Answer", "text": "No. Se protege el nacimiento del cabello con una linea definida; solo se depila la zona que tu marques."}}, {"@type": "Question", "name": "Se puede combinar con cuello?", "acceptedAnswer": {"@type": "Answer", "text": "Si, y es el combo mas comun: nuca y cuello en la misma sesion."}}, {"@type": "Question", "name": "Cuando notare el resultado?", "acceptedAnswer": {"@type": "Answer", "text": "Desde la sesion 3 veras la nuca mas limpia y el vello mas lento. Resultado final en sesion 6 a 8."}}]}]}</script>
-
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Service",
+      "@id": "https://depilasermexico.com/depilacion-laser-nuca.html",
+      "name": "Depilación Láser de Nuca",
+      "description": "Depilación láser de diodo en nuca en CDMX y Querétaro. Tratamiento preciso para eliminar el vello no deseado en la parte posterior del cuello, definir el contorno del nacimiento del cabello y mantener una apariencia limpia, con valoración gratuita y tecnología de última generación en BellaNick Clinic.",
+      "url": "https://depilasermexico.com/depilacion-laser-nuca.html",
+      "category": "Depilación Láser Facial",
+      "provider": {
+        "@type": "LocalBusiness",
+        "@id": "https://depilasermexico.com/#business",
+        "name": "BellaNick Clinic",
+        "url": "https://depilasermexico.com/",
+        "telephone": "+525535433490",
+        "image": "https://depilasermexico.com/assets/img/hero/h1_hero1.webp",
+        "areaServed": [
+          {
+            "@type": "AdministrativeArea",
+            "name": "Ciudad de México"
+          },
+          {
+            "@type": "AdministrativeArea",
+            "name": "Querétaro"
+          }
+        ]
+      },
+      "offers": {
+        "@type": "Offer",
+        "priceCurrency": "MXN",
+        "availability": "https://schema.org/InStock",
+        "url": "https://depilasermexico.com/depilacion-laser-nuca.html"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://depilasermexico.com/depilacion-laser-nuca.html#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "¿El láser puede afectar el cabello en la depilación de la nuca?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. El nacimiento del cabello se protege y se marca una línea definida antes del tratamiento. Solo se depila la zona que tú decides."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Se puede combinar la depilación láser de nuca con cuello?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sí. Es el combo más común, ya que permite tratar la nuca y el cuello en la misma sesión para un resultado más uniforme."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Cuándo se notan los resultados de la depilación láser en la nuca?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A partir de la tercera sesión suele notarse la nuca más limpia y el vello con crecimiento más lento. El resultado final se obtiene generalmente entre la sesión 6 y 8."
+          }
+        }
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://depilasermexico.com/depilacion-laser-nuca.html#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Inicio",
+          "item": "https://depilasermexico.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Precios por zona",
+          "item": "https://depilasermexico.com/precios-depilacion-laser.html"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Depilación Láser de Nuca",
+          "item": "https://depilasermexico.com/depilacion-laser-nuca.html"
+        }
+      ]
+    }
+  ]
+}
+</script>
   <style>
     :root {
       --cp: #c8386b;
@@ -1077,6 +1166,29 @@
       line-height: 1.65;
       font-size: 14.5px
     }
+
+    /* nav: scroll vertical en dropdown de servicios largo */
+    .bn-menu>li.open .bn-dropdown {
+      max-height: calc(100vh - 140px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: var(--cp) transparent;
+    }
+
+    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar {
+      width: 6px
+    }
+
+    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar-track {
+      background: transparent
+    }
+
+    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar-thumb {
+      background: var(--cp);
+      border-radius: 3px
+    }
   </style>
 </head>
 
@@ -1132,16 +1244,30 @@
             <li><a href="https://depilasermexico.com/electroestimulacion.html"><span
                   class="bn-dropdown-icon">⚡</span><span class="bn-dropdown-text"><span
                     class="bn-dropdown-title">Electroestimulación</span></span></a></li>
-            <li><a href="https://depilasermexico.com/carboxiterapia.html"><span class="bn-dropdown-icon">💨</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Carboxiterapia</span></span></a></li>
-            <li><a href="https://depilasermexico.com/vacumterapia.html"><span class="bn-dropdown-icon">🫧</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Vacumterapia</span></span></a></li>
-            <li><a href="https://depilasermexico.com/copas-colombianas.html"><span class="bn-dropdown-icon">🥂</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Copas Colombianas</span></span></a></li>
-            <li><a href="https://depilasermexico.com/holywood-peel.html"><span class="bn-dropdown-icon">⭐</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Holywood Peel</span></span></a></li>
-            <li><a href="https://depilasermexico.com/microdermoabrasion.html"><span class="bn-dropdown-icon">✴️</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Microdermoabrasión</span></span></a></li>
-            <li><a href="https://depilasermexico.com/hidrodermoabrasion.html"><span class="bn-dropdown-icon">💧</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Hidrodermoabrasión</span></span></a></li>
-            <li><a href="https://depilasermexico.com/despigmentacion.html"><span class="bn-dropdown-icon">🌸</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Despigmentación</span></span></a></li>
-            <li><a href="https://depilasermexico.com/eliminacion-tatuaje.html"><span class="bn-dropdown-icon">🎨</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Eliminación de Tatuaje</span></span></a></li>
+            <li><a href="https://depilasermexico.com/carboxiterapia.html"><span class="bn-dropdown-icon">💨</span><span
+                  class="bn-dropdown-text"><span class="bn-dropdown-title">Carboxiterapia</span></span></a></li>
+            <li><a href="https://depilasermexico.com/vacumterapia.html"><span class="bn-dropdown-icon">🫧</span><span
+                  class="bn-dropdown-text"><span class="bn-dropdown-title">Vacumterapia</span></span></a></li>
+            <li><a href="https://depilasermexico.com/copas-colombianas.html"><span
+                  class="bn-dropdown-icon">🥂</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Copas
+                    Colombianas</span></span></a></li>
+            <li><a href="https://depilasermexico.com/holywood-peel.html"><span class="bn-dropdown-icon">⭐</span><span
+                  class="bn-dropdown-text"><span class="bn-dropdown-title">Holywood Peel</span></span></a></li>
+            <li><a href="https://depilasermexico.com/microdermoabrasion.html"><span
+                  class="bn-dropdown-icon">✴️</span><span class="bn-dropdown-text"><span
+                    class="bn-dropdown-title">Microdermoabrasión</span></span></a></li>
+            <li><a href="https://depilasermexico.com/hidrodermoabrasion.html"><span
+                  class="bn-dropdown-icon">💧</span><span class="bn-dropdown-text"><span
+                    class="bn-dropdown-title">Hidrodermoabrasión</span></span></a></li>
+            <li><a href="https://depilasermexico.com/despigmentacion.html"><span class="bn-dropdown-icon">🌸</span><span
+                  class="bn-dropdown-text"><span class="bn-dropdown-title">Despigmentación</span></span></a></li>
+            <li><a href="https://depilasermexico.com/eliminacion-tatuaje.html"><span
+                  class="bn-dropdown-icon">🎨</span><span class="bn-dropdown-text"><span
+                    class="bn-dropdown-title">Eliminación de Tatuaje</span></span></a></li>
             <li class="bn-dropdown-sep" role="separator"></li>
-            <li><a href="https://depilasermexico.com/precios-servicios-esteticos.html"><span class="bn-dropdown-icon">📋</span><span class="bn-dropdown-text"><span class="bn-dropdown-title">Precios Estéticos</span></span></a></li>
+            <li><a href="https://depilasermexico.com/precios-servicios-esteticos.html"><span
+                  class="bn-dropdown-icon">📋</span><span class="bn-dropdown-text"><span
+                    class="bn-dropdown-title">Precios Estéticos</span></span></a></li>
           </ul>
         </li>
         <li><a href="https://depilasermexico.com/precios-depilacion-laser.html">Precios</a></li>

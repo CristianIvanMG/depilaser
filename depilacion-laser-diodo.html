@@ -5,18 +5,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Depilación Láser Diodo CDMX Desde $99 MXN | BellaNick ✅</title>
-  <meta name="description" content="Depilación láser de diodo en CDMX desde $99 MXN ✅ Tecnología médica, resultados visibles y atención personalizada en BellaNick Clinic. Agenda ya." />
-  <meta name="keywords" content="depilación láser diodo CDMX, láser de diodo, depilación láser barata CDMX, precio depilación láser, depilación láser desde 99 pesos, BellaNick Clinic" />
+  <meta name="description"
+    content="Depilación láser de diodo en CDMX desde $99 MXN ✅ Tecnología médica, resultados visibles y atención personalizada en BellaNick Clinic. Agenda ya." />
+  <meta name="keywords"
+    content="depilación láser diodo CDMX, láser de diodo, depilación láser barata CDMX, precio depilación láser, depilación láser desde 99 pesos, BellaNick Clinic" />
   <link rel="canonical" href="https://depilasermexico.com/depilacion-laser-diodo.html" />
+  <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico">
   <meta property="og:title" content="Depilación Láser Diodo CDMX Desde $99 MXN | BellaNick ✅" />
-  <meta property="og:description" content="Depilación láser de diodo desde $99 MXN en CDMX ✅ Resultados visibles, tecnología médica. BellaNick Clinic." />
+  <meta property="og:description"
+    content="Depilación láser de diodo desde $99 MXN en CDMX ✅ Resultados visibles, tecnología médica. BellaNick Clinic." />
   <meta property="og:image" content="https://depilasermexico.com/assets/img/gallery/blogs4.webp" />
   <meta property="og:url" content="https://depilasermexico.com/depilacion-laser-diodo.html" />
   <meta property="og:site_name" content="BellaNick Clinic" />
   <meta property="og:locale" content="es_MX" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Depilación Láser Diodo CDMX Desde $99 MXN | BellaNick ✅" />
-  <meta name="twitter:description" content="Depilación láser de diodo desde $99 MXN en CDMX ✅ Resultados visibles, tecnología médica. BellaNick Clinic." />
+  <meta name="twitter:description"
+    content="Depilación láser de diodo desde $99 MXN en CDMX ✅ Resultados visibles, tecnología médica. BellaNick Clinic." />
   <meta name="twitter:image" content="https://depilasermexico.com/img/og-bellanick-clinic.jpg" />
   <meta name="robots" content="index,follow,all,max-image-preview:large,max-snippet:-1" />
   <meta name="author" content="BellaNick Clinic" />
@@ -25,27 +30,49 @@
   <meta name="geo.placename" content="Ciudad de México" />
   <meta property="og:type" content="website" />
 
+
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Service",
-    "name": "Depilación Láser Diodo",
-    "provider": {
-      "@type": "MedicalBusiness",
-      "name": "BellaNick Clinic",
-      "url": "https://depilasermexico.com/",
-      "telephone": "+525535433490"
-    },
-    "description": "Eliminación definitiva del vello con tecnología láser diodo de última generación. Resultados visibles desde la primera sesión.",
-    "offers": {
-      "@type": "Offer",
-      "priceCurrency": "MXN",
-      "price": "99",
-      "description": "Precio desde $99 MXN en axilas"
-    },
-    "areaServed": "Ciudad de México"
-  }
-  </script>
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Service",
+      "@id": "https://depilasermexico.com/depilacion-laser-diodo.html#service",
+      "name": "Depilación Láser Diodo",
+      "description": "Depilación láser de diodo con tecnología de última generación para eliminar el vello de forma progresiva y duradera. Resultados visibles desde las primeras sesiones, con valoración gratuita y atención profesional en BellaNick Clinic.",
+      "url": "https://depilasermexico.com/depilacion-laser-diodo.html",
+      "category": "Depilación Láser",
+      "provider": {
+        "@type": "LocalBusiness",
+        "@id": "https://depilasermexico.com/#business",
+        "name": "BellaNick Clinic",
+        "url": "https://depilasermexico.com/",
+        "telephone": "+525535433490",
+        "image": "https://depilasermexico.com/assets/img/hero/h1_hero1.webp",
+        "areaServed": [
+          {
+            "@type": "AdministrativeArea",
+            "name": "Ciudad de México"
+          },
+          {
+            "@type": "AdministrativeArea",
+            "name": "Querétaro"
+          }
+        ]
+      },
+      "offers": {
+        "@type": "Offer",
+        "priceCurrency": "MXN",
+        "price": "99",
+        "availability": "https://schema.org/InStock",
+        "description": "Precio desde $99 MXN en zonas seleccionadas como axilas.",
+        "url": "https://depilasermexico.com/precios-depilacion-laser.html"
+      }
+    }
+  ]
+}
+</script>
+
   <style>
     /* ═══════════════════════════════════════════════════════════
        CSS BASE — Variables, Nav, Hamburguesa, Chat, Responsive
@@ -1728,8 +1755,9 @@
 
     /* ---- HERO SERVICIO ---- */
     .hero-srv {
-      background: linear-gradient(135deg, #fdf0f5 0%, #fff5f8 50%, #f8f0fb 100%);
-      padding: 72px 20px 56px;
+      background: linear-gradient(135deg, var(--cp-o) 0%, var(--cp) 60%, var(--cp-c) 100%);
+      padding: 60px 20px 70px;
+      color: #fff;
       position: relative;
       overflow: hidden
     }
@@ -1737,55 +1765,59 @@
     .hero-srv::before {
       content: '';
       position: absolute;
-      top: -100px;
-      right: -100px;
+      top: -80px;
+      right: -80px;
       width: 500px;
       height: 500px;
-      background: radial-gradient(circle, rgba(200, 56, 107, .07) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(255, 255, 255, .08) 0%, transparent 70%);
       pointer-events: none
     }
 
     .hero-srv-grid {
-      max-width: 1140px;
+      max-width: 1100px;
       margin: 0 auto;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 56px;
-      align-items: center
+      gap: 50px;
+      align-items: center;
+      position: relative;
+      z-index: 1
+    }
+
+    .hero-srv h1 {
+      font-family: var(--ft);
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 18px;
+      color: #fff
+    }
+
+    .hero-srv h1 em {
+      font-style: normal;
+      color: var(--ca)
+    }
+
+    .hero-srv-desc {
+      font-size: 17px;
+      line-height: 1.75;
+      color: rgba(255, 255, 255, .92);
+      margin-bottom: 28px;
+      max-width: 520px
     }
 
     .badge-srv {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: var(--ca);
-      color: var(--cp-o);
+      background: rgba(255, 255, 255, .2);
+      border: 1px solid rgba(255, 255, 255, .35);
+      color: #fff;
       border-radius: 50px;
       padding: 6px 16px;
       font-size: 13px;
       font-weight: 600;
-      margin-bottom: 18px
-    }
-
-    .hero-srv h1 {
-      font-family: var(--ft);
-      font-size: clamp(28px, 4vw, 46px);
-      font-weight: 700;
-      line-height: 1.2;
-      margin-bottom: 18px
-    }
-
-    .hero-srv h1 em {
-      font-style: normal;
-      color: var(--cp)
-    }
-
-    .hero-srv-desc {
-      font-size: 17px;
-      color: var(--ctc);
-      margin-bottom: 28px;
-      line-height: 1.75;
-      max-width: 500px
+      margin-bottom: 20px
     }
 
     .hero-ctas {
@@ -1819,9 +1851,9 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: transparent;
-      color: var(--cp);
-      border: 2px solid var(--cp);
+      background: rgba(255, 255, 255, .15);
+      border: 1.5px solid rgba(255, 255, 255, .5);
+      color: #fff;
       padding: 13px 26px;
       border-radius: 50px;
       font-weight: 600;
@@ -1830,8 +1862,8 @@
     }
 
     .btn-sec:hover {
-      background: var(--cp);
-      color: #fff;
+      background: rgba(255, 255, 255, .25);
+      border-color: #fff;
       transform: translateY(-2px)
     }
 
@@ -1842,16 +1874,20 @@
     }
 
     .mini-stat .n {
+      display: block;
       font-size: 28px;
-      font-weight: 700;
-      color: var(--cp);
-      line-height: 1
+      font-weight: 800;
+      color: #fff;
+      line-height: 1;
+      font-family: var(--ft)
     }
 
     .mini-stat .l {
+      display: block;
       font-size: 12.5px;
-      color: var(--ctc);
-      margin-top: 3px
+      color: rgba(255, 255, 255, .85);
+      margin-top: 4px;
+      font-weight: 500
     }
 
     .hero-img-wrap {
@@ -2410,6 +2446,7 @@
         grid-template-columns: 1fr
       }
     }
+
     /* =====================================================
        FIX MOVIL: elimina espacio blanco lateral
        ===================================================== */
@@ -2446,6 +2483,29 @@
       box-sizing: border-box;
     }
 
+
+    /* nav: scroll vertical en dropdown de servicios largo */
+    .bn-menu>li.open .bn-dropdown {
+      max-height: calc(100vh - 140px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: var(--cp) transparent;
+    }
+
+    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar {
+      width: 6px
+    }
+
+    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar-track {
+      background: transparent
+    }
+
+    .bn-menu>li.open .bn-dropdown::-webkit-scrollbar-thumb {
+      background: var(--cp);
+      border-radius: 3px
+    }
   </style>
 </head>
 
@@ -2707,15 +2767,24 @@
             class="mi">💫</span> Radiofrecuencia Tripolar</a>
         <a href="https://depilasermexico.com/electroestimulacion.html" class="bn-mobile-link"><span class="mi">⚡</span>
           Electroestimulación</a>
-        <a href="https://depilasermexico.com/carboxiterapia.html" class="bn-mobile-link"><span class="mi">💨</span> Carboxiterapia</a>
-        <a href="https://depilasermexico.com/vacumterapia.html" class="bn-mobile-link"><span class="mi">🫧</span> Vacumterapia</a>
-        <a href="https://depilasermexico.com/copas-colombianas.html" class="bn-mobile-link"><span class="mi">🥂</span> Copas Colombianas</a>
-        <a href="https://depilasermexico.com/holywood-peel.html" class="bn-mobile-link"><span class="mi">⭐</span> Holywood Peel</a>
-        <a href="https://depilasermexico.com/microdermoabrasion.html" class="bn-mobile-link"><span class="mi">✴️</span> Microdermoabrasión</a>
-        <a href="https://depilasermexico.com/hidrodermoabrasion.html" class="bn-mobile-link"><span class="mi">💧</span> Hidrodermoabrasión</a>
-        <a href="https://depilasermexico.com/despigmentacion.html" class="bn-mobile-link"><span class="mi">🌸</span> Despigmentación</a>
-        <a href="https://depilasermexico.com/eliminacion-tatuaje.html" class="bn-mobile-link"><span class="mi">🎨</span> Eliminación de Tatuaje</a>
-        <a href="https://depilasermexico.com/precios-servicios-esteticos.html" class="bn-mobile-link"><span class="mi">📋</span> <strong>Precios Estéticos</strong></a>
+        <a href="https://depilasermexico.com/carboxiterapia.html" class="bn-mobile-link"><span class="mi">💨</span>
+          Carboxiterapia</a>
+        <a href="https://depilasermexico.com/vacumterapia.html" class="bn-mobile-link"><span class="mi">🫧</span>
+          Vacumterapia</a>
+        <a href="https://depilasermexico.com/copas-colombianas.html" class="bn-mobile-link"><span class="mi">🥂</span>
+          Copas Colombianas</a>
+        <a href="https://depilasermexico.com/holywood-peel.html" class="bn-mobile-link"><span class="mi">⭐</span>
+          Holywood Peel</a>
+        <a href="https://depilasermexico.com/microdermoabrasion.html" class="bn-mobile-link"><span class="mi">✴️</span>
+          Microdermoabrasión</a>
+        <a href="https://depilasermexico.com/hidrodermoabrasion.html" class="bn-mobile-link"><span class="mi">💧</span>
+          Hidrodermoabrasión</a>
+        <a href="https://depilasermexico.com/despigmentacion.html" class="bn-mobile-link"><span class="mi">🌸</span>
+          Despigmentación</a>
+        <a href="https://depilasermexico.com/eliminacion-tatuaje.html" class="bn-mobile-link"><span class="mi">🎨</span>
+          Eliminación de Tatuaje</a>
+        <a href="https://depilasermexico.com/precios-servicios-esteticos.html" class="bn-mobile-link"><span
+            class="mi">📋</span> <strong>Precios Estéticos</strong></a>
       </div>
       <div class="bn-mobile-sep"></div>
       <a href="https://depilasermexico.com/blog.html" class="bn-mobile-link"><span class="mi">📝</span> Blog</a>
@@ -3179,7 +3248,6 @@
 
     })();
   </script>
-
 </body>
 
 </html>
