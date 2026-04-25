@@ -1,6 +1,6 @@
 # ==========================================================
 # robots.txt - BellaNick Clinic (depilasermexico.com)
-# Actualizado: 2026-04-20
+# Actualizado: 2026-04-24
 # ==========================================================
 
 # -------- Reglas generales (todos los bots) --------
@@ -50,7 +50,7 @@ Disallow: /php/
 Disallow: /Doc/
 Disallow: /licenciaspruebas/
 
-# -------- Bots agresivos (crawl-delay o bloqueo) --------
+# -------- Bots SEO agresivos (crawl-delay o bloqueo) --------
 User-agent: AhrefsBot
 Crawl-delay: 30
 
@@ -63,6 +63,22 @@ Disallow: /
 User-agent: DotBot
 Disallow: /
 
+# -------- AI Crawlers (decide si quieres entrenar IA con tu contenido) --------
+# Bloqueo activo: estos bots NO pueden entrenar IA con tu contenido.
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
 # -------- Host y sitemap --------
 Host: https://depilasermexico.com
 Sitemap: https://depilasermexico.com/sitemap.xml

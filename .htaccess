@@ -81,8 +81,8 @@ RedirectMatch 404 /\.git(/|$)
   Header set X-Frame-Options "SAMEORIGIN"
   Header set Referrer-Policy "strict-origin-when-cross-origin"
   Header set Permissions-Policy "geolocation=(self), microphone=(), camera=(), payment=()"
-  # HSTS solo si ya tienes HTTPS confirmado y estable:
-  # Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+  # HSTS activo (HTTPS confirmado estable):
+  Header set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
 </IfModule>
 
 # --- Compresion GZIP (Core Web Vitals) ---
@@ -104,18 +104,27 @@ RedirectMatch 404 /\.git(/|$)
   ExpiresByType font/woff2                "access plus 1 year"
 </IfModule>
 
-# ------------------------------------------------------------
-# OPCIONAL (descomentar cuando tengas SSL confirmado y estable)
-# ------------------------------------------------------------
-# <IfModule mod_rewrite.c>
-#   RewriteEngine On
-#   # Forzar HTTPS
-#   RewriteCond %{HTTPS} \!=on
-#   RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-#   # Canonical sin www (elige una y quedate)
-#   RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
-#   RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
-# </IfModule>
+
+
+
+# --- Rewrite combinado: HTTPS forzado + sin www + URLs limpias sin .html ---
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # 1) Forzar HTTPS (HTTPS confirmado estable)
+  RewriteCond %{HTTPS} !=on
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # 2) Canonical sin www (preferimos depilasermexico.com sobre www.depilasermexico.com)
+  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
+
+  # 3) URLs limpias: si /servicio existe como /servicio.html, servirlo (sin redirect)
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME}\.html -f
+  RewriteRule ^([^.]+)$ $1.html [L]
+</IfModule>
 
 # --- Paginas de error ---
 ErrorDocument 403 "Acceso denegado"
