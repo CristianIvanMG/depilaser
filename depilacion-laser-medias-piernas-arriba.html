@@ -1204,7 +1204,8 @@
       background: var(--cp);
       border-radius: 3px
     }
-      /* Trust bar — Soprano · FDA · COFEPRIS (SEO boost v1) */
+
+    /* Trust bar — Soprano · FDA · COFEPRIS (SEO boost v1) */
     .trust-bar {
       display: flex;
       flex-wrap: wrap;
@@ -1243,30 +1244,116 @@
     }
 
     @media (max-width: 640px) {
-      .trust-bar { font-size: 12px; gap: 6px 10px; padding: 9px 11px }
+      .trust-bar {
+        font-size: 12px;
+        gap: 6px 10px;
+        padding: 9px 11px
+      }
     }
 
-  
-    .foot-suc li{margin-bottom:14px;line-height:1.5;color:rgba(255,255,255,.75);font-size:13px}
-    .foot-suc li strong{color:#fff;font-weight:600}
-    .foot-suc li span{display:block;margin:2px 0;font-size:12px}
-    .foot-suc li a{color:#ffc8e4;text-decoration:none;font-size:12px}
-    .foot-suc li a:hover{color:#fff;text-decoration:underline}
-    .foot-hours{border-top:1px solid rgba(255,255,255,.15);padding-top:10px;margin-top:14px}
+    .breadcrumbs {
+      padding: 14px 0;
+      background: #fdf5f9;
+      border-bottom: 1px solid #ffe1ee;
+      font-size: 13px
+    }
 
-    .breadcrumbs{padding:14px 0;background:#fdf5f9;border-bottom:1px solid #ffe1ee;font-size:13px}
-    .breadcrumbs ol{max-width:1200px;margin:0 auto;padding:0 16px;list-style:none;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-    .breadcrumbs li{display:flex;align-items:center;gap:6px;color:#777}
-    .breadcrumbs li:not(:last-child)::after{content:"›";color:#bbb;margin:0 4px;font-weight:bold}
-    .breadcrumbs a{color:var(--ct,#b3325f);text-decoration:none;font-weight:500;transition:color .15s}
-    .breadcrumbs a:hover{color:#8a2348;text-decoration:underline}
-    .breadcrumbs li[aria-current]{color:#444;font-weight:600}
-</style>
-<style>
-    .skip-link{position:absolute;top:-40px;left:0;background:#d6336c;color:#fff;padding:8px 16px;z-index:10000;text-decoration:none;border-radius:0 0 4px 0;font-weight:600}
-    .skip-link:focus{top:0;outline:3px solid #ffd700;outline-offset:2px}
-    *:focus-visible{outline:3px solid #d6336c;outline-offset:2px}
-</style>
+    .breadcrumbs ol {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 16px;
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center
+    }
+
+    .breadcrumbs li {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #777
+    }
+
+    .breadcrumbs li:not(:last-child)::after {
+      content: "›";
+      color: #bbb;
+      margin: 0 4px;
+      font-weight: bold
+    }
+
+    .breadcrumbs a {
+      color: var(--ct, #b3325f);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color .15s
+    }
+
+    .breadcrumbs a:hover {
+      color: #8a2348;
+      text-decoration: underline
+    }
+
+    .breadcrumbs li[aria-current] {
+      color: #444;
+      font-weight: 600
+    }
+
+    .contacto-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 12px;
+      font-size: 13.5px;
+      color: rgba(255, 255, 255, .65);
+      font-style: normal
+    }
+
+    .contacto-item span {
+      font-size: 15px;
+      flex-shrink: 0
+    }
+
+    .contacto-item a {
+      color: rgba(255, 255, 255, .65);
+      text-decoration: none
+    }
+
+    .contacto-item a:hover {
+      color: #fff;
+      text-decoration: underline
+    }
+
+    address {
+      font-style: normal
+    }
+  </style>
+  <style>
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: #d6336c;
+      color: #fff;
+      padding: 8px 16px;
+      z-index: 10000;
+      text-decoration: none;
+      border-radius: 0 0 4px 0;
+      font-weight: 600
+    }
+
+    .skip-link:focus {
+      top: 0;
+      outline: 3px solid #ffd700;
+      outline-offset: 2px
+    }
+
+    *:focus-visible {
+      outline: 3px solid #d6336c;
+      outline-offset: 2px
+    }
+  </style>
 </head>
 
 <body>
@@ -1312,6 +1399,16 @@
             <li><a href="https://depilasermexico.com/depilacion-laser-diodo.html"><span
                   class="bn-dropdown-icon">✨</span><span class="bn-dropdown-text"><span
                     class="bn-dropdown-title">Depilación Láser Diodo</span></span></a></li>
+            <li role="menuitem">
+              <a href="https://depilasermexico.com/precios-depilacion-laser.html">
+                <span class="bn-dropdown-icon">💰</span>
+                <span class="bn-dropdown-text">
+                  <span class="bn-dropdown-title">Precios y Paquetes <span class="bn-badge">Nuevo</span></span>
+                  <span class="bn-dropdown-sub">Catálogo completo · 33 zonas del cuerpo</span>
+                </span>
+              </a>
+            </li>
+            <li class="bn-dropdown-sep" role="separator"></li>
             <li><a href="https://depilasermexico.com/lipolisis-laser.html"><span class="bn-dropdown-icon">🔥</span><span
                   class="bn-dropdown-text"><span class="bn-dropdown-title">Lipólisis Láser</span></span></a></li>
             <li><a href="https://depilasermexico.com/cavitacion.html"><span class="bn-dropdown-icon">🌊</span><span
@@ -1410,13 +1507,13 @@
       </div>
     </div>
   </header>
-<nav class="breadcrumbs" aria-label="Migas de pan">
-      <ol>
-        <li><a href="/">Inicio</a></li>
-        <li><a href="/precios-depilacion-laser.html">Precios por zona</a></li>
-        <li aria-current="page">Depilación Láser Medias piernas (arriba) en CDMX y Querétaro</li>
-      </ol>
-    </nav>
+  <nav class="breadcrumbs" aria-label="Migas de pan">
+    <ol>
+      <li><a href="/">Inicio</a></li>
+      <li><a href="/precios-depilacion-laser.html">Precios por zona</a></li>
+      <li aria-current="page">Depilación Láser Medias piernas (arriba) en CDMX y Querétaro</li>
+    </ol>
+  </nav>
 
 
   <section class="zona-intro" id="main-content">
@@ -1539,9 +1636,12 @@
         <!-- <img src="https://depilasermexico.com/assets/img/logo/logo.webp" alt="BellaNick Clinic" class="foot-logo" width="150" height="42" decoding="async" loading="eager" fetchpriority="high" /> -->
         <p class="foot-desc">Especialistas en depilación láser y tratamientos estéticos. CDMX y Querétaro.</p>
         <div class="redes">
-          <a href="https://www.instagram.com/bellanickclinicqro/" class="red" target="_blank" rel="noopener" aria-label="Instagram">📸</a>
-          <a href="https://www.facebook.com/61577831189576/" class="red" target="_blank" rel="noopener" aria-label="Facebook">👍</a>
-          <a href="https://www.tiktok.com/@bellanickclinic" class="red" target="_blank" rel="noopener" aria-label="TikTok">🎵</a>
+          <a href="https://www.instagram.com/bellanickclinicqro/" class="red" target="_blank" rel="noopener"
+            aria-label="Instagram">📸</a>
+          <a href="https://www.facebook.com/61577831189576/" class="red" target="_blank" rel="noopener"
+            aria-label="Facebook">👍</a>
+          <a href="https://www.tiktok.com/@bellanickclinic" class="red" target="_blank" rel="noopener"
+            aria-label="TikTok">🎵</a>
         </div>
       </div>
       <div>
@@ -1554,38 +1654,23 @@
       </div>
       <div>
         <div class="foot-tit">Contacto</div>
-        <ul class="foot-ul">
-          <li><a href="https://wa.me/525535433490" target="_blank" rel="noopener">WhatsApp</a></li>
-          <li><a href="mailto:administracion@depilasermexico.com">administracion@depilasermexico.com</a></li>
-          <li><a href="precios-depilacion-laser.html">Precios por zona</a></li>
-        </ul>
+        <address>
+          <div class="contacto-item"><span>📧</span><a href="mailto:administracion@depilasermexico.com"
+              style="color:rgba(255,255,255,.65)">administracion@depilasermexico.com</a></div>
+          <div class="contacto-item"><span>📍</span><span>Monterrey 325, Roma Sur, CDMX 06760</span></div>
+          <div class="contacto-item"><span>📞</span><a href="tel:+525535433490" style="color:rgba(255,255,255,.65)">(55)
+              3543-3490</a></div>
+          <div class="contacto-item"><span>📍</span><span>Av. Insurgentes Sur 1799, Benito Juárez, CDMX 01020</span>
+          </div>
+          <div class="contacto-item"><span>📞</span><a href="tel:+525556622079" style="color:rgba(255,255,255,.65)">(55)
+              5662-2079</a></div>
+          <div class="contacto-item"><span>📍</span><span>Corregidora, Querétaro, MX</span></div>
+          <div class="contacto-item"><span>📞</span><a href="tel:+524422218227"
+              style="color:rgba(255,255,255,.65)">(442) 221-8227</a></div>
+          <div class="contacto-item"><span>🕐</span><span>Lun–Vie 10:00–20:00 · Sáb 10:00–18:00</span></div>
+        </address>
       </div>
-    
-      <div>
-        <div class="foot-tit">Sucursales</div>
-        <ul class="foot-ul foot-suc">
-          <li>
-            <strong>CDMX · Roma Sur</strong><br>
-            <span>Monterrey 325, Roma Sur, Cuauhtémoc, CDMX, CP 06760</span><br>
-            <a href="https://www.google.com/maps/search/?api=1&query=BellaNick+Clinic+Roma+Sur+Monterrey+325+CDMX" target="_blank" rel="noopener">📍 Ver en Maps</a>
-          </li>
-          <li>
-            <strong>CDMX · Insurgentes Sur</strong><br>
-            <span>Av. Insurgentes Sur 1799, Benito Juárez, CDMX, CP 01020</span><br>
-            <a href="https://www.google.com/maps/search/?api=1&query=BellaNick+Clinic+Insurgentes+Sur+1799+CDMX" target="_blank" rel="noopener">📍 Ver en Maps</a>
-          </li>
-          <li>
-            <strong>Querétaro · Corregidora</strong><br>
-            <span>Corregidora, Querétaro, MX</span><br>
-            <a href="https://www.google.com/maps/search/?api=1&query=BellaNick+Clinic+Corregidora+Queretaro" target="_blank" rel="noopener">📍 Ver en Maps</a>
-          </li>
-          <li class="foot-hours">
-            <strong>Horario</strong><br>
-            <span>Lun–Vie: 10:00–20:00 · Sáb: 10:00–18:00</span>
-          </li>
-        </ul>
-      </div>
-</div>
+    </div>
     <div class="foot-bottom">Copyright © 2025 BellaNick Clinic · <a href="https://www.linkedin.com/in/cimoralesg"
         target="_blank" rel="noopener" style="color:rgba(255,255,255,.4);text-decoration:underline">Diseño: Cmorales</a>
     </div>
@@ -1595,8 +1680,8 @@
   <div id="bella-chat">
     <button id="chatClose" class="chat-close" aria-label="Cerrar chat">✕</button>
     <div id="messages"></div>
-    <div class="chat-input"><input type="text" id="userInput" placeholder="¿Te ayudo?"  aria-label="Escribe tu pregunta" /><button
-        id="sendBtn">Enviar</button></div>
+    <div class="chat-input"><input type="text" id="userInput" placeholder="¿Te ayudo?"
+        aria-label="Escribe tu pregunta" /><button id="sendBtn">Enviar</button></div>
   </div>
 
   <script>

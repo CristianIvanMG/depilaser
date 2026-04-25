@@ -1379,6 +1379,14 @@
     .breadcrumbs a:hover{color:#8a2348;text-decoration:underline}
     .breadcrumbs li[aria-current]{color:#444;font-weight:600}
 
+    .zone-index-az{padding:50px 0;background:#fff;border-top:1px solid #f3e0eb}
+    .zone-index-az h2{font-family:var(--FD,'Playfair Display',serif);font-size:clamp(22px,3.5vw,30px);font-weight:700;color:var(--ct,#b3325f);text-align:center;margin-bottom:8px}
+    .zone-index-az p.lead{text-align:center;color:#777;font-size:14px;margin-bottom:30px;max-width:680px;margin-left:auto;margin-right:auto}
+    .zone-index-grid{max-width:1100px;margin:0 auto;padding:0 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;list-style:none}
+    .zone-index-grid li{margin:0}
+    .zone-index-grid a{display:block;padding:10px 14px;background:#fdf5f9;border:1px solid #ffd8ea;border-radius:8px;color:#444;text-decoration:none;font-size:13px;transition:all .15s}
+    .zone-index-grid a:hover{background:var(--ct,#b3325f);color:#fff;border-color:var(--ct,#b3325f);transform:translateY(-1px)}
+
     .contacto-item{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;font-size:13.5px;color:rgba(255,255,255,.65);font-style:normal}
     .contacto-item span{font-size:15px;flex-shrink:0}
     .contacto-item a{color:rgba(255,255,255,.65);text-decoration:none}
@@ -1882,6 +1890,49 @@
   </section>
 
   <!-- FOOTER -->
+
+<section class="zone-index-az" aria-label="Índice de zonas de depilación láser">
+  <div class="container">
+    <h2>📋 Todas las zonas — A a Z</h2>
+    <p class="lead">Listado completo de zonas con su precio individual. Click directo a cada ficha.</p>
+    <ul class="zone-index-grid">
+        <li><a href="depilacion-laser-abdomen-hombre.html">Abdomen (hombre)</a></li>
+        <li><a href="depilacion-laser-abdomen.html">Abdomen completo</a></li>
+        <li><a href="depilacion-laser-antebrazos.html">Antebrazos</a></li>
+        <li><a href="depilacion-laser-areolas.html">Areolas</a></li>
+        <li><a href="depilacion-laser-axilas.html">Axilas</a></li>
+        <li><a href="depilacion-laser-axilas-hombre.html">Axilas (hombre)</a></li>
+        <li><a href="depilacion-laser-barba-hombre.html">Barba (moldeado)</a></li>
+        <li><a href="depilacion-laser-bigote.html">Bigote</a></li>
+        <li><a href="depilacion-laser-bikini.html">Bikini clásico</a></li>
+        <li><a href="depilacion-laser-bikini-plus.html">Bikini Plus</a></li>
+        <li><a href="depilacion-laser-brazilian.html">Brazilian</a></li>
+        <li><a href="depilacion-laser-brazos.html">Brazos completos</a></li>
+        <li><a href="depilacion-laser-cuello.html">Cuello (frente)</a></li>
+        <li><a href="depilacion-laser-entrecejo.html">Entrecejo</a></li>
+        <li><a href="depilacion-laser-espalda-baja.html">Espalda baja (lumbar)</a></li>
+        <li><a href="depilacion-laser-espalda-hombre.html">Espalda completa (hombre)</a></li>
+        <li><a href="depilacion-laser-facial-completo.html">Facial completo</a></li>
+        <li><a href="depilacion-laser-french-bikini.html">French Bikini</a></li>
+        <li><a href="depilacion-laser-gluteos.html">Glúteos</a></li>
+        <li><a href="depilacion-laser-gluteos-hombre.html">Glúteos (hombre)</a></li>
+        <li><a href="depilacion-laser-hombros-hombre.html">Hombros (hombre)</a></li>
+        <li><a href="depilacion-laser-linea-alba.html">Línea Alba (abdomen)</a></li>
+        <li><a href="depilacion-laser-manos.html">Manos y dedos</a></li>
+        <li><a href="depilacion-laser-medias-piernas-abajo.html">Medias piernas (abajo)</a></li>
+        <li><a href="depilacion-laser-medias-piernas-arriba.html">Medias piernas (arriba)</a></li>
+        <li><a href="depilacion-laser-menton.html">Mentón / Barbilla</a></li>
+        <li><a href="depilacion-laser-nuca.html">Nuca</a></li>
+        <li><a href="depilacion-laser-patillas.html">Patillas</a></li>
+        <li><a href="depilacion-laser-pecho-hombre.html">Pecho (hombre)</a></li>
+        <li><a href="depilacion-laser-piernas-completas.html">Piernas completas</a></li>
+        <li><a href="depilacion-laser-piernas-hombre.html">Piernas completas (hombre)</a></li>
+        <li><a href="depilacion-laser-pies.html">Pies y dedos</a></li>
+        <li><a href="depilacion-laser-rebaje-bikini.html">Rebaje de bikini</a></li>
+    </ul>
+  </div>
+</section>
+
   <footer>
     <div class="foot-grid">
       <div>
@@ -2381,3 +2432,4 @@
   </script>
 </body>
 </html>
+                                                                                                                                                      

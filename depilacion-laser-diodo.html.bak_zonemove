@@ -6,60 +6,88 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="preconnect" href="https://wa.me" crossorigin />
   <link rel="dns-prefetch" href="https://wa.me" />
-  <title>Depilación Láser Insurgentes Sur CDMX | BellaNick Clinic ✅</title>
+  <title>Depilación Láser Diodo CDMX Desde $99 MXN | BellaNick ✅</title>
   <meta name="description"
-    content="Depilación láser de diodo en Insurgentes Sur CDMX ✅ Sucursal BellaNick Clinic, Av. Insurgentes Sur 1799. Valoración sin costo desde $99 MXN. Agenda hoy." />
+    content="Depilación láser de diodo en CDMX desde $99 MXN ✅ Tecnología médica, resultados visibles y atención personalizada en BellaNick Clinic. Agenda ya." />
   <meta name="keywords"
-    content="depilación láser Insurgentes Sur, depilación láser CDMX, depilación láser Av. Insurgentes Sur 1799, clínica depilación Insurgentes, BellaNick Clinic Insurgentes Sur" />
-  <link rel="canonical" href="https://depilasermexico.com/depilacion-laser-cdmx-insurgentes-sur.html" />
+    content="depilación láser diodo CDMX, láser de diodo, depilación láser barata CDMX, precio depilación láser, depilación láser desde 99 pesos, BellaNick Clinic" />
+  <link rel="canonical" href="https://depilasermexico.com/depilacion-laser-diodo.html" />
   <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico">
-  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Depilación Láser Diodo CDMX Desde $99 MXN | BellaNick ✅" />
+  <meta property="og:description"
+    content="Depilación láser de diodo desde $99 MXN en CDMX ✅ Resultados visibles, tecnología médica. BellaNick Clinic Tecnología Soprano FDA·COFEPRIS." />
+  <meta property="og:image" content="https://depilasermexico.com/assets/img/gallery/blogs4.webp" />
+  <meta property="og:url" content="https://depilasermexico.com/depilacion-laser-diodo.html" />
   <meta property="og:site_name" content="BellaNick Clinic" />
   <meta property="og:locale" content="es_MX" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Depilación Láser Insurgentes Sur CDMX | BellaNick Clinic ✅" />
+  <meta name="twitter:title" content="Depilación Láser Diodo CDMX Desde $99 MXN | BellaNick ✅" />
   <meta name="twitter:description"
-    content="Depilación láser de diodo en Insurgentes Sur CDMX ✅ BellaNick Clinic Av. Insurgentes Sur 1799. Valoración gratis Tecnología Soprano FDA·COFEPRIS." />
+    content="Depilación láser de diodo desde $99 MXN en CDMX ✅ Resultados visibles, tecnología médica. BellaNick Clinic Tecnología Soprano FDA·COFEPRIS." />
   <meta name="twitter:image" content="https://depilasermexico.com/img/og-bellanick-clinic.jpg" />
   <meta name="robots" content="index,follow,all,max-image-preview:large,max-snippet:-1" />
   <meta name="author" content="BellaNick Clinic" />
   <meta http-equiv="Content-Language" content="es" />
   <meta name="geo.region" content="MX-CMX" />
   <meta name="geo.placename" content="Ciudad de México" />
-  <meta property="og:title" content="Depilación Láser Insurgentes Sur CDMX | BellaNick Clinic ✅" />
-  <meta property="og:description"
-    content="Depilación láser de diodo en Insurgentes Sur CDMX ✅ BellaNick Clinic Av. Insurgentes Sur 1799. Valoración gratis Tecnología Soprano FDA·COFEPRIS." />
-  <meta property="og:image" content="https://depilasermexico.com/assets/img/gallery/BellaNickInsurgentesSur.webp" />
+  <meta property="og:type" content="website" />
+
 
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "MedicalBusiness",
-    "name": "BellaNick Clinic Insurgentes Sur",
-    "url": "https://depilasermexico.com/depilacion-laser-cdmx-insurgentes-sur.html",
-    "image": "https://depilasermexico.com/assets/img/gallery/BellaNickInsurgentesSur.webp",
-    "logo": "https://depilasermexico.com/assets/img/logo/logo.webp",
-    "description": "Clínica especializada en depilación láser diodo y tratamientos estéticos en Insurgentes Sur, Cuauhtémoc, CDMX.",
-    "telephone": "+525556622079",
-    "email": "administracion@depilasermexico.com",
-    "priceRange": "$99 - $2999",
-    "address": {
-      "@type": "PostalAddress",
-      "streetAddress": "Insurgentes Sur 1799",
-      "addressLocality": "Insurgentes Sur",
-      "addressRegion": "Ciudad de México",
-      "postalCode": "01020",
-      "addressCountry": "MX"
-    },
-    "geo": { "@type": "GeoCoordinates", "latitude": 19.4183, "longitude": -99.1579 },
-    "openingHoursSpecification": [
-      { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"], "opens": "10:00", "closes": "20:00" },
-      { "@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "10:00", "closes": "18:00" }
-    ],
-    "sameAs": ["https://www.instagram.com/bellanickclinic/","https://www.facebook.com/BellaNickClinic"]
-  }
-  </script>
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Service",
+      "@id": "https://depilasermexico.com/depilacion-laser-diodo.html",
+      "name": "Depilación Láser Diodo",
+      "description": "Depilación láser de diodo con tecnología de última generación para eliminar el vello de forma progresiva y duradera. Resultados visibles desde las primeras sesiones, con valoración gratuita y atención profesional en BellaNick Clinic.",
+      "url": "https://depilasermexico.com/depilacion-laser-diodo.html",
+      "category": "Depilación Láser",
+      "provider": {
+        "@type": "HealthAndBeautyBusiness",
+        "@id": "https://depilasermexico.com/#business",
+        "name": "BellaNick Clinic",
+        "url": "https://depilasermexico.com/",
+        "telephone": "+525535433490",
+        "image": "https://depilasermexico.com/assets/img/hero/h1_hero1.webp",
+        "logo": "https://depilasermexico.com/assets/img/logo.webp",
+        "priceRange": "$$",
+        "currenciesAccepted": "MXN",
+        "paymentAccepted": "Cash, Credit Card, Debit Card, Bank Transfer",
+        "sameAs": [
+          "https://www.facebook.com/bellanickclinic",
+          "https://www.instagram.com/bellanickclinic"
+        ],
+        "areaServed": [
+          {
+            "@type": "AdministrativeArea",
+            "name": "Ciudad de México"
+          },
+          {
+            "@type": "AdministrativeArea",
+            "name": "Querétaro"
+          }
+        ]
+      },
+      "offers": {
+        "@type": "Offer",
+        "priceCurrency": "MXN",
+        "price": "99",
+        "availability": "https://schema.org/InStock",
+        "description": "Precio desde $99 MXN en zonas seleccionadas como axilas.",
+        "url": "https://depilasermexico.com/precios-depilacion-laser.html"
+      }
+    }
+  ]
+}
+</script>
+
   <style>
+    /* ═══════════════════════════════════════════════════════════
+       CSS BASE — Variables, Nav, Hamburguesa, Chat, Responsive
+       (idéntico al index.html — NO MODIFICAR)
+    ═══════════════════════════════════════════════════════════ */
     /* =====================================================
        VARIABLES
     ===================================================== */
@@ -1608,7 +1636,7 @@
       --rl: 24px;
       --tr: all .3s ease;
       --ft: 'Georgia', 'Times New Roman', serif;
-      --fb: 'Segoe UI', system-ui, -apple-system, sans-serif
+      --fb: 'Segoe UI', system-ui, -apple-system, sans-serif;
     }
 
     * {
@@ -1636,6 +1664,13 @@
       color: inherit
     }
 
+    .wrap {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 20px
+    }
+
+    /* ---- BARRA CONFIANZA ---- */
     .barra {
       background: var(--cp);
       color: #fff;
@@ -1653,6 +1688,7 @@
       content: "✓ "
     }
 
+    /* ---- NAV ---- */
     nav {
       background: #fff;
       border-bottom: 1px solid var(--cgb);
@@ -1719,159 +1755,88 @@
     }
 
     .nav-cta:hover {
-      background: var(--cp-o) !important
+      background: var(--cp-o) !important;
+      transform: translateY(-1px)
     }
 
     .nav-cta::after {
       display: none !important
     }
 
-    .breadcrumb {
-      background: var(--cg);
-      padding: 12px 20px;
-      font-size: 13px;
-      color: var(--ctc);
-      border-bottom: 1px solid var(--cgb)
-    }
-
-    .breadcrumb a {
-      color: var(--cp);
-      font-weight: 500
-    }
-
-    .breadcrumb span {
-      margin: 0 6px
-    }
-
-    /* HERO SUCURSAL — gradiente morado estilo Querétaro */
-    .hero-suc {
-      background: linear-gradient(135deg, #1a0a2e 0%, #2d1052 60%, #9e1f4e 100%);
-      padding: 80px 20px 64px;
+    /* ---- HERO SERVICIO ---- */
+    .hero-srv {
+      background: linear-gradient(135deg, var(--cp-o) 0%, var(--cp) 60%, var(--cp-c) 100%);
+      padding: 60px 20px 70px;
+      color: #fff;
       position: relative;
       overflow: hidden
     }
 
-    .hero-suc::before {
+    .hero-srv::before {
       content: '';
       position: absolute;
       top: -80px;
       right: -80px;
-      width: 560px;
-      height: 560px;
-      background: radial-gradient(circle, rgba(200, 56, 107, .2) 0%, transparent 70%);
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(255, 255, 255, .08) 0%, transparent 70%);
       pointer-events: none
     }
 
-    .hero-suc::after {
-      content: '';
-      position: absolute;
-      bottom: -60px;
-      left: -60px;
-      width: 400px;
-      height: 400px;
-      background: radial-gradient(circle, rgba(255, 255, 255, .04) 0%, transparent 70%);
-      pointer-events: none
-    }
-
-    .hero-suc-grid {
-      max-width: 1140px;
+    .hero-srv-grid {
+      max-width: 1100px;
       margin: 0 auto;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 60px;
+      gap: 50px;
       align-items: center;
       position: relative;
       z-index: 1
     }
 
-    .suc-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--cp);
-      color: #fff;
-      border-radius: 50px;
-      padding: 7px 18px;
-      font-size: 13px;
-      font-weight: 700;
-      margin-bottom: 20px;
-      letter-spacing: .3px
-    }
-
-    .hero-suc h1 {
+    .hero-srv h1 {
       font-family: var(--ft);
-      font-size: clamp(28px, 5vw, 52px);
+      font-size: clamp(2rem, 4vw, 2.8rem);
       font-weight: 700;
-      color: #fff;
-      line-height: 1.15;
-      margin-bottom: 18px
+      line-height: 1.2;
+      margin-bottom: 18px;
+      color: #fff
     }
 
-    .hero-suc h1 em {
+    .hero-srv h1 em {
       font-style: normal;
-      color: var(--cp-c)
+      color: var(--ca)
     }
 
-    .hero-suc-desc {
+    .hero-srv-desc {
       font-size: 17px;
-      color: rgba(255, 255, 255, .85);
-      margin-bottom: 30px;
       line-height: 1.75;
+      color: rgba(255, 255, 255, .92);
+      margin-bottom: 28px;
       max-width: 520px
     }
 
-    .hero-btns {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap
-    }
-
-    /* Imagen hero — más pequeña, dentro del grid */
-    .hero-img-wrap {
-      position: relative
-    }
-
-    .hero-img-wrap img {
-      border-radius: var(--rl, 18px);
-      box-shadow: 0 8px 40px rgba(0, 0, 0, .4);
-      width: 100%;
-      object-fit: cover;
-      aspect-ratio: 4/3;
-      opacity: 1
-    }
-
-    .suc-tag {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: var(--cp);
+    .badge-srv {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, .2);
+      border: 1px solid rgba(255, 255, 255, .35);
       color: #fff;
       border-radius: 50px;
-      padding: 8px 16px;
+      padding: 6px 16px;
       font-size: 13px;
-      font-weight: 700
+      font-weight: 600;
+      margin-bottom: 20px
     }
 
-    @media (max-width:900px) {
-      .hero-suc-grid {
-        grid-template-columns: 1fr;
-        gap: 36px
-      }
-
-      .hero-suc {
-        padding: 48px 14px
-      }
-
-      .hero-btns {
-        flex-direction: column
-      }
-
-      .hero-img-wrap img {
-        aspect-ratio: 16/10
-      }
+    .hero-ctas {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 32px
     }
 
-    /* BOTONES HERO (WhatsApp / secundario) */
     .btn-wa {
       display: inline-flex;
       align-items: center;
@@ -1883,12 +1848,13 @@
       font-weight: 700;
       font-size: 15px;
       transition: var(--tr);
-      box-shadow: 0 4px 20px rgba(37, 211, 102, .4)
+      box-shadow: 0 4px 20px rgba(37, 211, 102, .35)
     }
 
     .btn-wa:hover {
       background: #1ebe5d;
-      transform: translateY(-2px)
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(37, 211, 102, .45)
     }
 
     .btn-sec {
@@ -1896,9 +1862,9 @@
       align-items: center;
       gap: 8px;
       background: rgba(255, 255, 255, .15);
+      border: 1.5px solid rgba(255, 255, 255, .5);
       color: #fff;
-      border: 2px solid rgba(255, 255, 255, .4);
-      padding: 13px 24px;
+      padding: 13px 26px;
       border-radius: 50px;
       font-weight: 600;
       font-size: 15px;
@@ -1907,66 +1873,77 @@
 
     .btn-sec:hover {
       background: rgba(255, 255, 255, .25);
-      border-color: #fff
+      border-color: #fff;
+      transform: translateY(-2px)
     }
 
-    /* INFO RÁPIDA */
-    .info-rapida {
-      background: var(--cb);
-      border-bottom: 1px solid var(--cgb)
-    }
-
-    .info-rapida-inner {
-      max-width: 1140px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 0;
-      padding: 28px 20px
-    }
-
-    .info-item {
+    .mini-stats {
       display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 0 20px;
-      border-right: 1px solid var(--cgb)
+      gap: 28px;
+      flex-wrap: wrap
     }
 
-    .info-item:last-child {
-      border-right: none
+    .mini-stat .n {
+      display: block;
+      font-size: 28px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1;
+      font-family: var(--ft)
     }
 
-    .info-ico {
-      font-size: 22px;
-      line-height: 1
+    .mini-stat .l {
+      display: block;
+      font-size: 12.5px;
+      color: rgba(255, 255, 255, .85);
+      margin-top: 4px;
+      font-weight: 500
     }
 
-    .info-label {
-      font-size: 11.5px;
+    .hero-img-wrap {
+      position: relative
+    }
+
+    .hero-img-wrap img {
+      border-radius: var(--rl);
+      box-shadow: var(--sombra);
+      width: 100%;
+      object-fit: cover;
+      aspect-ratio: 4/3
+    }
+
+    .precio-flotante {
+      position: absolute;
+      bottom: 24px;
+      left: -20px;
+      background: #fff;
+      border-radius: var(--r);
+      padding: 14px 20px;
+      box-shadow: var(--sc);
+      border-left: 4px solid var(--cp);
+      min-width: 190px
+    }
+
+    .precio-flotante .pf-label {
+      font-size: 11px;
       color: var(--ctc);
       text-transform: uppercase;
-      letter-spacing: .5px;
+      letter-spacing: .8px
+    }
+
+    .precio-flotante .pf-precio {
+      font-size: 24px;
       font-weight: 700;
-      margin-bottom: 4px
+      color: var(--cp);
+      margin-top: 2px
     }
 
-    .info-val {
-      font-size: 14px;
-      color: var(--ct);
-      font-weight: 600;
-      line-height: 1.4
+    .precio-flotante .pf-desc {
+      font-size: 12px;
+      color: var(--ctc)
     }
 
-    .info-val a {
-      color: var(--cp)
-    }
-
-    .info-val a:hover {
-      text-decoration: underline
-    }
-
-    /* SECCIONES COMUNES */
+    /* ---- SECCIONES ---- */
     .sec {
       padding: 68px 20px
     }
@@ -2009,197 +1986,237 @@
       line-height: 1.7
     }
 
-    /* MAPA */
-    .mapa-wrap {
-      max-width: 1140px;
-      margin: 0 auto;
-      border-radius: var(--rl);
-      overflow: hidden;
-      box-shadow: var(--sc);
-      border: 1px solid var(--cgb)
-    }
-
-    .mapa-wrap iframe {
-      width: 100%;
-      height: 420px;
-      border: none;
-      display: block
-    }
-
-    /* SERVICIOS GRID */
-    .grid-srv {
+    /* ---- ZONAS / PRECIOS ---- */
+    .grid-zonas {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 18px;
+      gap: 16px;
       max-width: 1140px;
       margin: 0 auto
     }
 
-    .card-srv {
+    .card-zona {
       background: #fff;
       border-radius: var(--rl);
-      padding: 24px;
+      padding: 24px 20px;
       border: 1px solid var(--cgb);
       box-shadow: var(--sc);
-      transition: var(--tr);
-      text-align: center
+      text-align: center;
+      transition: var(--tr)
     }
 
-    .card-srv:hover {
+    .card-zona:hover {
       border-color: var(--cp);
       transform: translateY(-3px);
       box-shadow: var(--sombra)
     }
 
-    .srv-ico {
+    .zona-icono {
       font-size: 32px;
       margin-bottom: 10px
     }
 
-    .srv-nom {
+    .zona-nombre {
       font-size: 15px;
       font-weight: 700;
       color: var(--ct);
       margin-bottom: 6px
     }
 
-    .srv-desc {
-      font-size: 12.5px;
-      color: var(--ctc);
-      line-height: 1.5;
-      margin-bottom: 14px
+    .zona-precio {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--cp);
+      margin-bottom: 4px
     }
 
-    .chip {
-      display: inline-block;
+    .zona-tiempo {
+      font-size: 12px;
+      color: var(--ctc)
+    }
+
+    .zona-cta {
+      display: block;
+      margin-top: 14px;
       background: var(--ca);
       color: var(--cp-o);
       border-radius: 50px;
-      padding: 4px 12px;
-      font-size: 12px;
-      font-weight: 600
-    }
-
-    .btn-srv {
-      display: block;
-      margin-top: 12px;
-      background: var(--cp);
-      color: #fff;
-      border-radius: var(--r);
-      padding: 9px;
-      font-size: 13.5px;
+      padding: 8px;
+      font-size: 13px;
       font-weight: 600;
       transition: var(--tr)
     }
 
-    .btn-srv:hover {
-      background: var(--cp-o)
+    .zona-cta:hover {
+      background: var(--cp);
+      color: #fff
     }
 
-    /* COMO LLEGAR */
-    .como-llegar-grid {
+    /* ---- BENEFICIOS ---- */
+    .grid-ben {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 40px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 22px;
       max-width: 1140px;
-      margin: 0 auto;
-      align-items: start
+      margin: 0 auto
     }
 
-    .cl-card {
+    .card-ben {
       background: #fff;
       border-radius: var(--rl);
-      padding: 32px;
+      padding: 28px;
       border: 1px solid var(--cgb);
-      box-shadow: var(--sc)
+      box-shadow: var(--sc);
+      transition: var(--tr)
     }
 
-    .cl-titulo {
-      font-size: 18px;
+    .card-ben:hover {
+      border-color: var(--cp);
+      transform: translateY(-3px);
+      box-shadow: var(--sombra)
+    }
+
+    .ben-ico {
+      font-size: 34px;
+      margin-bottom: 14px;
+      display: block
+    }
+
+    .ben-tit {
+      font-size: 17px;
       font-weight: 700;
       color: var(--ct);
-      margin-bottom: 20px;
+      margin-bottom: 8px
+    }
+
+    .ben-desc {
+      font-size: 14px;
+      color: var(--ctc);
+      line-height: 1.65
+    }
+
+    /* ---- PROCESO ---- */
+    .proceso-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0;
+      max-width: 960px;
+      margin: 0 auto
+    }
+
+    .paso {
+      text-align: center;
+      padding: 24px 18px;
+      position: relative
+    }
+
+    .paso-n {
+      width: 54px;
+      height: 54px;
+      background: var(--cp);
+      color: #fff;
+      border-radius: 50%;
       display: flex;
       align-items: center;
-      gap: 10px
-    }
-
-    .cl-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      margin-bottom: 16px;
-      font-size: 14.5px;
-      color: var(--ctc);
-      line-height: 1.55
-    }
-
-    .cl-item .ico {
+      justify-content: center;
       font-size: 20px;
-      flex-shrink: 0;
-      margin-top: 1px
+      font-weight: 700;
+      margin: 0 auto 14px;
+      position: relative;
+      z-index: 1
     }
 
-    .cl-item strong {
-      color: var(--ct)
+    .paso-tit {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--ct);
+      margin-bottom: 7px
     }
 
-    /* HORARIOS */
-    .horario-tabla {
-      width: 100%;
-      border-collapse: collapse
+    .paso-desc {
+      font-size: 13px;
+      color: var(--ctc);
+      line-height: 1.6
     }
 
-    .horario-tabla td {
-      padding: 10px 0;
-      font-size: 14px;
+    /* ---- FAQ ---- */
+    .faq-lista {
+      max-width: 740px;
+      margin: 0 auto
+    }
+
+    .faq-item {
+      border: 1px solid var(--cgb);
+      border-radius: var(--r);
+      margin-bottom: 12px;
+      overflow: hidden;
+      transition: var(--tr)
+    }
+
+    .faq-item:hover {
+      border-color: var(--cp)
+    }
+
+    .faq-q {
+      padding: 18px 22px;
+      font-size: 15.5px;
+      font-weight: 600;
+      color: var(--ct);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fff;
+      list-style: none
+    }
+
+    .faq-q::-webkit-details-marker {
+      display: none
+    }
+
+    details[open] .faq-q {
+      color: var(--cp);
       border-bottom: 1px solid var(--cgb)
     }
 
-    .horario-tabla tr:last-child td {
-      border-bottom: none
+    .faq-ico {
+      font-size: 20px;
+      color: var(--cp);
+      transition: transform .3s;
+      flex-shrink: 0
     }
 
-    .horario-tabla .dia {
+    details[open] .faq-ico {
+      transform: rotate(45deg)
+    }
+
+    .faq-a {
+      padding: 18px 22px;
+      font-size: 14.5px;
       color: var(--ctc);
-      width: 55%
+      line-height: 1.75;
+      background: var(--cg)
     }
 
-    .horario-tabla .hora {
-      font-weight: 700;
-      color: var(--ct);
-      text-align: right
-    }
-
-    .horario-tabla .cerrado {
-      color: #dc2626
-    }
-
-    .badge-abierto {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #d1fae5;
-      color: #065f46;
-      border-radius: 50px;
-      padding: 5px 14px;
-      font-size: 12.5px;
-      font-weight: 700;
-      margin-bottom: 16px
-    }
-
-    .dot-verde {
-      width: 8px;
-      height: 8px;
-      background: #10b981;
-      border-radius: 50%
-    }
-
-    /* CTA */
+    /* ---- CTA BANNER ---- */
     .cta-ban {
       background: linear-gradient(135deg, var(--cp-o), var(--cp));
       padding: 72px 20px;
-      text-align: center
+      text-align: center;
+      position: relative;
+      overflow: hidden
+    }
+
+    .cta-ban::before {
+      content: '';
+      position: absolute;
+      top: -60%;
+      left: -10%;
+      width: 500px;
+      height: 500px;
+      background: rgba(255, 255, 255, .05);
+      border-radius: 50%;
+      pointer-events: none
     }
 
     .cta-ban h2 {
@@ -2208,7 +2225,7 @@
       font-weight: 700;
       color: #fff;
       margin-bottom: 14px;
-      max-width: 640px;
+      max-width: 680px;
       margin-left: auto;
       margin-right: auto
     }
@@ -2216,7 +2233,7 @@
     .cta-ban p {
       font-size: 17px;
       color: rgba(255, 255, 255, .85);
-      max-width: 500px;
+      max-width: 520px;
       margin: 0 auto 32px;
       line-height: 1.7
     }
@@ -2244,10 +2261,11 @@
 
     .btn-wa-lg:hover {
       background: #1ebe5d;
-      transform: translateY(-3px)
+      transform: translateY(-3px);
+      box-shadow: 0 10px 32px rgba(37, 211, 102, .5)
     }
 
-    .btn-otras {
+    .btn-tel {
       display: inline-flex;
       align-items: center;
       gap: 10px;
@@ -2261,11 +2279,12 @@
       transition: var(--tr)
     }
 
-    .btn-otras:hover {
+    .btn-tel:hover {
       background: rgba(255, 255, 255, .25);
       border-color: #fff
     }
 
+    /* ---- FOOTER ---- */
     footer {
       background: #0f0a14;
       color: rgba(255, 255, 255, .7);
@@ -2354,6 +2373,7 @@
       margin: 0 auto
     }
 
+    /* ---- FLOTANTE WA ---- */
     .wa-float {
       position: fixed;
       bottom: 26px;
@@ -2375,65 +2395,34 @@
       transform: scale(1.1)
     }
 
-    /* OTRAS SUCURSALES */
-    .grid-otras {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 20px;
-      max-width: 900px;
-      margin: 0 auto
-    }
-
-    .card-otra {
-      background: #fff;
-      border-radius: var(--rl);
-      padding: 24px;
-      border: 1px solid var(--cgb);
-      box-shadow: var(--sc);
-      display: flex;
-      gap: 16px;
-      align-items: flex-start;
-      transition: var(--tr)
-    }
-
-    .card-otra:hover {
-      border-color: var(--cp);
-      transform: translateY(-2px);
-      box-shadow: var(--sombra)
-    }
-
-    .otra-ico {
-      font-size: 28px;
-      flex-shrink: 0
-    }
-
-    .otra-nom {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--ct);
-      margin-bottom: 4px
-    }
-
-    .otra-dir {
+    /* ---- BREADCRUMB ---- */
+    .breadcrumb {
+      background: var(--cg);
+      padding: 12px 20px;
       font-size: 13px;
       color: var(--ctc);
-      margin-bottom: 12px;
-      line-height: 1.4
+      border-bottom: 1px solid var(--cgb)
     }
 
-    .otra-link {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--cp)
+    .breadcrumb a {
+      color: var(--cp);
+      font-weight: 500
     }
 
-    .otra-link:hover {
-      text-decoration: underline
+    .breadcrumb span {
+      margin: 0 6px;
+      color: var(--ctc)
     }
 
+    /* ---- RESPONSIVE ---- */
     @media(max-width:900px) {
-      .como-llegar-grid {
-        grid-template-columns: 1fr
+      .hero-srv-grid {
+        grid-template-columns: 1fr;
+        gap: 36px
+      }
+
+      .hero-img-wrap {
+        display: none
       }
 
       .foot-grid {
@@ -2450,7 +2439,11 @@
         padding: 48px 14px
       }
 
-      .hero-btns {
+      .hero-srv {
+        padding: 48px 14px 36px
+      }
+
+      .hero-ctas {
         flex-direction: column
       }
 
@@ -2461,15 +2454,6 @@
 
       .foot-grid {
         grid-template-columns: 1fr
-      }
-
-      .info-rapida-inner {
-        grid-template-columns: 1fr 1fr
-      }
-
-      .info-item {
-        border-right: none;
-        border-bottom: 1px solid var(--cgb)
       }
     }
 
@@ -2508,6 +2492,7 @@
       max-width: 100vw;
       box-sizing: border-box;
     }
+
 
     /* nav: scroll vertical en dropdown de servicios largo */
     .bn-menu>li.open .bn-dropdown {
@@ -2577,6 +2562,55 @@
         padding: 9px 11px
       }
     }
+
+    .breadcrumbs {
+      padding: 14px 0;
+      background: #fdf5f9;
+      border-bottom: 1px solid #ffe1ee;
+      font-size: 13px
+    }
+
+    .breadcrumbs ol {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 16px;
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center
+    }
+
+    .breadcrumbs li {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #777
+    }
+
+    .breadcrumbs li:not(:last-child)::after {
+      content: "›";
+      color: #bbb;
+      margin: 0 4px;
+      font-weight: bold
+    }
+
+    .breadcrumbs a {
+      color: var(--ct, #b3325f);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color .15s
+    }
+
+    .breadcrumbs a:hover {
+      color: #8a2348;
+      text-decoration: underline
+    }
+
+    .breadcrumbs li[aria-current] {
+      color: #444;
+      font-weight: 600
+    }
   </style>
   <style>
     .skip-link {
@@ -2607,6 +2641,13 @@
 
 <body>
   <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+  <nav class="breadcrumbs" aria-label="Migas de pan">
+    <ol>
+      <li><a href="/">Inicio</a></li>
+      <li aria-current="page">Depilación Láser Diodo</li>
+    </ol>
+  </nav>
+
 
   <!-- BARRA CONFIANZA -->
   <div class="barra-confianza">
@@ -2905,284 +2946,264 @@
     </div>
   </nav>
 
-  <div class="breadcrumb" style="max-width:1140px;margin:0 auto;padding:12px 20px;font-size:13px;color:var(--ctc)">
-    <a href="https://depilasermexico.com/">Inicio</a> <span>›</span> Sucursales <span>›</span> Insurgentes Sur
+
+
+
+  <div class="breadcrumb wrap">
+    <a href="https://depilasermexico.com/">Inicio</a>
+    <span>›</span>
+    <a href="https://depilasermexico.com/index.html#servicios">Servicios</a>
+    <span>›</span>
+    Depilación Láser Diodo
   </div>
 
   <main id="main-content">
     <!-- HERO -->
-    <section class="hero-suc" aria-labelledby="suc-titulo">
-      <div class="hero-suc-grid">
+    <section class="hero-srv">
+      <div class="hero-srv-grid">
         <div>
-          <div class="suc-badge">📍 Sucursal Insurgentes Sur · CDMX</div>
-          <h1 id="suc-titulo"><em>BellaNick Clinic</em><br>Insurgentes Sur</h1>
-          <p class="hero-suc-desc">Av. Insurgentes Sur, Colonia Del Valle, Benito Juárez, Ciudad de México. Atención
-            personalizada, tecnología láser diodo de última generación y primera valoración sin costo.</p>
-          <div class="hero-btns">
-            <a href="https://wa.me/525556622079?text=Hola%2C%20quiero%20agendar%20una%20cita%20en%20la%20sucursal%20Insurgentes%20Sur"
-              class="btn-wa" target="_blank" rel="noopener">💬 Agendar cita por WhatsApp</a>
-            <a href="tel:+525556622079" class="btn-tel">📞 (55) 5662-2079</a>
+          <div class="badge-srv">⭐ Servicio más popular en BellaNick Clinic</div>
+          <h1>Depilación <em>Láser Diodo</em><br>en CDMX</h1>
+          <p class="hero-srv-desc">Elimina el vello de forma definitiva con la tecnología más avanzada del mercado.
+            Resultados visibles desde la primera sesión. Indoloro, seguro y sin tiempo de recuperación.</p>
+          <div class="hero-ctas">
+            <a href="https://wa.me/525535433490?text=Hola%2C%20quiero%20cotizar%20depilaci%C3%B3n%20l%C3%A1ser%20diodo%20en%20BellaNick%20Clinic"
+              class="btn-wa" target="_blank" rel="noopener">💬 Cotizar por WhatsApp</a>
+            <a href="#zonas-precios" class="btn-sec">Ver precios por zona →</a>
+          </div>
+          <div class="trust-bar" role="complementary" aria-label="Respaldos y certificaciones">
+            <span class="ti">🏥 <strong>Tecnología Soprano</strong> · TriLáser de diodo</span>
+            <span class="ti">✅ Aprobado <strong>FDA</strong></span>
+            <span class="ti">🛡 <strong>COFEPRIS</strong> 2309155036X00981</span>
+            <span class="ti">💉 Equipo <strong>grado médico</strong></span>
+          </div>
+          <div class="mini-stats">
+            <div class="mini-stat"><span class="n">98%</span><span class="l">Tasa de éxito</span></div>
+            <div class="mini-stat"><span class="n">6-8</span><span class="l">Sesiones promedio</span></div>
+            <div class="mini-stat"><span class="n">$99</span><span class="l">Precio desde (MXN)</span></div>
           </div>
         </div>
         <div class="hero-img-wrap">
-          <img src="https://depilasermexico.com/assets/img/gallery/BellaNickInsurgentesSur.webp"
-            alt="Interior BellaNick Clinic Insurgentes Sur, CDMX" width="560" height="420" loading="eager"
-            decoding="async" fetchpriority="high" />
-          <div class="suc-tag">📍 Insurgentes Sur, CDMX</div>
+          <img src="https://depilasermexico.com/assets/img/gallery/blogs4.webp"
+            alt="Depilación láser diodo siendo aplicada en BellaNick Clinic CDMX" width="560" height="420"
+            loading="eager" decoding="async" fetchpriority="high" />
+          <div class="precio-flotante">
+            <div class="pf-label">Precio desde</div>
+            <div class="pf-precio">$99 MXN</div>
+            <div class="pf-desc">Axilas · Sin compromiso</div>
+          </div>
         </div>
       </div>
     </section>
-    <!-- INFO RÁPIDA -->
-    <div class="info-rapida">
-      <div class="info-rapida-inner">
-        <div class="info-item">
-          <span class="info-ico">📍</span>
-          <div>
-            <div class="info-label">Dirección</div>
-            <div class="info-val">Av. Insurgentes Sur 1799, Guadalupe Inn,<br>Álvaro Obregón, CDMX 01020</div>
-          </div>
-        </div>
-        <div class="info-item">
-          <span class="info-ico">📞</span>
-          <div>
-            <div class="info-label">Teléfono</div>
-            <div class="info-val"><a href="tel:+525556622079">(55) 5662-2079</a></div>
-          </div>
-        </div>
-        <div class="info-item">
-          <span class="info-ico">🕙</span>
-          <div>
-            <div class="info-label">Horarios</div>
-            <div class="info-val">Lun–Vie: 10:00–20:00<br>Sábado: 10:00–18:00</div>
-          </div>
-        </div>
-        <div class="info-item">
-          <span class="info-ico">🚇</span>
-          <div>
-            <div class="info-label">Metro más cercano</div>
-            <div class="info-val">Barranca del Muerto (L7)<br>La Bombilla (L7)</div>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- MAPA -->
-    <section class="sec" aria-labelledby="mapa-tit">
+    <!-- ZONAS Y PRECIOS -->
+    <section class="sec" id="zonas-precios" aria-labelledby="zonas-tit">
       <div class="sec-hdr">
-        <span class="etq">Ubicación</span>
-        <h2 class="sec-tit" id="mapa-tit">¿Cómo llegar a Insurgentes Sur?</h2>
-        <p class="sec-sub">Encuéntranos en Av. Insurgentes Sur 1799, Guadalupe Inn, Álvaro Obregón, 01020 Ciudad de
-          México, CDMX muy cerca del metro y con zonas de
-          estacionamiento en la zona.</p>
+        <span class="etq">Precios y Zonas</span>
+        <h2 class="sec-tit" id="zonas-tit">¿Cuánto cuesta la depilación láser?</h2>
+        <p class="sec-sub">Precios accesibles por zona. Solicita tu cotización personalizada con paquetes y planes de
+          pago.</p>
       </div>
-      <div class="mapa-wrap">
-        <iframe
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3763.5!2d-99.1579!3d19.4183!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTnCsDI1JzA2LjAiTiA5OcKwMDknMjguNCJX!5e0!3m2!1ses!2smx!4v1700000000000!5m2!1ses!2smx"
-          title="Mapa BellaNick Clinic Insurgentes Sur — Av. Insurgentes Sur 1799, CDMX" loading="lazy" allowfullscreen
-          referrerpolicy="no-referrer-when-downgrade">
-        </iframe>
-      </div>
-      <div style="text-align:center;margin-top:20px">
-        <a href="https://maps.app.goo.gl/ascm3hQKkEth9Exx9" target="_blank" rel="noopener"
-          style="display:inline-flex;align-items:center;gap:8px;background:var(--cp);color:#fff;padding:12px 28px;border-radius:50px;font-weight:700;font-size:14.5px;transition:var(--tr)">
-          🗺️ Abrir en Google Maps
-        </a>
+      <div class="grid-zonas">
+        <div class="card-zona">
+          <div class="zona-icono">👄</div>
+          <div class="zona-nombre">Bello labio</div>
+          <div class="zona-precio">Cotizar</div>
+          <div class="zona-tiempo">⏱ ~10 min por sesión</div>
+          <a href="https://wa.me/525535433490?text=Hola%2C%20quiero%20cotizar%20depilaci%C3%B3n%20l%C3%A1ser%20en%20bello%20labio"
+            class="zona-cta" target="_blank" rel="noopener">💬 Cotizar</a>
+        </div>
+        <div class="card-zona">
+          <div class="zona-icono">🙌</div>
+          <div class="zona-nombre">Axilas</div>
+          <div class="zona-precio">Desde $99</div>
+          <div class="zona-tiempo">⏱ ~15-20 min por sesión</div>
+          <a href="https://wa.me/525535433490?text=Hola%2C%20quiero%20cotizar%20depilaci%C3%B3n%20l%C3%A1ser%20en%20axilas"
+            class="zona-cta" target="_blank" rel="noopener">💬 Cotizar</a>
+        </div>
+        <div class="card-zona">
+          <div class="zona-icono">👙</div>
+          <div class="zona-nombre">Bikini</div>
+          <div class="zona-precio">Cotizar</div>
+          <div class="zona-tiempo">⏱ ~20-30 min por sesión</div>
+          <a href="https://wa.me/525535433490?text=Hola%2C%20quiero%20cotizar%20depilaci%C3%B3n%20l%C3%A1ser%20en%20bikini"
+            class="zona-cta" target="_blank" rel="noopener">💬 Cotizar</a>
+        </div>
+        <div class="card-zona">
+          <div class="zona-icono">🦵</div>
+          <div class="zona-nombre">Medias piernas</div>
+          <div class="zona-precio">Cotizar</div>
+          <div class="zona-tiempo">⏱ ~25-35 min por sesión</div>
+          <a href="https://wa.me/525535433490?text=Hola%2C%20quiero%20cotizar%20depilaci%C3%B3n%20l%C3%A1ser%20en%20medias%20piernas"
+            class="zona-cta" target="_blank" rel="noopener">💬 Cotizar</a>
+        </div>
+        <div class="card-zona">
+          <div class="zona-icono">🦿</div>
+          <div class="zona-nombre">Piernas completas</div>
+          <div class="zona-precio">Desde $299</div>
+          <div class="zona-tiempo">⏱ ~45-60 min por sesión</div>
+          <a href="https://wa.me/525535433490?text=Hola%2C%20quiero%20cotizar%20depilaci%C3%B3n%20l%C3%A1ser%20en%20piernas%20completas"
+            class="zona-cta" target="_blank" rel="noopener">💬 Cotizar</a>
+        </div>
+        <div class="card-zona">
+          <div class="zona-icono">💪</div>
+          <div class="zona-nombre">Brazos</div>
+          <div class="zona-precio">Cotizar</div>
+          <div class="zona-tiempo">⏱ ~25-40 min por sesión</div>
+          <a href="https://wa.me/525535433490?text=Hola%2C%20quiero%20cotizar%20depilaci%C3%B3n%20l%C3%A1ser%20en%20brazos"
+            class="zona-cta" target="_blank" rel="noopener">💬 Cotizar</a>
+        </div>
+        <div class="card-zona">
+          <div class="zona-icono">🔙</div>
+          <div class="zona-nombre">Espalda / Pecho</div>
+          <div class="zona-precio">Cotizar</div>
+          <div class="zona-tiempo">⏱ ~30-45 min por sesión</div>
+          <a href="https://wa.me/525535433490?text=Hola%2C%20quiero%20cotizar%20depilaci%C3%B3n%20l%C3%A1ser%20en%20espalda"
+            class="zona-cta" target="_blank" rel="noopener">💬 Cotizar</a>
+        </div>
+        <div class="card-zona" style="border-color:var(--cp);background:var(--ca)">
+          <div class="zona-icono">🌟</div>
+          <div class="zona-nombre">Cuerpo completo</div>
+          <div class="zona-precio" style="font-size:18px">Paquete especial</div>
+          <div class="zona-tiempo">Máximo ahorro</div>
+          <a href="https://wa.me/525535433490?text=Hola%2C%20quiero%20cotizar%20un%20paquete%20de%20cuerpo%20completo"
+            class="zona-cta" target="_blank" rel="noopener">💬 Cotizar paquete</a>
+        </div>
       </div>
     </section>
 
-    <!-- CÓMO LLEGAR -->
-
-    <section class="sec sec-alt" aria-labelledby="cl-tit">
+    <!-- BENEFICIOS -->
+    <section class="sec sec-alt" aria-labelledby="ben-tit">
       <div class="sec-hdr">
-        <span class="etq">Cómo llegar</span>
-        <h2 class="sec-tit" id="cl-tit">Medios de transporte</h2>
-        <p class="sec-sub">Estamos bien conectados para que llegues fácil a Av. Insurgentes Sur 1799 desde cualquier
-          parte de la ciudad.</p>
+        <span class="etq">¿Por qué láser diodo?</span>
+        <h2 class="sec-tit" id="ben-tit">Ventajas de la depilación láser diodo</h2>
+        <p class="sec-sub">El láser diodo es el estándar de oro mundial en depilación definitiva. Aquí te explicamos por
+          qué.</p>
       </div>
-      <div class="como-llegar-grid">
-        <div class="cl-card">
-          <h3 class="cl-titulo">🚇 Transporte público</h3>
-          <div class="cl-item"><span class="ico">🔵</span>
-            <div><strong>Metro Barranca del Muerto (L7)</strong><br>A 15 minutos caminando sobre Av. Insurgentes Sur en
-              dirección norte</div>
-          </div>
-          <div class="cl-item"><span class="ico">🟢</span>
-            <div><strong>Metro Mixcoac (L7)</strong><br>A 12 minutos caminando por Av. Insurgentes Sur hacia Guadalupe
-              Inn</div>
-          </div>
-          <div class="cl-item"><span class="ico">🚌</span>
-            <div><strong>Metrobús Insurgentes Sur (L1)</strong><br>Baja en la estación Río Mixcoac o Teatro Insurgentes
-            </div>
-          </div>
-          <div class="cl-item"><span class="ico">🚌</span>
-            <div><strong>Múltiples rutas de camión</strong><br>Circulan por Av. Insurgentes Sur y calles de Guadalupe
-              Inn</div>
-          </div>
+      <div class="grid-ben">
+        <div class="card-ben"><span class="ben-ico">🎯</span>
+          <h3 class="ben-tit">Resultados visibles desde la 1ª sesión</h3>
+          <p class="ben-desc">Notarás una reducción significativa del vello desde tu primera sesión. Con el plan
+            completo, logras una eliminación prácticamente definitiva.</p>
         </div>
-        <div class="cl-card">
-          <h3 class="cl-titulo">🚗 En automóvil</h3>
-          <div class="cl-item"><span class="ico">🅿️</span>
-            <div><strong>Estacionamiento en la zona</strong><br>Hay opciones de estacionamiento y parquímetro en Av.
-              Insurgentes Sur y calles cercanas</div>
-          </div>
-          <div class="cl-item"><span class="ico">📌</span>
-            <div><strong>Desde Insurgentes Sur:</strong><br>Circula por Av. Insurgentes Sur hasta el número 1799, en la
-              colonia Guadalupe Inn</div>
-          </div>
-          <div class="cl-item"><span class="ico">📌</span>
-            <div><strong>Desde Periférico:</strong><br>Toma Periférico Sur y conecta con Av. Insurgentes Sur rumbo al
-              centro</div>
-          </div>
-          <div class="cl-item"><span class="ico">📱</span>
-            <div><strong>Navegación GPS:</strong><br>Busca "BellaNick Clinic Insurgentes Sur 1799" en Google Maps o Waze
-            </div>
-          </div>
+        <div class="card-ben"><span class="ben-ico">😌</span>
+          <h3 class="ben-tit">Procedimiento casi indoloro</h3>
+          <p class="ben-desc">La tecnología diodo de última generación incorpora sistema de enfriamiento que minimiza el
+            discomfort. La mayoría lo describe como un leve calor.</p>
+        </div>
+        <div class="card-ben"><span class="ben-ico">⚡</span>
+          <h3 class="ben-tit">Sesiones rápidas y eficientes</h3>
+          <p class="ben-desc">Axilas en 15 minutos, piernas completas en menos de 1 hora. Diseñadas para que no
+            interrumpas tu día a día.</p>
+        </div>
+        <div class="card-ben"><span class="ben-ico">🔬</span>
+          <h3 class="ben-tit">Tecnología de grado médico</h3>
+          <p class="ben-desc">Trabajamos con equipos láser diodo de última generación, seguros para todo tipo de piel,
+            incluyendo pieles oscuras y morenas.</p>
+        </div>
+        <div class="card-ben"><span class="ben-ico">💰</span>
+          <h3 class="ben-tit">La inversión más inteligente</h3>
+          <p class="ben-desc">Comparado con el gasto acumulado en rasuradoras, cera y cremas depiladoras, la depilación
+            láser es mucho más económica a largo plazo.</p>
+        </div>
+        <div class="card-ben"><span class="ben-ico">✅</span>
+          <h3 class="ben-tit">Sin tiempo de recuperación</h3>
+          <p class="ben-desc">Puedes retomar tus actividades normales inmediatamente después de cada sesión. No hay
+            enrojecimiento prolongado ni restricciones severas.</p>
         </div>
       </div>
     </section>
 
-    <!-- SERVICIOS EN ESTA SUCURSAL -->
-    <section class="sec" aria-labelledby="srv-tit">
+    <!-- PROCESO -->
+    <section class="sec" aria-labelledby="proc-tit">
       <div class="sec-hdr">
-        <span class="etq">Servicios disponibles</span>
-        <h2 class="sec-tit" id="srv-tit">Tratamientos en Insurgentes Sur</h2>
-        <p class="sec-sub">Todos nuestros servicios disponibles en esta sucursal. Agenda por WhatsApp y recibe tu
-          cotización personalizada.</p>
+        <span class="etq">¿Cómo funciona?</span>
+        <h2 class="sec-tit" id="proc-tit">Tu tratamiento paso a paso</h2>
+        <p class="sec-sub">Comenzar es muy sencillo. En menos de 24 horas puedes tener tu primera cita agendada.</p>
       </div>
-      <div class="grid-srv">
-        <div class="card-srv">
-          <div class="srv-ico">✨</div>
-          <div class="srv-nom">Depilación Láser Diodo</div>
-          <div class="srv-desc">Elimina el vello definitivamente con tecnología de última generación.</div><span
-            class="chip">Desde $99 MXN</span><a href="https://depilasermexico.com/depilacion-laser-diodo.html"
-            class="btn-srv">Ver tratamiento →</a>
+      <div class="proceso-grid">
+        <div class="paso">
+          <div class="paso-n">1</div>
+          <h3 class="paso-tit">Escríbenos por WhatsApp</h3>
+          <p class="paso-desc">Cuéntanos qué zona te interesa y resolvemos todas tus dudas al instante.</p>
         </div>
-        <div class="card-srv">
-          <div class="srv-ico">🔥</div>
-          <div class="srv-nom">Lipólisis Láser</div>
-          <div class="srv-desc">Reduce grasa localizada sin cirugía ni tiempo de recuperación.</div><span
-            class="chip">Consultar precio</span><a href="https://depilasermexico.com/lipolisis-laser.html"
-            class="btn-srv">Ver tratamiento →</a>
+        <div class="paso">
+          <div class="paso-n">2</div>
+          <h3 class="paso-tit">Valoración gratuita</h3>
+          <p class="paso-desc">Analizamos tu tipo de piel y vello, y diseñamos tu plan de tratamiento personalizado.</p>
         </div>
-        <div class="card-srv">
-          <div class="srv-ico">🌊</div>
-          <div class="srv-nom">Cavitación</div>
-          <div class="srv-desc">Elimina celulitis y reduce medidas con ultrasonido de alta frecuencia.</div><span
-            class="chip">Consultar precio</span><a href="https://depilasermexico.com/cavitacion.html"
-            class="btn-srv">Ver tratamiento →</a>
+        <div class="paso">
+          <div class="paso-n">3</div>
+          <h3 class="paso-tit">Sesiones de láser</h3>
+          <p class="paso-desc">Sesiones rápidas, cómodas y sin dolor con el equipo láser diodo más avanzado.</p>
         </div>
-        <div class="card-srv">
-          <div class="srv-ico">💫</div>
-          <div class="srv-nom">Radiofrecuencia Tripolar</div>
-          <div class="srv-desc">Reafirma y tonifica cara y cuerpo estimulando el colágeno.</div><span
-            class="chip">Consultar precio</span><a href="https://depilasermexico.com/radiofrecuencia-tripolar.html"
-            class="btn-srv">Ver tratamiento →</a>
-        </div>
-        <div class="card-srv">
-          <div class="srv-ico">⚡</div>
-          <div class="srv-nom">Electroestimulación</div>
-          <div class="srv-desc">Tonifica músculos sin esfuerzo con corrientes de baja frecuencia.</div><span
-            class="chip">Consultar precio</span><a href="https://depilasermexico.com/electroestimulacion.html"
-            class="btn-srv">Ver tratamiento →</a>
+        <div class="paso">
+          <div class="paso-n">4</div>
+          <h3 class="paso-tit">Piel libre de vello</h3>
+          <p class="paso-desc">Disfruta de resultados permanentes y olvídate de rasuradoras y cera para siempre.</p>
         </div>
       </div>
     </section>
 
-    <!-- HORARIOS DETALLADOS -->
-    <section class="sec sec-alt" aria-labelledby="hor-tit">
+    <!-- FAQ -->
+    <section class="sec sec-alt" aria-labelledby="faq-tit">
       <div class="sec-hdr">
-        <span class="etq">Horarios de atención</span>
-        <h2 class="sec-tit" id="hor-tit">Estamos aquí para ti</h2>
-        <p class="sec-sub">Horarios de la sucursal Insurgentes Sur. Te recomendamos agendar cita previa para garantizar
-          tu atención.</p>
+        <span class="etq">Preguntas frecuentes</span>
+        <h2 class="sec-tit" id="faq-tit">Todo sobre la depilación láser diodo</h2>
       </div>
-      <div
-        style="max-width:480px;margin:0 auto;background:#fff;border-radius:var(--rl);padding:32px;box-shadow:var(--sc);border:1px solid var(--cgb)">
-        <div class="badge-abierto"><span class="dot-verde"></span> Abierto en horario regular</div>
-        <table class="horario-tabla">
-          <tr>
-            <td class="dia">Lunes</td>
-            <td class="hora">10:00 – 20:00</td>
-          </tr>
-          <tr>
-            <td class="dia">Martes</td>
-            <td class="hora">10:00 – 20:00</td>
-          </tr>
-          <tr>
-            <td class="dia">Miércoles</td>
-            <td class="hora">10:00 – 20:00</td>
-          </tr>
-          <tr>
-            <td class="dia">Jueves</td>
-            <td class="hora">10:00 – 20:00</td>
-          </tr>
-          <tr>
-            <td class="dia">Viernes</td>
-            <td class="hora">10:00 – 20:00</td>
-          </tr>
-          <tr>
-            <td class="dia">Sábado</td>
-            <td class="hora">10:00 – 18:00</td>
-          </tr>
-          <tr>
-            <td class="dia">Domingo</td>
-            <td class="hora cerrado">Cerrado</td>
-          </tr>
-        </table>
-        <div style="margin-top:20px;text-align:center">
-          <a href="https://wa.me/525556622079?text=Hola%2C%20quiero%20agendar%20cita%20en%20Roma%20Sur"
-            style="display:inline-flex;align-items:center;gap:8px;background:#25D366;color:#fff;padding:12px 24px;border-radius:50px;font-weight:700;font-size:14px"
-            target="_blank" rel="noopener">
-            💬 Agendar cita
-          </a>
-        </div>
+      <div class="faq-lista">
+        <details class="faq-item">
+          <summary class="faq-q">¿Cuántas sesiones necesito para ver resultados permanentes?<span
+              class="faq-ico">+</span></summary>
+          <div class="faq-a">Entre 6 y 8 sesiones espaciadas cada 4-6 semanas para resultados definitivos. Sin embargo,
+            desde la primera sesión notarás una reducción notable. La cantidad exacta depende de tu tipo de piel y vello
+            — te lo determinamos en tu valoración gratuita.</div>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-q">¿Duele la depilación láser diodo?<span class="faq-ico">+</span></summary>
+          <div class="faq-a">La tecnología diodo es de las más cómodas del mercado. Incluye sistema de enfriamiento
+            integrado que protege la piel y minimiza el discomfort. La mayoría de los clientes lo describe como una
+            sensación de calor leve. No se requiere anestesia.</div>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-q">¿Funciona en pieles morenas o bronceadas?<span class="faq-ico">+</span></summary>
+          <div class="faq-a">Sí. El láser diodo es seguro para una amplia gama de tonos de piel, incluyendo pieles
+            morenas, que son comunes en México. En tu valoración evaluamos tu tono y ajustamos los parámetros del equipo
+            para máxima seguridad y eficacia.</div>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-q">¿Cuánto tiempo duran los resultados?<span class="faq-ico">+</span></summary>
+          <div class="faq-a">Con el ciclo de sesiones completo, los resultados son prácticamente definitivos. Algunos
+            factores hormonales (embarazo, menopausia) pueden activar nuevo crecimiento de vello con el tiempo, pero es
+            mínimo comparado con el estado original.</div>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-q">¿Qué debo hacer antes de una sesión?<span class="faq-ico">+</span></summary>
+          <div class="faq-a">Rasurar el área 24 horas antes (no depilar con cera). Evitar exposición solar 2 semanas
+            previas. No usar cremas hidratantes el día de la sesión. No tener el área bronceada. Te damos todas las
+            indicaciones detalladas al agendar tu cita.</div>
+        </details>
       </div>
     </section>
 
-    <!-- OTRAS SUCURSALES -->
-    <section class="sec" aria-labelledby="otras-tit">
-      <div class="sec-hdr">
-        <span class="etq">Red BellaNick</span>
-        <h2 class="sec-tit" id="otras-tit">Visita nuestras otras sucursales</h2>
-      </div>
-      <div class="grid-otras">
-        <a href="https://depilasermexico.com/depilacion-laser-cdmx-insurgentes-sur.html" class="card-otra">
-          <span class="otra-ico">📍</span>
-          <div>
-            <div class="otra-nom">Insurgentes Sur</div>
-            <div class="otra-dir">Insurgentes Sur #1799, Guadalupe Inn, Barranca del Muerto, CDMX 01020</div>
-            <div class="otra-link">Ver sucursal →</div>
-          </div>
-        </a>
-        <a href="https://depilasermexico.com/depilacion-laser-queretaro-corregidora.html" class="card-otra"
-          style="border-color:var(--cp)">
-          <span class="otra-ico">🌟</span>
-          <div>
-            <div class="otra-nom">Querétaro <span
-                style="font-size:11px;background:var(--cp);color:#fff;border-radius:20px;padding:2px 8px;font-weight:700;vertical-align:middle">Nueva</span>
-            </div>
-            <div class="otra-dir">Municipio de Corregidora, Querétaro</div>
-            <div class="otra-link">Ver sucursal →</div>
-          </div>
-        </a>
-      </div>
-    </section>
-
-    <section class="cta-ban">
-      <h2>¿Lista para comenzar<br>tu transformación en Insurgentes Sur?</h2>
-      <p>Agenda tu cita de valoración gratuita hoy. Sin compromiso, sin costo.</p>
+    <!-- CTA -->
+    <section class="cta-ban" aria-labelledby="cta-tit">
+      <h2 id="cta-tit">¿Lista para olvidarte del vello<br>para siempre?</h2>
+      <p>Primera valoración sin costo. Prueba de sensibilidad gratuita. Agenda hoy y comienza tu transformación.</p>
       <div class="cta-bts">
-        <a href="https://wa.me/525556622079?text=Hola%2C%20quiero%20agendar%20en%20sucursal%20Roma%20Sur"
-          class="btn-wa-lg" target="_blank" rel="noopener">💬 Agendar cita por WhatsApp</a>
-        <a href="https://depilasermexico.com/index.html#servicios" class="btn-otras">Ver todos los servicios</a>
+        <a href="https://wa.me/525535433490?text=Hola%2C%20quiero%20agendar%20mi%20valoraci%C3%B3n%20gratuita%20de%20depilaci%C3%B3n%20l%C3%A1ser"
+          class="btn-wa-lg" target="_blank" rel="noopener">💬 Agendar valoración gratuita</a>
+        <a href="tel:+525535433490" class="btn-tel">📞 (55) 3543-3490</a>
       </div>
     </section>
   </main>
+
   <footer>
     <div class="foot-grid">
       <div>
         <!-- <img src="https://depilasermexico.com/assets/img/logo/logo.webp" alt="BellaNick Clinic" class="foot-logo" width="150" height="42" loading="lazy" / decoding="async"> -->
-        <p class="foot-desc">Especialistas en depilación láser y tratamientos estéticos. CDMX y Querétaro.</p>
+        <p class="foot-desc">Especialistas en depilación láser y tratamientos estéticos en CDMX. Roma Sur e Insurgentes
+          Sur.</p>
         <div class="redes">
           <a href="https://www.instagram.com/bellanickclinic/" class="red" target="_blank" rel="noopener"
             aria-label="Instagram">📸</a>
@@ -3193,11 +3214,21 @@
         </div>
       </div>
       <div>
-        <div class="foot-tit">Sucursales</div>
+        <div class="foot-tit">Servicios</div>
         <ul class="foot-ul">
-          <li><a href="depilacion-laser-cdmx-insurgentes-sur.html">Insurgentes Sur · CDMX</a></li>
-          <li><a href="depilacion-laser-cdmx-insurgentes-sur.html">Insurgentes Sur · CDMX</a></li>
-          <li><a href="depilacion-laser-queretaro-corregidora.html">Corregidora · Querétaro</a></li>
+          <li><a href="depilacion-laser-diodo.html">Depilación Láser Diodo</a></li>
+          <li><a href="lipolisis-laser.html">Lipólisis Láser</a></li>
+          <li><a href="cavitacion.html">Cavitación</a></li>
+          <li><a href="radiofrecuencia-tripolar.html">Radiofrecuencia Tripolar</a></li>
+          <li><a href="electroestimulacion.html">Electroestimulación</a></li>
+          <li><a href="carboxiterapia.html">Carboxiterapia</a></li>
+          <li><a href="vacumterapia.html">Vacumterapia</a></li>
+          <li><a href="copas-colombianas.html">Copas Colombianas</a></li>
+          <li><a href="holywood-peel.html">Holywood Peel</a></li>
+          <li><a href="microdermoabrasion.html">Microdermoabrasión</a></li>
+          <li><a href="hidrodermoabrasion.html">Hidrodermoabrasión</a></li>
+          <li><a href="despigmentacion.html">Despigmentación</a></li>
+          <li><a href="eliminacion-tatuaje.html">Eliminación de Tatuaje</a></li>
         </ul>
       </div>
       <div>
@@ -3223,6 +3254,8 @@
         target="_blank" rel="noopener" style="color:rgba(255,255,255,.4);text-decoration:underline">Diseño: Cmorales</a>
     </div>
   </footer>
+
+
 
 
   <!-- BOTÓN FLOTANTE / CHAT -->
@@ -3351,33 +3384,4 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ message: text })
           });
-          var data = JSON.parse(await res.text());
-          messages.lastChild.remove();
-          addMessage('bella', data.reply);
-
-          if (data.ia_disabled) {
-            iaDisponible = false;
-            closeChat();
-            setTimeout(function () { window.open('https://wa.me/525535433490', '_blank'); }, 1200);
-            return;
-          }
-          if (wantsWA) {
-            closeChat();
-            setTimeout(function () { window.open('https://wa.me/525535433490', '_blank'); }, 800);
-          }
-        } catch (e) {
-          addMessage('bella', 'Hubo un problema técnico. ¿Prefieres que te atiendan por WhatsApp?');
-        }
-      }
-
-      sendBtn.addEventListener('click', sendMessage);
-      input.addEventListener('keypress', function (e) { if (e.key === 'Enter') sendMessage(); });
-
-      async function resetSession() {
-        try { await fetch('/php/reset_session.php', { method: 'POST', credentials: 'same-origin', cache: 'no-store' }); } catch (e) { }
-      }
-
-    })();
-  </script>
-</body>
-</html>
+        
