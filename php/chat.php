@@ -88,7 +88,7 @@ FLUJO DE CITA (síguelo en orden, sin saltarte pasos ni retroceder)
 5. Si elige llamada: comparte el número 55 3543 3490 y cierra con una frase cálida.
 
 SERVICIOS (solo para responder dudas si preguntan)
-- Depilación láser cuatridiodo soprano
+- Depilación láser cuatridiodo Soprano de última generación soprano
 - Lipólisis láser
 - Cavitación
 - Radiofrecuencia tripolar
