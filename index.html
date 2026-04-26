@@ -1044,7 +1044,9 @@
       font-size: 14px;
       color: rgba(255, 255, 255, .8);
       margin-top: 8px
-    }/* =====================================================
+    }
+
+    /* =====================================================
        FAQ
     ===================================================== */
     .faq-lista {
@@ -1640,7 +1642,8 @@
       background: var(--cp);
       border-radius: 3px
     }
-      /* Trust bar — Soprano · FDA · COFEPRIS (SEO boost v1) */
+
+    /* Trust bar — Soprano · FDA · COFEPRIS (SEO boost v1) */
     .trust-bar {
       display: flex;
       flex-wrap: wrap;
@@ -1679,28 +1682,137 @@
     }
 
     @media (max-width: 640px) {
-      .trust-bar { font-size: 12px; gap: 6px 10px; padding: 9px 11px }
+      .trust-bar {
+        font-size: 12px;
+        gap: 6px 10px;
+        padding: 9px 11px
+      }
     }
 
-  
-    .resenas-sec{padding:70px 0;background:#fff}
-    .resenas-head{text-align:center;max-width:720px;margin:0 auto 40px}
-    .resenas-head h2{font-family:var(--FD,'Playfair Display',serif);font-size:clamp(26px,4vw,36px);font-weight:700;color:var(--ct,#b3325f);margin-bottom:12px}
-    .resenas-head p{color:#555;font-size:15px;margin-bottom:16px}
-    .g-rating{display:inline-flex;align-items:center;gap:10px;background:#fff8fb;border:1px solid #ffd8ea;padding:10px 18px;border-radius:999px;font-size:14px;color:#333}
-    .g-rating .stars{color:#ffc107;font-size:18px;letter-spacing:2px}
-    .resenas-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;max-width:1100px;margin:0 auto}
-    .resena-card{background:#fdf5f9;border:1px solid #ffd8ea;border-radius:16px;padding:24px;transition:transform .2s,box-shadow .2s}
-    .resena-card:hover{transform:translateY(-4px);box-shadow:0 8px 28px rgba(179,50,95,.12)}
-    .resena-stars{color:#ffc107;font-size:16px;letter-spacing:2px;margin-bottom:10px}
-    .resena-text{color:#444;font-size:14px;line-height:1.6;margin-bottom:14px;font-style:italic}
-    .resena-autor{font-weight:600;color:var(--ct,#b3325f);font-size:13px}
-    .resena-fuente{display:inline-block;margin-left:8px;font-size:11px;background:#fff;border:1px solid #eee;padding:2px 8px;border-radius:4px;color:#888;font-weight:normal;font-style:normal}
-    .resenas-cta{text-align:center;margin-top:36px}
-    .resenas-cta a{display:inline-block;margin:6px;padding:12px 22px;background:#fff;border:2px solid var(--ct,#b3325f);color:var(--ct,#b3325f);border-radius:999px;text-decoration:none;font-weight:600;font-size:14px;transition:all .2s}
-    .resenas-cta a:hover{background:var(--ct,#b3325f);color:#fff}
-</style>
-<script type="application/ld+json">
+
+    .resenas-sec {
+      padding: 70px 0;
+      background: #fff
+    }
+
+    .resenas-head {
+      text-align: center;
+      max-width: 720px;
+      margin: 0 auto 40px
+    }
+
+    .resenas-head h2 {
+      font-family: var(--FD, 'Playfair Display', serif);
+      font-size: clamp(26px, 4vw, 36px);
+      font-weight: 700;
+      color: var(--ct, #b3325f);
+      margin-bottom: 12px
+    }
+
+    .resenas-head p {
+      color: #555;
+      font-size: 15px;
+      margin-bottom: 16px
+    }
+
+    .g-rating {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: #fff8fb;
+      border: 1px solid #ffd8ea;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 14px;
+      color: #333
+    }
+
+    .g-rating .stars {
+      color: #ffc107;
+      font-size: 18px;
+      letter-spacing: 2px
+    }
+
+    .resenas-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      max-width: 1100px;
+      margin: 0 auto
+    }
+
+    .resena-card {
+      background: #fdf5f9;
+      border: 1px solid #ffd8ea;
+      border-radius: 16px;
+      padding: 24px;
+      transition: transform .2s, box-shadow .2s
+    }
+
+    .resena-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 28px rgba(179, 50, 95, .12)
+    }
+
+    .resena-stars {
+      color: #ffc107;
+      font-size: 16px;
+      letter-spacing: 2px;
+      margin-bottom: 10px
+    }
+
+    .resena-text {
+      color: #444;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 14px;
+      font-style: italic
+    }
+
+    .resena-autor {
+      font-weight: 600;
+      color: var(--ct, #b3325f);
+      font-size: 13px
+    }
+
+    .resena-fuente {
+      display: inline-block;
+      margin-left: 8px;
+      font-size: 11px;
+      background: #fff;
+      border: 1px solid #eee;
+      padding: 2px 8px;
+      border-radius: 4px;
+      color: #888;
+      font-weight: normal;
+      font-style: normal
+    }
+
+    .resenas-cta {
+      text-align: center;
+      margin-top: 36px
+    }
+
+    .resenas-cta a {
+      display: inline-block;
+      margin: 6px;
+      padding: 12px 22px;
+      background: #fff;
+      border: 2px solid var(--ct, #b3325f);
+      color: var(--ct, #b3325f);
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all .2s
+    }
+
+    .resenas-cta a:hover {
+      background: var(--ct, #b3325f);
+      color: #fff
+    }
+  </style>
+  <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "HealthAndBeautyBusiness",
@@ -1728,6 +1840,11 @@
   "review": [
     {
       "@type": "Review",
+      "itemReviewed": {
+        "@type": "HealthAndBeautyBusiness",
+        "name": "BellaNick Clinic",
+        "@id": "https://depilasermexico.com/#business-reviews"
+      },
       "reviewRating": {
         "@type": "Rating",
         "ratingValue": "5",
@@ -1745,6 +1862,11 @@
     },
     {
       "@type": "Review",
+      "itemReviewed": {
+        "@type": "HealthAndBeautyBusiness",
+        "name": "BellaNick Clinic",
+        "@id": "https://depilasermexico.com/#business-reviews"
+      },
       "reviewRating": {
         "@type": "Rating",
         "ratingValue": "5",
@@ -1762,6 +1884,11 @@
     },
     {
       "@type": "Review",
+      "itemReviewed": {
+        "@type": "HealthAndBeautyBusiness",
+        "name": "BellaNick Clinic",
+        "@id": "https://depilasermexico.com/#business-reviews"
+      },
       "reviewRating": {
         "@type": "Rating",
         "ratingValue": "5",
@@ -1779,6 +1906,11 @@
     },
     {
       "@type": "Review",
+      "itemReviewed": {
+        "@type": "HealthAndBeautyBusiness",
+        "name": "BellaNick Clinic",
+        "@id": "https://depilasermexico.com/#business-reviews"
+      },
       "reviewRating": {
         "@type": "Rating",
         "ratingValue": "5",
@@ -1796,6 +1928,11 @@
     },
     {
       "@type": "Review",
+      "itemReviewed": {
+        "@type": "HealthAndBeautyBusiness",
+        "name": "BellaNick Clinic",
+        "@id": "https://depilasermexico.com/#business-reviews"
+      },
       "reviewRating": {
         "@type": "Rating",
         "ratingValue": "5",
@@ -1813,6 +1950,11 @@
     },
     {
       "@type": "Review",
+      "itemReviewed": {
+        "@type": "HealthAndBeautyBusiness",
+        "name": "BellaNick Clinic",
+        "@id": "https://depilasermexico.com/#business-reviews"
+      },
       "reviewRating": {
         "@type": "Rating",
         "ratingValue": "5",
@@ -1830,6 +1972,11 @@
     },
     {
       "@type": "Review",
+      "itemReviewed": {
+        "@type": "HealthAndBeautyBusiness",
+        "name": "BellaNick Clinic",
+        "@id": "https://depilasermexico.com/#business-reviews"
+      },
       "reviewRating": {
         "@type": "Rating",
         "ratingValue": "5",
@@ -1847,6 +1994,11 @@
     },
     {
       "@type": "Review",
+      "itemReviewed": {
+        "@type": "HealthAndBeautyBusiness",
+        "name": "BellaNick Clinic",
+        "@id": "https://depilasermexico.com/#business-reviews"
+      },
       "reviewRating": {
         "@type": "Rating",
         "ratingValue": "5",
@@ -1864,6 +2016,11 @@
     },
     {
       "@type": "Review",
+      "itemReviewed": {
+        "@type": "HealthAndBeautyBusiness",
+        "name": "BellaNick Clinic",
+        "@id": "https://depilasermexico.com/#business-reviews"
+      },
       "reviewRating": {
         "@type": "Rating",
         "ratingValue": "5",
@@ -1881,6 +2038,11 @@
     },
     {
       "@type": "Review",
+      "itemReviewed": {
+        "@type": "HealthAndBeautyBusiness",
+        "name": "BellaNick Clinic",
+        "@id": "https://depilasermexico.com/#business-reviews"
+      },
       "reviewRating": {
         "@type": "Rating",
         "ratingValue": "5",
@@ -1898,6 +2060,11 @@
     },
     {
       "@type": "Review",
+      "itemReviewed": {
+        "@type": "HealthAndBeautyBusiness",
+        "name": "BellaNick Clinic",
+        "@id": "https://depilasermexico.com/#business-reviews"
+      },
       "reviewRating": {
         "@type": "Rating",
         "ratingValue": "5",
@@ -1915,6 +2082,11 @@
     },
     {
       "@type": "Review",
+      "itemReviewed": {
+        "@type": "HealthAndBeautyBusiness",
+        "name": "BellaNick Clinic",
+        "@id": "https://depilasermexico.com/#business-reviews"
+      },
       "reviewRating": {
         "@type": "Rating",
         "ratingValue": "5",
@@ -1933,11 +2105,31 @@
   ]
 }
 </script>
-<style>
-    .skip-link{position:absolute;top:-40px;left:0;background:#d6336c;color:#fff;padding:8px 16px;z-index:10000;text-decoration:none;border-radius:0 0 4px 0;font-weight:600}
-    .skip-link:focus{top:0;outline:3px solid #ffd700;outline-offset:2px}
-    *:focus-visible{outline:3px solid #d6336c;outline-offset:2px}
-</style>
+  <style>
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: #d6336c;
+      color: #fff;
+      padding: 8px 16px;
+      z-index: 10000;
+      text-decoration: none;
+      border-radius: 0 0 4px 0;
+      font-weight: 600
+    }
+
+    .skip-link:focus {
+      top: 0;
+      outline: 3px solid #ffd700;
+      outline-offset: 2px
+    }
+
+    *:focus-visible {
+      outline: 3px solid #d6336c;
+      outline-offset: 2px
+    }
+  </style>
 </head>
 
 <body>
@@ -1957,7 +2149,8 @@
 
       <a class="nav-logo" href="https://depilasermexico.com/index.html" aria-label="BellaNick Clinic - Inicio">
         <img src="https://depilasermexico.com/assets/img/logo/logo.webp"
-          alt="Logo BellaNick Clinic - Depilación Láser CDMX" width="160" height="48" decoding="async" loading="eager" />
+          alt="Logo BellaNick Clinic - Depilación Láser CDMX" width="160" height="48" decoding="async"
+          loading="eager" />
       </a>
 
       <!-- MENÚ DESKTOP -->
@@ -2254,7 +2447,8 @@
             en BellaNick Clinic
           </h1>
           <p class="hero-desc">
-            Resultados visibles desde las primeras sesiones. Tecnología láser cuatridiodo Soprano de última generación soprano de última generación,
+            Resultados visibles desde las primeras sesiones. Tecnología láser cuatridiodo Soprano de última generación
+            soprano de última generación,
             atención personalizada en nuestras sucursales de Ciudad de México y Querétaro.
             <strong>Primera valoración sin costo.</strong>
           </p>
@@ -2279,8 +2473,8 @@
         </div>
         <div class="hero-imagen">
           <img src="https://depilasermexico.com/assets/img/hero/h1_hero1.webp"
-            alt="Depilación láser cuatridiodo Soprano de última generación en BellaNick Clinic Roma Sur, Ciudad de México" width="600" height="500"
-            loading="eager" decoding="async" fetchpriority="high" />
+            alt="Depilación láser cuatridiodo Soprano de última generación en BellaNick Clinic Roma Sur, Ciudad de México"
+            width="600" height="500" loading="eager" decoding="async" fetchpriority="high" />
           <div class="hero-oferta-flotante">
             <div class="titulo-oferta">Precio desde</div>
             <div class="precio-oferta">$99 MXN</div>
@@ -2313,7 +2507,8 @@
       <div class="grid-2">
         <article class="card-sucursal">
           <img src="https://depilasermexico.com/assets/img/gallery/BellaNickRomaSur.webp"
-            alt="Interior de BellaNick Clinic Roma Sur, Cuauhtémoc CDMX" width="560" height="240" loading="lazy" / decoding="async">
+            alt="Interior de BellaNick Clinic Roma Sur, Cuauhtémoc CDMX" width="560" height="240" loading="lazy" /
+            decoding="async">
           <div class="card-sucursal-cuerpo">
             <h3 class="card-sucursal-nombre">BellaNick Clinic Roma Sur</h3>
             <p class="card-sucursal-dir">Monterrey 325, Roma Sur, Cuauhtémoc, CDMX 06760</p>
@@ -2348,7 +2543,8 @@
         </article>
         <article class="card-sucursal">
           <img src="https://depilasermexico.com/assets/img/gallery/BellaNickClinicQro.webp"
-            alt="Interior de BellaNick Clinic Corregidora, Queretaro" width="560" height="240" loading="lazy" / decoding="async">
+            alt="Interior de BellaNick Clinic Corregidora, Queretaro" width="560" height="240" loading="lazy" /
+            decoding="async">
           <div class="card-sucursal-cuerpo">
             <h3 class="card-sucursal-nombre">BellaNick Clinic Querétaro</h3>
             <p class="card-sucursal-dir">Plaza Lugo, Cam. a Vanegas 28 local 29, 76900 Corregidora, Qro.</p>
@@ -2377,7 +2573,8 @@
       <div class="grid-servicios">
         <article class="card-servicio">
           <img src="https://depilasermexico.com/assets/img/bella-nick-clinic/depilacion-laser-piernas-completas.webp"
-            alt="Depilación láser cuatridiodo Soprano de última generación en piernas completas en BellaNick Clinic CDMX" width="260" height="180" loading="lazy" / decoding="async">
+            alt="Depilación láser cuatridiodo Soprano de última generación en piernas completas en BellaNick Clinic CDMX"
+            width="260" height="180" loading="lazy" / decoding="async">
           <div class="card-servicio-cuerpo">
             <h3 class="card-servicio-nombre">Depilación láser cuatridiodo Soprano de última generación</h3>
             <p class="card-servicio-desc">Elimina el vello de forma definitiva con tecnología diodo. Resultados visibles
@@ -2389,7 +2586,8 @@
         </article>
         <article class="card-servicio">
           <img src="https://depilasermexico.com/assets/img/bella-nick-clinic/tratamiento-estetico-lipolisis-laser.webp"
-            alt="Lipólisis láser corporal en BellaNick Clinic CDMX" width="260" height="180" loading="lazy" / decoding="async">
+            alt="Lipólisis láser corporal en BellaNick Clinic CDMX" width="260" height="180" loading="lazy" /
+            decoding="async">
           <div class="card-servicio-cuerpo">
             <h3 class="card-servicio-nombre">Lipólisis Láser</h3>
             <p class="card-servicio-desc">Reduce la grasa localizada de forma no invasiva. Ideal para abdomen, brazos y
@@ -2401,7 +2599,8 @@
         </article>
         <article class="card-servicio">
           <img src="https://depilasermexico.com/assets/img/bella-nick-clinic/tratamiento-estetico-cavitacion.webp"
-            alt="Cavitación ultrasónica reductiva en BellaNick Clinic CDMX" width="260" height="180" loading="lazy" / decoding="async">
+            alt="Cavitación ultrasónica reductiva en BellaNick Clinic CDMX" width="260" height="180" loading="lazy" /
+            decoding="async">
           <div class="card-servicio-cuerpo">
             <h3 class="card-servicio-nombre">Cavitación</h3>
             <p class="card-servicio-desc">Ultrasonido de alta frecuencia para eliminar celulitis y afinar la silueta
@@ -2412,9 +2611,10 @@
           </div>
         </article>
         <article class="card-servicio">
-          <img src="https://depilasermexico.com/assets/img/bella-nick-clinic/tratamiento-estetico-radiofrecuencia-tripolar.webp"
-            alt="Radiofrecuencia tripolar reafirmante en BellaNick Clinic CDMX" width="260" height="180"
-            loading="lazy" / decoding="async">
+          <img
+            src="https://depilasermexico.com/assets/img/bella-nick-clinic/tratamiento-estetico-radiofrecuencia-tripolar.webp"
+            alt="Radiofrecuencia tripolar reafirmante en BellaNick Clinic CDMX" width="260" height="180" loading="lazy"
+            / decoding="async">
           <div class="card-servicio-cuerpo">
             <h3 class="card-servicio-nombre">Radiofrecuencia Tripolar</h3>
             <p class="card-servicio-desc">Reafirma y tonifica la piel estimulando el colágeno de forma profunda y sin
@@ -2425,8 +2625,10 @@
           </div>
         </article>
         <article class="card-servicio">
-          <img src="https://depilasermexico.com/assets/img/bella-nick-clinic/tratamiento-estetico-electroestimulacion.webp"
-            alt="Electroestimulación muscular en BellaNick Clinic CDMX" width="260" height="180" loading="lazy" / decoding="async">
+          <img
+            src="https://depilasermexico.com/assets/img/bella-nick-clinic/tratamiento-estetico-electroestimulacion.webp"
+            alt="Electroestimulación muscular en BellaNick Clinic CDMX" width="260" height="180" loading="lazy" /
+            decoding="async">
           <div class="card-servicio-cuerpo">
             <h3 class="card-servicio-nombre">Electroestimulación</h3>
             <p class="card-servicio-desc">Tonifica y define músculos con corrientes eléctricas de baja frecuencia. Sin
@@ -2448,7 +2650,8 @@
       </div>
       <div class="grid-razones">
         <div class="card-razon"><span class="razon-icono">🔬</span>
-          <h3 class="razon-titulo">Tecnología láser cuatridiodo Soprano de última generación Soprano de última generación</h3>
+          <h3 class="razon-titulo">Tecnología láser cuatridiodo Soprano de última generación Soprano de última
+            generación</h3>
           <p class="razon-desc">Trabajamos con equipos de grado médico que garantizan mayor efectividad, seguridad y
             comfort en cada sesión.</p>
         </div>
@@ -2539,7 +2742,7 @@
       </div>
     </section>
 
-        <!-- FAQ -->
+    <!-- FAQ -->
     <section class="section" id="preguntas-frecuentes" style="background:var(--cg)" aria-labelledby="faq-titulo">
       <div class="section-header">
         <span class="section-etiqueta">FAQ</span>
@@ -2607,101 +2810,226 @@
   </main>
   <!-- FOOTER -->
 
-<section class="resenas-sec" aria-label="Reseñas reales de clientes en Google" itemscope itemtype="https://schema.org/HealthAndBeautyBusiness">
-  <meta itemprop="name" content="BellaNick Clinic">
-  <div class="container">
-    <div class="resenas-head">
-      <h2>Lo que dicen nuestras clientas</h2>
-      <p>Reseñas <strong>verificadas en Google</strong> de clientes reales de nuestras 3 sucursales: Roma Sur, Insurgentes Sur y Querétaro. Calificación promedio <strong>5.0</strong> sobre 50+ opiniones.</p>
-      <div class="g-rating" itemprop="aggregateRating" itemscope itemtype="https://schema.org/AggregateRating">
-        <span class="stars">★★★★★</span>
-        <span><strong itemprop="ratingValue">5.0</strong> · <span itemprop="reviewCount">50</span> reseñas en Google</span>
-        <meta itemprop="bestRating" content="5">
-        <meta itemprop="worstRating" content="1">
+  <section class="resenas-sec" aria-label="Reseñas reales de clientes en Google" itemscope
+    itemtype="https://schema.org/HealthAndBeautyBusiness">
+    <meta itemprop="name" content="BellaNick Clinic">
+    <div class="container">
+      <div class="resenas-head">
+        <h2>Lo que dicen nuestras clientas</h2>
+        <p>Reseñas <strong>verificadas en Google</strong> de clientes reales de nuestras 3 sucursales: Roma Sur,
+          Insurgentes Sur y Querétaro. Calificación promedio <strong>5.0</strong> sobre 50+ opiniones.</p>
+        <div class="g-rating" itemprop="aggregateRating" itemscope itemtype="https://schema.org/AggregateRating">
+          <span class="stars">★★★★★</span>
+          <span><strong itemprop="ratingValue">5.0</strong> · <span itemprop="reviewCount">50</span> reseñas en
+            Google</span>
+          <meta itemprop="bestRating" content="5">
+          <meta itemprop="worstRating" content="1">
+        </div>
+      </div>
+      <div class="resenas-grid">
+        <article class="resena-card" itemscope itemtype="https://schema.org/Review">
+          <div itemprop="itemReviewed" itemscope itemtype="https://schema.org/HealthAndBeautyBusiness"
+            style="display:none">
+            <meta itemprop="name" content="BellaNick Clinic">
+          </div>
+          <div itemprop="reviewRating" itemscope itemtype="https://schema.org/Rating" style="display:none">
+            <meta itemprop="ratingValue" content="5">
+            <meta itemprop="bestRating" content="5">
+          </div>
+          <div class="resena-stars" aria-label="5 de 5 estrellas">★★★★★</div>
+          <p class="resena-text" itemprop="reviewBody">"Totalmente recomendable, precio-calidad, buena atención, las
+            chicas tanto de atención en redes sociales cómo en sucursales son muy amables. Todo el proceso es bien
+            explicado desde el día uno, y siempre te resuelven todas las dudas que vayan surgiendo. Servicio 10/10
+            amixes."</p>
+          <div class="resena-autor"><span itemprop="author" itemscope itemtype="https://schema.org/Person"><span
+                itemprop="name">Hannick Vratny</span></span> <span class="resena-fuente">Google · Roma Sur</span></div>
+        </article>
+        <article class="resena-card" itemscope itemtype="https://schema.org/Review">
+          <div itemprop="itemReviewed" itemscope itemtype="https://schema.org/HealthAndBeautyBusiness"
+            style="display:none">
+            <meta itemprop="name" content="BellaNick Clinic">
+          </div>
+          <div itemprop="reviewRating" itemscope itemtype="https://schema.org/Rating" style="display:none">
+            <meta itemprop="ratingValue" content="5">
+            <meta itemprop="bestRating" content="5">
+          </div>
+          <div class="resena-stars" aria-label="5 de 5 estrellas">★★★★★</div>
+          <p class="resena-text" itemprop="reviewBody">"Excelente servicio super recomendado, son muy amables, el lugar
+            es muy limpio y lindo, me estoy tratando axilas y bikini y veo un gran cambio, es un gran lugar 🩷"</p>
+          <div class="resena-autor"><span itemprop="author" itemscope itemtype="https://schema.org/Person"><span
+                itemprop="name">Ashley C.</span></span> <span class="resena-fuente">Google · Roma Sur</span></div>
+        </article>
+        <article class="resena-card" itemscope itemtype="https://schema.org/Review">
+          <div itemprop="itemReviewed" itemscope itemtype="https://schema.org/HealthAndBeautyBusiness"
+            style="display:none">
+            <meta itemprop="name" content="BellaNick Clinic">
+          </div>
+          <div itemprop="reviewRating" itemscope itemtype="https://schema.org/Rating" style="display:none">
+            <meta itemprop="ratingValue" content="5">
+            <meta itemprop="bestRating" content="5">
+          </div>
+          <div class="resena-stars" aria-label="5 de 5 estrellas">★★★★★</div>
+          <p class="resena-text" itemprop="reviewBody">"Excelente servicio, me estoy tratando axila y piernas y he
+            notado gran avance en tan poco tiempo. Siempre siguiendo las indicaciones para que el tratamiento sea el
+            mejor. Gracias por su atención y excelente trato."</p>
+          <div class="resena-autor"><span itemprop="author" itemscope itemtype="https://schema.org/Person"><span
+                itemprop="name">Sandra S.</span></span> <span class="resena-fuente">Google · Roma Sur</span></div>
+        </article>
+        <article class="resena-card" itemscope itemtype="https://schema.org/Review">
+          <div itemprop="itemReviewed" itemscope itemtype="https://schema.org/HealthAndBeautyBusiness"
+            style="display:none">
+            <meta itemprop="name" content="BellaNick Clinic">
+          </div>
+          <div itemprop="reviewRating" itemscope itemtype="https://schema.org/Rating" style="display:none">
+            <meta itemprop="ratingValue" content="5">
+            <meta itemprop="bestRating" content="5">
+          </div>
+          <div class="resena-stars" aria-label="5 de 5 estrellas">★★★★★</div>
+          <p class="resena-text" itemprop="reviewBody">"Instalaciones muy limpias y muy lindo trato, costos accesibles.
+            Servicio con base en tus necesidades definitivamente una maravillosa opción. Excelente ubicación lo
+            recomiendo ampliamente."</p>
+          <div class="resena-autor"><span itemprop="author" itemscope itemtype="https://schema.org/Person"><span
+                itemprop="name">Paola C.</span></span> <span class="resena-fuente">Google · Roma Sur</span></div>
+        </article>
+        <article class="resena-card" itemscope itemtype="https://schema.org/Review">
+          <div itemprop="itemReviewed" itemscope itemtype="https://schema.org/HealthAndBeautyBusiness"
+            style="display:none">
+            <meta itemprop="name" content="BellaNick Clinic">
+          </div>
+          <div itemprop="reviewRating" itemscope itemtype="https://schema.org/Rating" style="display:none">
+            <meta itemprop="ratingValue" content="5">
+            <meta itemprop="bestRating" content="5">
+          </div>
+          <div class="resena-stars" aria-label="5 de 5 estrellas">★★★★★</div>
+          <p class="resena-text" itemprop="reviewBody">"Muy buena atención y sobre todo muy buenas promociones. La
+            depilación láser me ha ayudado mucho y en poco tiempo. Muy efectiva."</p>
+          <div class="resena-autor"><span itemprop="author" itemscope itemtype="https://schema.org/Person"><span
+                itemprop="name">Mony L.</span></span> <span class="resena-fuente">Google · Roma Sur</span></div>
+        </article>
+        <article class="resena-card" itemscope itemtype="https://schema.org/Review">
+          <div itemprop="itemReviewed" itemscope itemtype="https://schema.org/HealthAndBeautyBusiness"
+            style="display:none">
+            <meta itemprop="name" content="BellaNick Clinic">
+          </div>
+          <div itemprop="reviewRating" itemscope itemtype="https://schema.org/Rating" style="display:none">
+            <meta itemprop="ratingValue" content="5">
+            <meta itemprop="bestRating" content="5">
+          </div>
+          <div class="resena-stars" aria-label="5 de 5 estrellas">★★★★★</div>
+          <p class="resena-text" itemprop="reviewBody">"Llevo 5 sesiones de depilación y la verdad todo muy bien, el
+            lugar está lindo, la atención muy buena y se han visto los resultados aún a la mitad del tratamiento ✨"</p>
+          <div class="resena-autor"><span itemprop="author" itemscope itemtype="https://schema.org/Person"><span
+                itemprop="name">Thelma P.</span></span> <span class="resena-fuente">Google · Roma Sur</span></div>
+        </article>
+        <article class="resena-card" itemscope itemtype="https://schema.org/Review">
+          <div itemprop="itemReviewed" itemscope itemtype="https://schema.org/HealthAndBeautyBusiness"
+            style="display:none">
+            <meta itemprop="name" content="BellaNick Clinic">
+          </div>
+          <div itemprop="reviewRating" itemscope itemtype="https://schema.org/Rating" style="display:none">
+            <meta itemprop="ratingValue" content="5">
+            <meta itemprop="bestRating" content="5">
+          </div>
+          <div class="resena-stars" aria-label="5 de 5 estrellas">★★★★★</div>
+          <p class="resena-text" itemprop="reviewBody">"Yo amo Bellanick, todos sus tratamientos están increíbles,
+            cumplen con lo que dicen y los precios son extraordinarios, además la atención y el lugar está divino, te
+            hacen sentir súper cómoda 💖"</p>
+          <div class="resena-autor"><span itemprop="author" itemscope itemtype="https://schema.org/Person"><span
+                itemprop="name">Jazmín L.</span></span> <span class="resena-fuente">Google · Insurgentes Sur</span>
+          </div>
+        </article>
+        <article class="resena-card" itemscope itemtype="https://schema.org/Review">
+          <div itemprop="itemReviewed" itemscope itemtype="https://schema.org/HealthAndBeautyBusiness"
+            style="display:none">
+            <meta itemprop="name" content="BellaNick Clinic">
+          </div>
+          <div itemprop="reviewRating" itemscope itemtype="https://schema.org/Rating" style="display:none">
+            <meta itemprop="ratingValue" content="5">
+            <meta itemprop="bestRating" content="5">
+          </div>
+          <div class="resena-stars" aria-label="5 de 5 estrellas">★★★★★</div>
+          <p class="resena-text" itemprop="reviewBody">"Excelente servicio, muy amables, y es un lugar céntrico. Lo
+            recomiendo."</p>
+          <div class="resena-autor"><span itemprop="author" itemscope itemtype="https://schema.org/Person"><span
+                itemprop="name">Mónica M.</span></span> <span class="resena-fuente">Google · Insurgentes Sur</span>
+          </div>
+        </article>
+        <article class="resena-card" itemscope itemtype="https://schema.org/Review">
+          <div itemprop="itemReviewed" itemscope itemtype="https://schema.org/HealthAndBeautyBusiness"
+            style="display:none">
+            <meta itemprop="name" content="BellaNick Clinic">
+          </div>
+          <div itemprop="reviewRating" itemscope itemtype="https://schema.org/Rating" style="display:none">
+            <meta itemprop="ratingValue" content="5">
+            <meta itemprop="bestRating" content="5">
+          </div>
+          <div class="resena-stars" aria-label="5 de 5 estrellas">★★★★★</div>
+          <p class="resena-text" itemprop="reviewBody">"Es un excelente lugar, la atención es muy buena, las
+            instalaciones son muy cómodas y el servicio muy bueno, recomendable 100%."</p>
+          <div class="resena-autor"><span itemprop="author" itemscope itemtype="https://schema.org/Person"><span
+                itemprop="name">Jocelyn G.</span></span> <span class="resena-fuente">Google · Insurgentes Sur</span>
+          </div>
+        </article>
+        <article class="resena-card" itemscope itemtype="https://schema.org/Review">
+          <div itemprop="itemReviewed" itemscope itemtype="https://schema.org/HealthAndBeautyBusiness"
+            style="display:none">
+            <meta itemprop="name" content="BellaNick Clinic">
+          </div>
+          <div itemprop="reviewRating" itemscope itemtype="https://schema.org/Rating" style="display:none">
+            <meta itemprop="ratingValue" content="5">
+            <meta itemprop="bestRating" content="5">
+          </div>
+          <div class="resena-stars" aria-label="5 de 5 estrellas">★★★★★</div>
+          <p class="resena-text" itemprop="reviewBody">"Excelente lugar, excelente ubicación, personal profesional y con
+            una gran atención. Lo recomiendo ampliamente."</p>
+          <div class="resena-autor"><span itemprop="author" itemscope itemtype="https://schema.org/Person"><span
+                itemprop="name">Melanie P.</span></span> <span class="resena-fuente">Google · Insurgentes Sur</span>
+          </div>
+        </article>
+        <article class="resena-card" itemscope itemtype="https://schema.org/Review">
+          <div itemprop="itemReviewed" itemscope itemtype="https://schema.org/HealthAndBeautyBusiness"
+            style="display:none">
+            <meta itemprop="name" content="BellaNick Clinic">
+          </div>
+          <div itemprop="reviewRating" itemscope itemtype="https://schema.org/Rating" style="display:none">
+            <meta itemprop="ratingValue" content="5">
+            <meta itemprop="bestRating" content="5">
+          </div>
+          <div class="resena-stars" aria-label="5 de 5 estrellas">★★★★★</div>
+          <p class="resena-text" itemprop="reviewBody">"El local siempre está limpio y la decoración está linda, la
+            plaza tiene bastante lugar de estacionamiento, excelente atención. Pau te explica super bien cada
+            procedimiento y te hace sentir muy cómoda. También puedes accesar a sus servicios a través de Total Pass."
+          </p>
+          <div class="resena-autor"><span itemprop="author" itemscope itemtype="https://schema.org/Person"><span
+                itemprop="name">Vero S.</span></span> <span class="resena-fuente">Google · Querétaro</span></div>
+        </article>
+        <article class="resena-card" itemscope itemtype="https://schema.org/Review">
+          <div itemprop="itemReviewed" itemscope itemtype="https://schema.org/HealthAndBeautyBusiness"
+            style="display:none">
+            <meta itemprop="name" content="BellaNick Clinic">
+          </div>
+          <div itemprop="reviewRating" itemscope itemtype="https://schema.org/Rating" style="display:none">
+            <meta itemprop="ratingValue" content="5">
+            <meta itemprop="bestRating" content="5">
+          </div>
+          <div class="resena-stars" aria-label="5 de 5 estrellas">★★★★★</div>
+          <p class="resena-text" itemprop="reviewBody">"Excelente atención, Pau te resuelve todas las dudas que tengas.
+            Las instalaciones siempre están muy limpias. Sus paquetes siempre se adaptan a lo que necesitas y sus
+            precios son muy accesibles."</p>
+          <div class="resena-autor"><span itemprop="author" itemscope itemtype="https://schema.org/Person"><span
+                itemprop="name">Estela R.</span></span> <span class="resena-fuente">Google · Querétaro</span></div>
+        </article>
+      </div>
+      <div class="resenas-cta">
+        <a href="https://g.co/kgs/HN9ZMX3" target="_blank" rel="noopener">⭐ Ver reseñas Google · Roma Sur</a>
+        <a href="https://share.google/oxxGtspuoQwxrbxuN" target="_blank" rel="noopener">⭐ Ver reseñas Google ·
+          Insurgentes Sur</a>
+        <a href="https://www.google.com/search?q=bellanick+clinic" target="_blank" rel="noopener">⭐ Ver todas las
+          opiniones en Google Maps →</a>
       </div>
     </div>
-    <div class="resenas-grid">
-      <article class="resena-card" itemscope itemtype="https://schema.org/Review">
-        <meta itemprop="reviewRating" content="5">
-        <div class="resena-stars" aria-label="5 de 5 estrellas">★★★★★</div>
-        <p class="resena-text" itemprop="reviewBody">"Totalmente recomendable, precio-calidad, buena atención, las chicas tanto de atención en redes sociales cómo en sucursales son muy amables. Todo el proceso es bien explicado desde el día uno, y siempre te resuelven todas las dudas que vayan surgiendo. Servicio 10/10 amixes."</p>
-        <div class="resena-autor"><span itemprop="author">Hannick Vratny</span> <span class="resena-fuente">Google · Roma Sur</span></div>
-      </article>
-      <article class="resena-card" itemscope itemtype="https://schema.org/Review">
-        <meta itemprop="reviewRating" content="5">
-        <div class="resena-stars" aria-label="5 de 5 estrellas">★★★★★</div>
-        <p class="resena-text" itemprop="reviewBody">"Excelente servicio super recomendado, son muy amables, el lugar es muy limpio y lindo, me estoy tratando axilas y bikini y veo un gran cambio, es un gran lugar 🩷"</p>
-        <div class="resena-autor"><span itemprop="author">Ashley C.</span> <span class="resena-fuente">Google · Roma Sur</span></div>
-      </article>
-      <article class="resena-card" itemscope itemtype="https://schema.org/Review">
-        <meta itemprop="reviewRating" content="5">
-        <div class="resena-stars" aria-label="5 de 5 estrellas">★★★★★</div>
-        <p class="resena-text" itemprop="reviewBody">"Excelente servicio, me estoy tratando axila y piernas y he notado gran avance en tan poco tiempo. Siempre siguiendo las indicaciones para que el tratamiento sea el mejor. Gracias por su atención y excelente trato."</p>
-        <div class="resena-autor"><span itemprop="author">Sandra S.</span> <span class="resena-fuente">Google · Roma Sur</span></div>
-      </article>
-      <article class="resena-card" itemscope itemtype="https://schema.org/Review">
-        <meta itemprop="reviewRating" content="5">
-        <div class="resena-stars" aria-label="5 de 5 estrellas">★★★★★</div>
-        <p class="resena-text" itemprop="reviewBody">"Instalaciones muy limpias y muy lindo trato, costos accesibles. Servicio con base en tus necesidades definitivamente una maravillosa opción. Excelente ubicación lo recomiendo ampliamente."</p>
-        <div class="resena-autor"><span itemprop="author">Paola C.</span> <span class="resena-fuente">Google · Roma Sur</span></div>
-      </article>
-      <article class="resena-card" itemscope itemtype="https://schema.org/Review">
-        <meta itemprop="reviewRating" content="5">
-        <div class="resena-stars" aria-label="5 de 5 estrellas">★★★★★</div>
-        <p class="resena-text" itemprop="reviewBody">"Muy buena atención y sobre todo muy buenas promociones. La depilación láser me ha ayudado mucho y en poco tiempo. Muy efectiva."</p>
-        <div class="resena-autor"><span itemprop="author">Mony L.</span> <span class="resena-fuente">Google · Roma Sur</span></div>
-      </article>
-      <article class="resena-card" itemscope itemtype="https://schema.org/Review">
-        <meta itemprop="reviewRating" content="5">
-        <div class="resena-stars" aria-label="5 de 5 estrellas">★★★★★</div>
-        <p class="resena-text" itemprop="reviewBody">"Llevo 5 sesiones de depilación y la verdad todo muy bien, el lugar está lindo, la atención muy buena y se han visto los resultados aún a la mitad del tratamiento ✨"</p>
-        <div class="resena-autor"><span itemprop="author">Thelma P.</span> <span class="resena-fuente">Google · Roma Sur</span></div>
-      </article>
-      <article class="resena-card" itemscope itemtype="https://schema.org/Review">
-        <meta itemprop="reviewRating" content="5">
-        <div class="resena-stars" aria-label="5 de 5 estrellas">★★★★★</div>
-        <p class="resena-text" itemprop="reviewBody">"Yo amo Bellanick, todos sus tratamientos están increíbles, cumplen con lo que dicen y los precios son extraordinarios, además la atención y el lugar está divino, te hacen sentir súper cómoda 💖"</p>
-        <div class="resena-autor"><span itemprop="author">Jazmín L.</span> <span class="resena-fuente">Google · Insurgentes Sur</span></div>
-      </article>
-      <article class="resena-card" itemscope itemtype="https://schema.org/Review">
-        <meta itemprop="reviewRating" content="5">
-        <div class="resena-stars" aria-label="5 de 5 estrellas">★★★★★</div>
-        <p class="resena-text" itemprop="reviewBody">"Excelente servicio, muy amables, y es un lugar céntrico. Lo recomiendo."</p>
-        <div class="resena-autor"><span itemprop="author">Mónica M.</span> <span class="resena-fuente">Google · Insurgentes Sur</span></div>
-      </article>
-      <article class="resena-card" itemscope itemtype="https://schema.org/Review">
-        <meta itemprop="reviewRating" content="5">
-        <div class="resena-stars" aria-label="5 de 5 estrellas">★★★★★</div>
-        <p class="resena-text" itemprop="reviewBody">"Es un excelente lugar, la atención es muy buena, las instalaciones son muy cómodas y el servicio muy bueno, recomendable 100%."</p>
-        <div class="resena-autor"><span itemprop="author">Jocelyn G.</span> <span class="resena-fuente">Google · Insurgentes Sur</span></div>
-      </article>
-      <article class="resena-card" itemscope itemtype="https://schema.org/Review">
-        <meta itemprop="reviewRating" content="5">
-        <div class="resena-stars" aria-label="5 de 5 estrellas">★★★★★</div>
-        <p class="resena-text" itemprop="reviewBody">"Excelente lugar, excelente ubicación, personal profesional y con una gran atención. Lo recomiendo ampliamente."</p>
-        <div class="resena-autor"><span itemprop="author">Melanie P.</span> <span class="resena-fuente">Google · Insurgentes Sur</span></div>
-      </article>
-      <article class="resena-card" itemscope itemtype="https://schema.org/Review">
-        <meta itemprop="reviewRating" content="5">
-        <div class="resena-stars" aria-label="5 de 5 estrellas">★★★★★</div>
-        <p class="resena-text" itemprop="reviewBody">"El local siempre está limpio y la decoración está linda, la plaza tiene bastante lugar de estacionamiento, excelente atención. Pau te explica super bien cada procedimiento y te hace sentir muy cómoda. También puedes accesar a sus servicios a través de Total Pass."</p>
-        <div class="resena-autor"><span itemprop="author">Vero S.</span> <span class="resena-fuente">Google · Querétaro</span></div>
-      </article>
-      <article class="resena-card" itemscope itemtype="https://schema.org/Review">
-        <meta itemprop="reviewRating" content="5">
-        <div class="resena-stars" aria-label="5 de 5 estrellas">★★★★★</div>
-        <p class="resena-text" itemprop="reviewBody">"Excelente atención, Pau te resuelve todas las dudas que tengas. Las instalaciones siempre están muy limpias. Sus paquetes siempre se adaptan a lo que necesitas y sus precios son muy accesibles."</p>
-        <div class="resena-autor"><span itemprop="author">Estela R.</span> <span class="resena-fuente">Google · Querétaro</span></div>
-      </article>
-    </div>
-    <div class="resenas-cta">
-      <a href="https://g.co/kgs/HN9ZMX3" target="_blank" rel="noopener">⭐ Ver reseñas Google · Roma Sur</a>
-      <a href="https://share.google/oxxGtspuoQwxrbxuN" target="_blank" rel="noopener">⭐ Ver reseñas Google · Insurgentes Sur</a>
-      <a href="https://www.google.com/search?q=bellanick+clinic" target="_blank" rel="noopener">⭐ Ver todas las opiniones en Google Maps →</a>
-    </div>
-  </div>
-</section>
-<footer id="contacto" role="contentinfo">
+  </section>
+  <footer id="contacto" role="contentinfo">
     <div class="footer-grid">
       <div>
         <!-- <img src="https://depilasermexico.com/assets/img/logo/logo.webp" alt="Logo BellaNick Clinic" class="footer-logo"
@@ -2720,7 +3048,8 @@
       <div>
         <h3 class="footer-titulo-col">Servicios</h3>
         <ul class="footer-lista">
-          <li><a href="https://depilasermexico.com/depilacion-laser.html">Depilación láser cuatridiodo Soprano de última generación</a></li>
+          <li><a href="https://depilasermexico.com/depilacion-laser.html">Depilación láser cuatridiodo Soprano de última
+              generación</a></li>
           <li><a href="https://depilasermexico.com/lipolisis-laser.html">Lipólisis Láser</a></li>
           <li><a href="https://depilasermexico.com/cavitacion.html">Cavitación</a></li>
           <li><a href="https://depilasermexico.com/radiofrecuencia-tripolar.html">Radiofrecuencia Tripolar</a></li>
@@ -2753,7 +3082,8 @@
           <div class="contacto-item"><span>📍</span><span>Monterrey 325, Roma Sur, CDMX 06760</span></div>
           <div class="contacto-item"><span>📞</span><a href="tel:+525535433490" style="color:rgba(255,255,255,.65)">(55)
               3543-3490</a></div>
-          <div class="contacto-item"><span>📍</span><span>Av. Insurgentes Sur 1799, Benito Juárez, CDMX 01020</span></div>
+          <div class="contacto-item"><span>📍</span><span>Av. Insurgentes Sur 1799, Benito Juárez, CDMX 01020</span>
+          </div>
           <div class="contacto-item"><span>📞</span><a href="tel:+525556622079" style="color:rgba(255,255,255,.65)">(55)
               5662-2079</a></div>
           <div class="contacto-item"><span>📍</span><span>Corregidora, Querétaro, MX</span></div>
@@ -2777,7 +3107,7 @@
     <button id="chatClose" class="chat-close" aria-label="Cerrar chat">✕</button>
     <div id="messages"></div>
     <div class="chat-input">
-      <input type="text" id="userInput" placeholder="¿Te ayudo a agendar?"  aria-label="Escribe tu pregunta" />
+      <input type="text" id="userInput" placeholder="¿Te ayudo a agendar?" aria-label="Escribe tu pregunta" />
       <button id="sendBtn">Enviar</button>
     </div>
   </div>
@@ -2930,4 +3260,5 @@
     })();
   </script>
 </body>
+
 </html>
