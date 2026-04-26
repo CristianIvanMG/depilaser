@@ -1954,10 +1954,10 @@
     const ZONAS = [
       // FACIAL – MUJER
       { id: 'bigote', nombre: 'Bigote', zona: 'Bigote', cat: 'facial', genero: 'mujer', paquete: 'sesion', icon: '💋', precio: 99, img: 'depilacion-laser-bigote.webp', slug: 'depilacion-laser-bigote' },
-      { id: 'menton', nombre: 'Mentón / Barbilla', zona: 'Mentón', cat: 'facial', genero: 'mujer', paquete: 'sesion', icon: '✨', precio: 99, slug: 'depilacion-laser-menton' },
+      { id: 'menton', nombre: 'Mentón / Barbilla', zona: 'Mentón', cat: 'facial', genero: 'mujer', paquete: 'sesion', icon: '✨', precio: 99, img: 'depilacion-laser-barbilla.webp', slug: 'depilacion-laser-menton' },
       { id: 'patillas', nombre: 'Patillas', zona: 'Patillas', cat: 'facial', genero: 'mujer', paquete: 'sesion', icon: '✨', precio: 99, img: 'depilacion-laser-patillas.webp', slug: 'depilacion-laser-patillas' },
-      { id: 'entrecejo', nombre: 'Entrecejo', zona: 'Entrecejo', cat: 'facial', genero: 'mujer', paquete: 'sesion', icon: '👁️', precio: 99, slug: 'depilacion-laser-entrecejo' },
-      { id: 'cuello-frente', nombre: 'Cuello (frente)', zona: 'Cuello', cat: 'facial', genero: 'mujer', paquete: 'sesion', icon: '✨', precio: 99, slug: 'depilacion-laser-cuello' },
+      { id: 'entrecejo', nombre: 'Entrecejo', zona: 'Entrecejo', cat: 'facial', genero: 'mujer', paquete: 'sesion', icon: '👁️', precio: 99, img: 'depilacion-laser-entrecejo.webp', slug: 'depilacion-laser-entrecejo' },
+      { id: 'cuello-frente', nombre: 'Cuello (frente)', zona: 'Cuello', cat: 'facial', genero: 'mujer', paquete: 'sesion', icon: '✨', precio: 99, img: 'depilacion-laser-cuello.webp', slug: 'depilacion-laser-cuello' },
       { id: 'nuca', nombre: 'Nuca', zona: 'Nuca', cat: 'facial', genero: 'unisex', paquete: 'sesion', icon: '✨', precio: 99, img: 'depilacion-laser-nuca.webp', slug: 'depilacion-laser-nuca' },
       { id: 'facial-completo', nombre: 'Facial completo', zona: 'Facial', cat: 'facial', genero: 'mujer', paquete: 'paquete6', icon: '💎', precio: 299, img: 'depilacion-laser-facial-completo.webp', slug: 'depilacion-laser-facial-completo' },
 
@@ -1965,15 +1965,15 @@
       { id: 'axilas', nombre: 'Axilas', zona: 'Axilas', cat: 'corporal', genero: 'mujer', paquete: 'paquete6', icon: '💖', precio: 99, img: 'depilacion-laser-axilas.webp', slug: 'depilacion-laser-axilas' },
       { id: 'antebrazos', nombre: 'Antebrazos', zona: 'Brazos', cat: 'corporal', genero: 'mujer', paquete: 'paquete6', icon: '💪', precio: 250, img: 'depilacion-laser-antebrazos.webp', slug: 'depilacion-laser-antebrazos' },
       { id: 'brazos-completos', nombre: 'Brazos completos', zona: 'Brazos', cat: 'corporal', genero: 'mujer', paquete: 'paquete6', icon: '💪', precio: 299, img: 'depilacion-laser-brazos.webp', slug: 'depilacion-laser-brazos' },
-      { id: 'linea-alba', nombre: 'Línea Alba (abdomen)', zona: 'Abdomen', cat: 'corporal', genero: 'mujer', paquete: 'sesion', icon: '✨', precio: 99, slug: 'depilacion-laser-linea-alba' },
-      { id: 'abdomen', nombre: 'Abdomen completo', zona: 'Abdomen', cat: 'corporal', genero: 'mujer', paquete: 'paquete6', icon: '💫', precio: 350, slug: 'depilacion-laser-abdomen' },
+      { id: 'linea-alba', nombre: 'Línea Alba (abdomen)', zona: 'Abdomen', cat: 'corporal', genero: 'mujer', paquete: 'sesion', icon: '✨', precio: 99, img: 'depilacion-laser-linea-alba-abdomen.webp', slug: 'depilacion-laser-linea-alba' },
+      { id: 'abdomen', nombre: 'Abdomen completo', zona: 'Abdomen', cat: 'corporal', genero: 'mujer', paquete: 'paquete6', icon: '💫', precio: 350, img: 'depilacion-laser-abdomen-completo.webp', slug: 'depilacion-laser-abdomen' },
       { id: 'espalda-baja', nombre: 'Espalda baja (lumbar)', zona: 'Espalda', cat: 'corporal', genero: 'mujer', paquete: 'paquete6', icon: '✨', precio: 350, img: 'depilacion-laser-espalda-baja.webp', slug: 'depilacion-laser-espalda-baja' },
       { id: 'areolas', nombre: 'Areolas', zona: 'Senos', cat: 'corporal', genero: 'mujer', paquete: 'sesion', icon: '💗', precio: 99, slug: 'depilacion-laser-areolas' },
       { id: 'medias-piernas', nombre: 'Medias piernas (abajo)', zona: 'Piernas', cat: 'corporal', genero: 'mujer', paquete: 'paquete6', icon: '🦵', precio: 250, img: 'depilacion-laser-medias-piernas-abajo.webp', slug: 'depilacion-laser-medias-piernas-abajo' },
       { id: 'medias-piernas-arriba', nombre: 'Medias piernas (arriba)', zona: 'Piernas', cat: 'corporal', genero: 'mujer', paquete: 'paquete6', icon: '🦵', precio: 250, img: 'depilacion-laser-medias-piernas-arriba.webp', slug: 'depilacion-laser-medias-piernas-arriba' },
       { id: 'piernas-completas', nombre: 'Piernas completas', zona: 'Piernas', cat: 'corporal', genero: 'mujer', paquete: 'paquete6', icon: '🦵', precio: 350, img: 'depilacion-laser-piernas-completas.webp', slug: 'depilacion-laser-piernas-completas' },
       { id: 'gluteos', nombre: 'Glúteos', zona: 'Glúteos', cat: 'corporal', genero: 'mujer', paquete: 'paquete6', icon: '🍑', precio: 350, img: 'depilacion-laser-gluteos.webp', slug: 'depilacion-laser-gluteos' },
-      { id: 'manos-dedos', nombre: 'Manos y dedos', zona: 'Manos', cat: 'corporal', genero: 'unisex', paquete: 'sesion', icon: '✋', precio: 99, slug: 'depilacion-laser-manos' },
+      { id: 'manos-dedos', nombre: 'Manos y dedos', zona: 'Manos', cat: 'corporal', genero: 'unisex', paquete: 'sesion', icon: '✋', precio: 99, img: 'depilacion-laser-manos-dedos.webp', slug: 'depilacion-laser-manos' },
       { id: 'pies-dedos', nombre: 'Pies y dedos', zona: 'Pies', cat: 'corporal', genero: 'unisex', paquete: 'sesion', icon: '🦶', precio: 99, img: 'depilacion-laser-pies.webp', slug: 'depilacion-laser-pies' },
 
       // ÍNTIMA – MUJER
@@ -1984,13 +1984,13 @@
       { id: 'rebaje-bikini', nombre: 'Rebaje de bikini', zona: 'Bikini', cat: 'intima', genero: 'mujer', paquete: 'sesion', icon: '✨', precio: 199, slug: 'depilacion-laser-rebaje-bikini' },
 
       // HOMBRE
-      { id: 'barba-moldeado', nombre: 'Barba (moldeado)', zona: 'Barba', cat: 'facial', genero: 'hombre', paquete: 'paquete6', icon: '🧔', precio: 299, slug: 'depilacion-laser-barba-hombre' },
+      { id: 'barba-moldeado', nombre: 'Barba (moldeado)', zona: 'Barba', cat: 'facial', genero: 'hombre', paquete: 'paquete6', icon: '🧔', precio: 299, img: 'depilacion-laser-barba-hombre.webp', slug: 'depilacion-laser-barba-hombre' },
       { id: 'pecho-hombre', nombre: 'Pecho (hombre)', zona: 'Pecho', cat: 'corporal', genero: 'hombre', paquete: 'paquete6', icon: '💪', precio: 350, img: 'depilacion-laser-pecho-hombre.webp', slug: 'depilacion-laser-pecho-hombre' },
       { id: 'abdomen-hombre', nombre: 'Abdomen (hombre)', zona: 'Abdomen', cat: 'corporal', genero: 'hombre', paquete: 'paquete6', icon: '💪', precio: 450, img: 'depilacion-laser-abdomen-hombre.webp', slug: 'depilacion-laser-abdomen-hombre' },
       { id: 'espalda-hombre', nombre: 'Espalda completa (hombre)', zona: 'Espalda', cat: 'corporal', genero: 'hombre', paquete: 'paquete6', icon: '💪', precio: 450, img: 'depilacion-laser-espalda-hombre.webp', slug: 'depilacion-laser-espalda-hombre' },
-      { id: 'hombros-hombre', nombre: 'Hombros (hombre)', zona: 'Hombros', cat: 'corporal', genero: 'hombre', paquete: 'sesion', icon: '💪', precio: 350, slug: 'depilacion-laser-hombros-hombre' },
-      { id: 'axilas-hombre', nombre: 'Axilas (hombre)', zona: 'Axilas', cat: 'corporal', genero: 'hombre', paquete: 'paquete6', icon: '💪', precio: 99, slug: 'depilacion-laser-axilas-hombre' },
-      { id: 'piernas-hombre', nombre: 'Piernas completas (hombre)', zona: 'Piernas', cat: 'corporal', genero: 'hombre', paquete: 'paquete6', icon: '🦵', precio: 450, slug: 'depilacion-laser-piernas-hombre' },
+      { id: 'hombros-hombre', nombre: 'Hombros (hombre)', zona: 'Hombros', cat: 'corporal', genero: 'hombre', paquete: 'sesion', icon: '💪', precio: 350, img: 'depilacion-laser-hombros-hombre.webp', slug: 'depilacion-laser-hombros-hombre' },
+      { id: 'axilas-hombre', nombre: 'Axilas (hombre)', zona: 'Axilas', cat: 'corporal', genero: 'hombre', paquete: 'paquete6', icon: '💪', precio: 99, img: 'depilacion-laser-axilas-hombre.webp', slug: 'depilacion-laser-axilas-hombre' },
+      { id: 'piernas-hombre', nombre: 'Piernas completas (hombre)', zona: 'Piernas', cat: 'corporal', genero: 'hombre', paquete: 'paquete6', icon: '🦵', precio: 450, img: 'depilacion-laser-piernas-completas-hombre.webp', slug: 'depilacion-laser-piernas-hombre' },
       { id: 'gluteos-hombre', nombre: 'Glúteos (hombre)', zona: 'Glúteos', cat: 'corporal', genero: 'hombre', paquete: 'paquete6', icon: '💪', precio: 450, img: 'depilacion-laser-gluteos-hombre.webp', slug: 'depilacion-laser-gluteos-hombre' }
     ];
 
@@ -2055,7 +2055,7 @@
           <article class="zona-card">
             <div class="zona-img">
               <span class="zona-tag ${tagClass}">${tagTxt}</span>
-              ${z.img ? `<img src="assets/img/depilacion-laser-zonas/${z.img}" alt="Depilación láser de ${z.nombre} en BellaNick Clinic" class="zona-pic" loading="lazy" decoding="async" width="600" height="600">` : `<span class="zona-icon" aria-hidden="true">${z.icon}</span>`}
+              ${z.img ? `<img src="assets/img/bella-nick-clinic/${z.img}" alt="Depilación láser de ${z.nombre} en BellaNick Clinic" class="zona-pic" loading="lazy" decoding="async" width="600" height="600">` : `<span class="zona-icon" aria-hidden="true">${z.icon}</span>`}
             </div>
             <div class="zona-body">
               <div class="zona-cat">${L_CAT[z.cat]} · ${L_PAQUETE[z.paquete]}</div>
