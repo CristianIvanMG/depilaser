@@ -105,25 +105,25 @@ RedirectMatch 404 /\.git(/|$)
 </IfModule>
 
 
-
-
 # --- Rewrite combinado: HTTPS forzado + sin www + URLs limpias sin .html ---
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
   # 1) Forzar HTTPS (HTTPS confirmado estable)
   RewriteCond %{HTTPS} !=on
-  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+  RewriteRule ^(.*)$ https://depilasermexico.com/$1 [R=301,L]
 
   # 2) Canonical sin www (preferimos depilasermexico.com sobre www.depilasermexico.com)
-  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
-  RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
+  RewriteCond %{HTTP_HOST} ^www\.depilasermexico\.com [NC]
+  RewriteRule ^(.*)$ https://depilasermexico.com/$1 [R=301,L]
 
   # 3) URLs limpias: si /servicio existe como /servicio.html, servirlo (sin redirect)
+  RewriteCond %{THE_REQUEST} /index\.html [NC]
+  RewriteRule ^index\.html$ / [R=301,L]
+
   RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteCond %{REQUEST_FILENAME}\.html -f
-  RewriteRule ^([^.]+)$ $1.html [L]
+  RewriteCond %{REQUEST_URI} !/$
+  RewriteRule ^(.*)$ https://depilasermexico.com/$1/ [R=301,L]
 </IfModule>
 
 # --- Paginas de error ---
