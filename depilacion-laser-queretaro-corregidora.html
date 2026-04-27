@@ -2131,8 +2131,8 @@
     /* SERVICIOS */
     .grid-srv {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 22px;
       max-width: 1140px;
       margin: 0 auto
     }
@@ -2140,17 +2140,46 @@
     .card-srv {
       background: #fff;
       border-radius: var(--rl);
-      padding: 24px;
+      padding: 0;
       border: 1px solid var(--cgb);
       box-shadow: var(--sc);
       transition: var(--tr);
-      text-align: center
+      text-align: center;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column
     }
 
     .card-srv:hover {
       border-color: var(--cp);
       transform: translateY(-3px);
       box-shadow: var(--sombra)
+    }
+
+    .srv-img-wrap {
+      position: relative;
+      aspect-ratio: 4 / 3;
+      background: linear-gradient(135deg, #fdf2f7 0%, #fce7f3 100%);
+      overflow: hidden
+    }
+
+    .srv-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform .4s ease
+    }
+
+    .card-srv:hover .srv-img-wrap img {
+      transform: scale(1.06)
+    }
+
+    .srv-body {
+      padding: 20px 20px 22px;
+      display: flex;
+      flex-direction: column;
+      flex: 1
     }
 
     .srv-ico {
@@ -2162,14 +2191,16 @@
       font-size: 15px;
       font-weight: 700;
       color: var(--ct);
-      margin-bottom: 6px
+      margin-bottom: 6px;
+      line-height: 1.35
     }
 
     .srv-desc {
       font-size: 12.5px;
       color: var(--ctc);
       line-height: 1.5;
-      margin-bottom: 14px
+      margin-bottom: 14px;
+      flex: 1
     }
 
     .chip {
@@ -3128,38 +3159,69 @@
       </div>
       <div class="grid-srv">
         <div class="card-srv">
-          <div class="srv-ico">✨</div>
-          <div class="srv-nom">Depilación láser cuatridiodo Soprano de última generación</div>
-          <div class="srv-desc">Elimina el vello definitivamente. Resultados desde la primera sesión.</div><span
-            class="chip">Desde $99 MXN</span><a href="https://depilasermexico.com/depilacion-laser-diodo.html"
-            class="btn-srv">Ver tratamiento →</a>
+          <div class="srv-img-wrap">
+            <img src="https://depilasermexico.com/assets/img/bella-nick-clinic/depilacion-laser-axilas.webp"
+              alt="Depilación láser cuatridiodo Soprano en BellaNick Clinic Querétaro" loading="lazy" decoding="async"
+              width="400" height="300">
+          </div>
+          <div class="srv-body">
+            <div class="srv-nom">Depilación láser cuatridiodo Soprano de última generación</div>
+            <div class="srv-desc">Elimina el vello definitivamente. Resultados desde la primera sesión.</div>
+            <span class="chip">Desde $99 MXN</span>
+            <a href="https://depilasermexico.com/depilacion-laser-diodo.html" class="btn-srv">Ver tratamiento →</a>
+          </div>
         </div>
         <div class="card-srv">
-          <div class="srv-ico">🔥</div>
-          <div class="srv-nom">Lipólisis Láser</div>
-          <div class="srv-desc">Reduce grasa localizada sin cirugía ni tiempo de recuperación.</div><span
-            class="chip">Consultar precio</span><a href="https://depilasermexico.com/lipolisis-laser.html"
-            class="btn-srv">Ver tratamiento →</a>
+          <div class="srv-img-wrap">
+            <img src="https://depilasermexico.com/assets/img/bella-nick-clinic/tratamiento-estetico-lipolisis-laser.webp"
+              alt="Lipólisis láser para reducir grasa localizada en Querétaro" loading="lazy" decoding="async"
+              width="400" height="300">
+          </div>
+          <div class="srv-body">
+            <div class="srv-nom">Lipólisis Láser</div>
+            <div class="srv-desc">Reduce grasa localizada sin cirugía ni tiempo de recuperación.</div>
+            <span class="chip">Consultar precio</span>
+            <a href="https://depilasermexico.com/lipolisis-laser.html" class="btn-srv">Ver tratamiento →</a>
+          </div>
         </div>
         <div class="card-srv">
-          <div class="srv-ico">🌊</div>
-          <div class="srv-nom">Cavitación</div>
-          <div class="srv-desc">Elimina celulitis y reduce medidas con ultrasonido.</div><span class="chip">Consultar
-            precio</span><a href="https://depilasermexico.com/cavitacion.html" class="btn-srv">Ver tratamiento →</a>
+          <div class="srv-img-wrap">
+            <img src="https://depilasermexico.com/assets/img/bella-nick-clinic/tratamiento-estetico-cavitacion.webp"
+              alt="Cavitación con ultrasonido para reducir celulitis en Querétaro" loading="lazy" decoding="async"
+              width="400" height="300">
+          </div>
+          <div class="srv-body">
+            <div class="srv-nom">Cavitación</div>
+            <div class="srv-desc">Elimina celulitis y reduce medidas con ultrasonido.</div>
+            <span class="chip">Consultar precio</span>
+            <a href="https://depilasermexico.com/cavitacion.html" class="btn-srv">Ver tratamiento →</a>
+          </div>
         </div>
         <div class="card-srv">
-          <div class="srv-ico">💫</div>
-          <div class="srv-nom">Radiofrecuencia Tripolar</div>
-          <div class="srv-desc">Reafirma y tonifica piel estimulando el colágeno.</div><span class="chip">Consultar
-            precio</span><a href="https://depilasermexico.com/radiofrecuencia-tripolar.html" class="btn-srv">Ver
-            tratamiento →</a>
+          <div class="srv-img-wrap">
+            <img src="https://depilasermexico.com/assets/img/bella-nick-clinic/tratamiento-estetico-radiofrecuencia-tripolar.webp"
+              alt="Radiofrecuencia tripolar para reafirmar piel en Querétaro" loading="lazy" decoding="async"
+              width="400" height="300">
+          </div>
+          <div class="srv-body">
+            <div class="srv-nom">Radiofrecuencia Tripolar</div>
+            <div class="srv-desc">Reafirma y tonifica piel estimulando el colágeno.</div>
+            <span class="chip">Consultar precio</span>
+            <a href="https://depilasermexico.com/radiofrecuencia-tripolar.html" class="btn-srv">Ver tratamiento →</a>
+          </div>
         </div>
         <div class="card-srv">
-          <div class="srv-ico">⚡</div>
-          <div class="srv-nom">Electroestimulación</div>
-          <div class="srv-desc">Tonifica músculos sin esfuerzo físico.</div><span class="chip">Consultar
-            precio</span><a href="https://depilasermexico.com/electroestimulacion.html" class="btn-srv">Ver tratamiento
-            →</a>
+          <div class="srv-img-wrap">
+            <img src="https://depilasermexico.com/assets/img/bella-nick-clinic/tratamiento-estetico-electroestimulacion.webp"
+              alt="Electroestimulación muscular para tonificar en Querétaro" loading="lazy" decoding="async"
+              width="400" height="300">
+          </div>
+          <div class="srv-body">
+            <div class="srv-nom">Electroestimulación</div>
+            <div class="srv-desc">Tonifica músculos sin esfuerzo físico.</div>
+            <span class="chip">Consultar precio</span>
+            <a href="https://depilasermexico.com/electroestimulacion.html" class="btn-srv">Ver tratamiento →</a>
+          </div>
         </div>
       </div>
     </section>
@@ -3298,6 +3360,19 @@
           <li><a href="depilacion-laser-queretaro-corregidora.html">Corregidora · Querétaro</a></li>
         </ul>
       </div>
+      <div>
+        <div class="foot-tit">Zonas l&aacute;ser</div>
+        <ul class="foot-ul">
+          <!-- Zonas principales de depilacion laser -->
+          <li><a href="depilacion-laser-facial-completo.html">Depilaci&oacute;n l&aacute;ser Facial completo</a></li>
+          <li><a href="depilacion-laser-bikini.html">Depilaci&oacute;n l&aacute;ser Bikini</a></li>
+          <li><a href="depilacion-laser-brazos.html">Depilaci&oacute;n l&aacute;ser Brazos</a></li>
+          <li><a href="depilacion-laser-piernas.html">Depilaci&oacute;n l&aacute;ser Piernas</a></li>
+          <li><a href="depilacion-laser-cuerpo.html">Depilaci&oacute;n l&aacute;ser Cuerpo</a></li>
+          <li><a href="depilacion-laser-hombre.html">Depilaci&oacute;n l&aacute;ser Hombre</a></li>
+        </ul>
+      </div>
+
       <div>
         <div class="foot-tit">Contacto</div>
         <address>

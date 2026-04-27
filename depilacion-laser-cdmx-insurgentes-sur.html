@@ -2029,8 +2029,8 @@
     /* SERVICIOS GRID */
     .grid-srv {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 22px;
       max-width: 1140px;
       margin: 0 auto
     }
@@ -2038,17 +2038,46 @@
     .card-srv {
       background: #fff;
       border-radius: var(--rl);
-      padding: 24px;
+      padding: 0;
       border: 1px solid var(--cgb);
       box-shadow: var(--sc);
       transition: var(--tr);
-      text-align: center
+      text-align: center;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column
     }
 
     .card-srv:hover {
       border-color: var(--cp);
       transform: translateY(-3px);
       box-shadow: var(--sombra)
+    }
+
+    .srv-img-wrap {
+      position: relative;
+      aspect-ratio: 4 / 3;
+      background: linear-gradient(135deg, #fdf2f7 0%, #fce7f3 100%);
+      overflow: hidden
+    }
+
+    .srv-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform .4s ease
+    }
+
+    .card-srv:hover .srv-img-wrap img {
+      transform: scale(1.06)
+    }
+
+    .srv-body {
+      padding: 20px 20px 22px;
+      display: flex;
+      flex-direction: column;
+      flex: 1
     }
 
     .srv-ico {
@@ -2060,14 +2089,16 @@
       font-size: 15px;
       font-weight: 700;
       color: var(--ct);
-      margin-bottom: 6px
+      margin-bottom: 6px;
+      line-height: 1.35
     }
 
     .srv-desc {
       font-size: 12.5px;
       color: var(--ctc);
       line-height: 1.5;
-      margin-bottom: 14px
+      margin-bottom: 14px;
+      flex: 1
     }
 
     .chip {
@@ -2977,9 +3008,9 @@
       </div>
       <div class="mapa-wrap">
         <iframe
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3763.5!2d-99.1579!3d19.4183!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTnCsDI1JzA2LjAiTiA5OcKwMDknMjguNCJX!5e0!3m2!1ses!2smx!4v1700000000000!5m2!1ses!2smx"
-          title="Mapa BellaNick Clinic Insurgentes Sur — Av. Insurgentes Sur 1799, CDMX" loading="lazy" allowfullscreen
-          referrerpolicy="no-referrer-when-downgrade">
+          src="https://maps.google.com/maps?q=Av.%20Insurgentes%20Sur%201799%2C%20Guadalupe%20Inn%2C%20%C3%81lvaro%20Obreg%C3%B3n%2C%2001020%20CDMX&t=&z=16&ie=UTF8&iwloc=&output=embed"
+          title="Mapa BellaNick Clinic Insurgentes Sur — Av. Insurgentes Sur 1799, Guadalupe Inn, CDMX"
+          loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade">
         </iframe>
       </div>
       <div style="text-align:center;margin-top:20px">
@@ -3051,39 +3082,69 @@
       </div>
       <div class="grid-srv">
         <div class="card-srv">
-          <div class="srv-ico">✨</div>
-          <div class="srv-nom">Depilación láser cuatridiodo Soprano de última generación</div>
-          <div class="srv-desc">Elimina el vello definitivamente con tecnología de última generación.</div><span
-            class="chip">Desde $99 MXN</span><a href="https://depilasermexico.com/depilacion-laser-diodo.html"
-            class="btn-srv">Ver tratamiento →</a>
+          <div class="srv-img-wrap">
+            <img src="https://depilasermexico.com/assets/img/bella-nick-clinic/depilacion-laser-axilas.webp"
+              alt="Depilación láser cuatridiodo Soprano en BellaNick Clinic Insurgentes Sur" loading="lazy"
+              decoding="async" width="400" height="300">
+          </div>
+          <div class="srv-body">
+            <div class="srv-nom">Depilación láser cuatridiodo Soprano de última generación</div>
+            <div class="srv-desc">Elimina el vello definitivamente con tecnología de última generación.</div>
+            <span class="chip">Desde $99 MXN</span>
+            <a href="https://depilasermexico.com/depilacion-laser-diodo.html" class="btn-srv">Ver tratamiento →</a>
+          </div>
         </div>
         <div class="card-srv">
-          <div class="srv-ico">🔥</div>
-          <div class="srv-nom">Lipólisis Láser</div>
-          <div class="srv-desc">Reduce grasa localizada sin cirugía ni tiempo de recuperación.</div><span
-            class="chip">Consultar precio</span><a href="https://depilasermexico.com/lipolisis-laser.html"
-            class="btn-srv">Ver tratamiento →</a>
+          <div class="srv-img-wrap">
+            <img src="https://depilasermexico.com/assets/img/bella-nick-clinic/tratamiento-estetico-lipolisis-laser.webp"
+              alt="Lipólisis láser para reducir grasa localizada en Insurgentes Sur" loading="lazy" decoding="async"
+              width="400" height="300">
+          </div>
+          <div class="srv-body">
+            <div class="srv-nom">Lipólisis Láser</div>
+            <div class="srv-desc">Reduce grasa localizada sin cirugía ni tiempo de recuperación.</div>
+            <span class="chip">Consultar precio</span>
+            <a href="https://depilasermexico.com/lipolisis-laser.html" class="btn-srv">Ver tratamiento →</a>
+          </div>
         </div>
         <div class="card-srv">
-          <div class="srv-ico">🌊</div>
-          <div class="srv-nom">Cavitación</div>
-          <div class="srv-desc">Elimina celulitis y reduce medidas con ultrasonido de alta frecuencia.</div><span
-            class="chip">Consultar precio</span><a href="https://depilasermexico.com/cavitacion.html"
-            class="btn-srv">Ver tratamiento →</a>
+          <div class="srv-img-wrap">
+            <img src="https://depilasermexico.com/assets/img/bella-nick-clinic/tratamiento-estetico-cavitacion.webp"
+              alt="Cavitación con ultrasonido para reducir celulitis en Insurgentes Sur" loading="lazy"
+              decoding="async" width="400" height="300">
+          </div>
+          <div class="srv-body">
+            <div class="srv-nom">Cavitación</div>
+            <div class="srv-desc">Elimina celulitis y reduce medidas con ultrasonido de alta frecuencia.</div>
+            <span class="chip">Consultar precio</span>
+            <a href="https://depilasermexico.com/cavitacion.html" class="btn-srv">Ver tratamiento →</a>
+          </div>
         </div>
         <div class="card-srv">
-          <div class="srv-ico">💫</div>
-          <div class="srv-nom">Radiofrecuencia Tripolar</div>
-          <div class="srv-desc">Reafirma y tonifica cara y cuerpo estimulando el colágeno.</div><span
-            class="chip">Consultar precio</span><a href="https://depilasermexico.com/radiofrecuencia-tripolar.html"
-            class="btn-srv">Ver tratamiento →</a>
+          <div class="srv-img-wrap">
+            <img src="https://depilasermexico.com/assets/img/bella-nick-clinic/tratamiento-estetico-radiofrecuencia-tripolar.webp"
+              alt="Radiofrecuencia tripolar para reafirmar piel en Insurgentes Sur" loading="lazy" decoding="async"
+              width="400" height="300">
+          </div>
+          <div class="srv-body">
+            <div class="srv-nom">Radiofrecuencia Tripolar</div>
+            <div class="srv-desc">Reafirma y tonifica cara y cuerpo estimulando el colágeno.</div>
+            <span class="chip">Consultar precio</span>
+            <a href="https://depilasermexico.com/radiofrecuencia-tripolar.html" class="btn-srv">Ver tratamiento →</a>
+          </div>
         </div>
         <div class="card-srv">
-          <div class="srv-ico">⚡</div>
-          <div class="srv-nom">Electroestimulación</div>
-          <div class="srv-desc">Tonifica músculos sin esfuerzo con corrientes de baja frecuencia.</div><span
-            class="chip">Consultar precio</span><a href="https://depilasermexico.com/electroestimulacion.html"
-            class="btn-srv">Ver tratamiento →</a>
+          <div class="srv-img-wrap">
+            <img src="https://depilasermexico.com/assets/img/bella-nick-clinic/tratamiento-estetico-electroestimulacion.webp"
+              alt="Electroestimulación muscular para tonificar en Insurgentes Sur" loading="lazy" decoding="async"
+              width="400" height="300">
+          </div>
+          <div class="srv-body">
+            <div class="srv-nom">Electroestimulación</div>
+            <div class="srv-desc">Tonifica músculos sin esfuerzo con corrientes de baja frecuencia.</div>
+            <span class="chip">Consultar precio</span>
+            <a href="https://depilasermexico.com/electroestimulacion.html" class="btn-srv">Ver tratamiento →</a>
+          </div>
         </div>
       </div>
     </section>
@@ -3200,6 +3261,19 @@
           <li><a href="depilacion-laser-queretaro-corregidora.html">Corregidora · Querétaro</a></li>
         </ul>
       </div>
+      <div>
+        <div class="foot-tit">Zonas l&aacute;ser</div>
+        <ul class="foot-ul">
+          <!-- Zonas principales de depilacion laser -->
+          <li><a href="depilacion-laser-facial-completo.html">Depilaci&oacute;n l&aacute;ser Facial completo</a></li>
+          <li><a href="depilacion-laser-bikini.html">Depilaci&oacute;n l&aacute;ser Bikini</a></li>
+          <li><a href="depilacion-laser-brazos.html">Depilaci&oacute;n l&aacute;ser Brazos</a></li>
+          <li><a href="depilacion-laser-piernas.html">Depilaci&oacute;n l&aacute;ser Piernas</a></li>
+          <li><a href="depilacion-laser-cuerpo.html">Depilaci&oacute;n l&aacute;ser Cuerpo</a></li>
+          <li><a href="depilacion-laser-hombre.html">Depilaci&oacute;n l&aacute;ser Hombre</a></li>
+        </ul>
+      </div>
+
       <div>
         <div class="foot-tit">Contacto</div>
         <address>

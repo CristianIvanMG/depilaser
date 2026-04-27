@@ -1904,6 +1904,19 @@
         </ul>
       </div>
       <div>
+        <div class="foot-tit">Zonas l&aacute;ser</div>
+        <ul class="foot-ul">
+          <!-- Zonas principales de depilacion laser -->
+          <li><a href="depilacion-laser-facial-completo.html">Depilaci&oacute;n l&aacute;ser Facial completo</a></li>
+          <li><a href="depilacion-laser-bikini.html">Depilaci&oacute;n l&aacute;ser Bikini</a></li>
+          <li><a href="depilacion-laser-brazos.html">Depilaci&oacute;n l&aacute;ser Brazos</a></li>
+          <li><a href="depilacion-laser-piernas.html">Depilaci&oacute;n l&aacute;ser Piernas</a></li>
+          <li><a href="depilacion-laser-cuerpo.html">Depilaci&oacute;n l&aacute;ser Cuerpo</a></li>
+          <li><a href="depilacion-laser-hombre.html">Depilaci&oacute;n l&aacute;ser Hombre</a></li>
+        </ul>
+      </div>
+
+      <div>
         <div class="foot-tit">Contacto</div>
         <address>
           <div class="contacto-item"><span>📧</span><a href="mailto:administracion@depilasermexico.com"
@@ -1991,6 +2004,33 @@
     const L_CAT = { facial: 'Facial', corporal: 'Corporal', intima: 'Íntima' };
     const L_PAQUETE = { sesion: 'Sesión suelta', paquete6: 'Paquete 6 sesiones', paquete10: 'Paquete 10 sesiones' };
 
+    const CANONICAL_SLUGS = {
+      'depilacion-laser-menton': 'depilacion-laser-facial-completo',
+      'depilacion-laser-bigote': 'depilacion-laser-facial-completo',
+      'depilacion-laser-entrecejo': 'depilacion-laser-facial-completo',
+      'depilacion-laser-patillas': 'depilacion-laser-facial-completo',
+      'depilacion-laser-bikini-plus': 'depilacion-laser-bikini',
+      'depilacion-laser-brazilian': 'depilacion-laser-bikini',
+      'depilacion-laser-rebaje-bikini': 'depilacion-laser-bikini',
+      'depilacion-laser-french-bikini': 'depilacion-laser-bikini',
+      'depilacion-laser-antebrazos': 'depilacion-laser-brazos',
+      'depilacion-laser-manos': 'depilacion-laser-brazos',
+      'depilacion-laser-piernas-completas': 'depilacion-laser-piernas',
+      'depilacion-laser-medias-piernas-arriba': 'depilacion-laser-piernas',
+      'depilacion-laser-medias-piernas-abajo': 'depilacion-laser-piernas',
+      'depilacion-laser-abdomen': 'depilacion-laser-cuerpo',
+      'depilacion-laser-espalda-baja': 'depilacion-laser-cuerpo',
+      'depilacion-laser-barba-hombre': 'depilacion-laser-hombre',
+      'depilacion-laser-pecho-hombre': 'depilacion-laser-hombre',
+      'depilacion-laser-espalda-hombre': 'depilacion-laser-hombre',
+      'depilacion-laser-gluteos-hombre': 'depilacion-laser-hombre',
+      'depilacion-laser-abdomen-hombre': 'depilacion-laser-hombre',
+      'depilacion-laser-axilas-hombre': 'depilacion-laser-hombre',
+      'depilacion-laser-hombros-hombre': 'depilacion-laser-hombre',
+      'depilacion-laser-piernas-hombre': 'depilacion-laser-hombre'
+    };
+    const canonicalSlug = slug => CANONICAL_SLUGS[slug] || slug;
+
     const money = n => n > 0
       ? `<span class="moneda">Por 1 sesión</span><strong>$${n.toLocaleString('es-MX')} MXN</strong>`
       : `<span class="moneda">Precio:</span><strong>Cotizar</strong>`;
@@ -2053,7 +2093,7 @@
               <div class="zona-cat">${L_CAT[z.cat]} · ${L_PAQUETE[z.paquete]}</div>
               <h3 class="zona-nombre">${z.nombre}</h3>
               <div class="zona-precio">${money(z.precio)}</div>
-              <a href="${z.slug}.html" class="zona-btn" aria-label="Ver detalle y cotizar ${z.nombre}">Cotizar ahora →</a>
+              <a href="${canonicalSlug(z.slug)}.html" class="zona-btn" aria-label="Ver detalle y cotizar ${z.nombre}">Cotizar ahora →</a>
             </div>
           </article>
         `;
