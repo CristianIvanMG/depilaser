@@ -557,9 +557,24 @@
 
     .hero-ctas {
       display: flex;
+      flex-direction: column;
+      align-items: stretch;
       gap: 16px;
-      flex-wrap: wrap;
+      max-width: 360px;
+      width: 100%;
       margin-bottom: 36px
+    }
+
+    /* Hace que los 3 CTAs (principal, calc-wrap, secundario) tengan el mismo ancho dentro del hero */
+    .hero-ctas > a,
+    .hero-ctas > .btn-calc-wrap {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .hero-ctas .btn-principal,
+    .hero-ctas .btn-secundario {
+      justify-content: center;
     }
 
     .btn-principal {
@@ -605,10 +620,8 @@
     /* === Botón Calculadora (CTA terciario, SEO: ¿cuántas sesiones de depilación láser son necesarias?) === */
     .btn-calc-wrap {
       position: relative;
-      display: inline-block;
-      /* Ancho mínimo aproximado al botón verde de WhatsApp para que queden parejos */
-      min-width: 348px;
-      max-width: 100%;
+      display: block;
+      /* Hereda el ancho del contenedor .hero-ctas (max 360px) para mantenerse parejo con los otros 2 botones */
     }
 
     .btn-calc {
@@ -1622,20 +1635,7 @@
         display: none
       }
 
-      .hero-ctas {
-        flex-direction: column
-      }
-
-      .btn-principal,
-      .btn-secundario,
-      .btn-calc {
-        justify-content: center
-      }
-
-      .btn-calc-wrap {
-        min-width: 0;
-        width: 100%;
-      }
+      /* .hero-ctas ya es flex-column con max-width 360px desde el desktop, sin override extra aquí */
 
       .btn-calc {
         padding: 14px 22px;

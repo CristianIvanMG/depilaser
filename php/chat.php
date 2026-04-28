@@ -155,8 +155,8 @@ if (isset($data['entry'][0]['changes'][0]['value']['messages'][0])) {
         // ===========================
         // 📤 RESPUESTA A META
         // ===========================
-        $META_TOKEN = "AQUI_TU_TOKEN";
-        $META_PHONE_ID = "AQUI_TU_PHONE_ID";
+        $META_TOKEN = "EAAfQpULmWiUBRaO6W6q6F7QnZBfDnIYdoWm1BmITZCUZAj8Ke2vhDnSRdoNFo27tg8WjKCYg6hzEXtnP0LmkuCmh77Pt0MMcXwulBimP4kizZAOtxAvpN9tp125UUiXarENJZCZCZBeZCZAtcdfvcXEGQRt9KbkiGsxIL8Qux6A1HlFe0PWCvPx0wC81l4lLW2gd00tZCWoc9nMa9KhuPNb9eBaGZCoHDQkLA02H6rJhll0M3guSJZCnRGETtoRHRDZA1ZCMyneYazgvWw11PhOv1tymmhndWqdD3gjZAa2VZAYZD";
+        $META_PHONE_ID = "1116317188227216";
 
         $url = "https://graph.facebook.com/v18.0/$META_PHONE_ID/messages";
 
