@@ -602,6 +602,118 @@
       transform: translateY(-2px)
     }
 
+    /* === Botón Calculadora (CTA terciario, SEO: ¿cuántas sesiones de depilación láser son necesarias?) === */
+    .btn-calc-wrap {
+      position: relative;
+      display: inline-block;
+      /* Ancho mínimo aproximado al botón verde de WhatsApp para que queden parejos */
+      min-width: 348px;
+      max-width: 100%;
+    }
+
+    .btn-calc {
+      position: relative;
+      display: flex;
+      width: 100%;
+      box-sizing: border-box;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #ff4fa3 0%, #c63d8a 50%, #8a2c6e 100%);
+      color: #fff;
+      padding: 14px 28px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 15px;
+      text-decoration: none;
+      box-shadow: 0 4px 22px rgba(198, 61, 138, .42), inset 0 1px 0 rgba(255, 255, 255, .25);
+      transition: var(--tr);
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .btn-calc::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, .35) 50%, transparent 70%);
+      transform: translateX(-110%);
+      transition: transform .7s ease;
+      z-index: 0;
+    }
+
+    .btn-calc:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(198, 61, 138, .55), inset 0 1px 0 rgba(255, 255, 255, .3);
+      background: linear-gradient(135deg, #ff63b0 0%, #d34a96 50%, #99347a 100%);
+    }
+
+    .btn-calc:hover::before {
+      transform: translateX(110%);
+    }
+
+    .btn-calc:focus-visible {
+      outline: 3px solid #ffd1e6;
+      outline-offset: 3px;
+    }
+
+    .btn-calc-icon,
+    .btn-calc-text,
+    .btn-calc-arrow {
+      position: relative;
+      z-index: 1;
+    }
+
+    .btn-calc-icon {
+      font-size: 18px;
+      animation: btn-calc-bounce 2.4s ease-in-out infinite;
+    }
+
+    .btn-calc-arrow {
+      transition: transform .25s ease;
+      font-weight: 800;
+    }
+
+    .btn-calc:hover .btn-calc-arrow {
+      transform: translateX(4px);
+    }
+
+    .btn-calc-badge {
+      position: absolute;
+      top: -10px;
+      right: 18px;
+      background: #fff;
+      color: #c63d8a;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .5px;
+      padding: 3px 9px;
+      border-radius: 50px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, .18);
+      z-index: 3;
+      pointer-events: none;
+      animation: btn-calc-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes btn-calc-bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+
+    @keyframes btn-calc-pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .btn-calc-icon,
+      .btn-calc-badge,
+      .btn-calc::before {
+        animation: none;
+        transition: none;
+      }
+    }
+
     .hero-confianza {
       display: flex;
       gap: 28px;
@@ -1515,8 +1627,22 @@
       }
 
       .btn-principal,
-      .btn-secundario {
+      .btn-secundario,
+      .btn-calc {
         justify-content: center
+      }
+
+      .btn-calc-wrap {
+        min-width: 0;
+        width: 100%;
+      }
+
+      .btn-calc {
+        padding: 14px 22px;
+      }
+
+      .btn-calc-badge {
+        right: 18px;
       }
 
       /* Layouts de 2 columnas → 1 columna */
@@ -2447,8 +2573,7 @@
             en BellaNick Clinic
           </h1>
           <p class="hero-desc">
-            Resultados visibles desde las primeras sesiones. Tecnología láser cuatridiodo Soprano de última generación
-            soprano de última generación,
+            Resultados visibles desde las primeras sesiones. Tecnología láser cuatridiodo soprano de última generación,
             atención personalizada en nuestras sucursales de Ciudad de México y Querétaro.
             <strong>Primera valoración sin costo.</strong>
           </p>
@@ -2457,6 +2582,17 @@
               class="btn-principal" target="_blank" rel="noopener noreferrer">
               💬 Agendar cita gratis por WhatsApp
             </a>
+            <div class="btn-calc-wrap">
+              <a href="https://depilasermexico.com/cuantas-sesiones-depilacion-laser.html"
+                class="btn-calc"
+                title="Calculadora gratuita: cuántas sesiones de depilación láser necesitas según tu zona y tipo de vello"
+                aria-label="Calcular cuántas sesiones de depilación láser necesito - Calculadora gratuita 2026">
+                <span class="btn-calc-icon" aria-hidden="true">🧮</span>
+                <span class="btn-calc-text">¿Cuántas sesiones necesito?</span>
+                <span class="btn-calc-arrow" aria-hidden="true">→</span>
+              </a>
+              <span class="btn-calc-badge" aria-hidden="true">NUEVO</span>
+            </div>
             <a href="https://depilasermexico.com/precios-depilacion-laser.html" class="btn-secundario">Ver precios y
               servicios →</a>
           </div>

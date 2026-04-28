@@ -1,6 +1,27 @@
 <?php
 // ===========================
-// CONFIGURACIÓN ANTI-BUFFER (LiteSpeed)
+// 🔐 VERIFICACIÓN META (DEBE IR PRIMERO)
+// ===========================
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+
+    $verify_token = "bella123"; // <-- mismo que configuras en Meta
+
+    if (
+        isset($_GET['hub_mode']) &&
+        $_GET['hub_mode'] === 'subscribe' &&
+        isset($_GET['hub_verify_token']) &&
+        $_GET['hub_verify_token'] === $verify_token
+    ) {
+        echo $_GET['hub_challenge'];
+        exit;
+    } else {
+        http_response_code(403);
+        exit;
+    }
+}
+
+// ===========================
+// CONFIG ANTI-BUFFER
 // ===========================
 ini_set('display_errors', 0);
 ini_set('output_buffering', 'off');
@@ -11,7 +32,7 @@ while (ob_get_level()) { ob_end_clean(); }
 session_start();
 
 // ===========================
-// CARGAR API KEY (compartida por ambos flujos)
+// CARGAR API KEY OPENAI
 // ===========================
 $secretsPaths = [
   __DIR__ . '/../../../../secrets.php',
@@ -31,7 +52,7 @@ foreach ($secretsPaths as $path) {
 $apiKey = is_array($config) ? ($config['openai_api_key'] ?? null) : null;
 
 // ===========================
-// PROMPT BASE (compartido)
+// PROMPT BASE
 // ===========================
 $systemPrompt = <<<PROMPT
 Eres Paola, recepcionista virtual de BellaNick Clinic, clínica de depilación láser y estética en CDMX.
@@ -74,111 +95,102 @@ Nunca repitas información innecesaria.
 PROMPT;
 
 // ===========================
-// ██████  FLUJO TWILIO  ██████
-// Si es Twilio: entra aquí, hace todo y sale con exit.
-// El flujo web nunca ve este bloque.
+// 🔥 FLUJO WHATSAPP META
 // ===========================
-if (isset($_POST['Body'])) {
+$raw = file_get_contents("php://input");
+$data = json_decode($raw, true);
 
-  // — Prompt específico para WhatsApp —
-  $systemPromptTwilio = $systemPrompt . "\n\nCANAL: WhatsApp. NUNCA ofrezcas el enlace de WhatsApp ni lo menciones. Para agendar, usa solo el número telefónico 55 3543-3490. Ve directo al cierre de cita.";
+if (isset($data['entry'][0]['changes'][0]['value']['messages'][0])) {
 
-  $userMessage = trim($_POST['Body'] ?? "");
-  $userId      = $_POST['From'] ?? "twilio_unknown";
-  $sessionKey  = "twilio_" . md5($userId);
+    $msg = $data['entry'][0]['changes'][0]['value']['messages'][0];
 
-  // Validar mensaje vacío
-  if ($userMessage === "") {
-    header("Content-Type: text/xml; charset=UTF-8");
-    echo "<Response><Message>Hola, soy Paola de BellaNick Clinic. ¿En qué te puedo ayudar?</Message></Response>";
-    exit;
-  }
+    $numero = $msg['from'] ?? '';
+    $userMessage = $msg['text']['body'] ?? '';
 
-  // Validar API key
-  if (!$apiKey) {
-    header("Content-Type: text/xml; charset=UTF-8");
-    echo "<Response><Message>Servicio temporalmente no disponible. Llámanos al 55 3543-3490.</Message></Response>";
-    exit;
-  }
+    if ($userMessage && $apiKey) {
 
-  // Memoria de sesión por número de WhatsApp
-  if (!isset($_SESSION[$sessionKey])) {
-    $_SESSION[$sessionKey] = [
-      ["role" => "system", "content" => $systemPromptTwilio]
-    ];
-  }
+        $sessionKey = "wa_" . md5($numero);
 
-  $_SESSION[$sessionKey][] = [
-    "role"    => "user",
-    "content" => $userMessage
-  ];
+        if (!isset($_SESSION[$sessionKey])) {
+            $_SESSION[$sessionKey] = [
+                ["role" => "system", "content" => $systemPrompt . "\nCANAL: WhatsApp. No menciones enlaces."]
+            ];
+        }
 
-  // Payload OpenAI
-  $payload = [
-    "model"       => "gpt-4.1-mini",
-    "messages"    => $_SESSION[$sessionKey],
-    "temperature" => 0.4
-  ];
+        $_SESSION[$sessionKey][] = [
+            "role" => "user",
+            "content" => $userMessage
+        ];
 
-  // Curl OpenAI
-  $ch = curl_init("https://api.openai.com/v1/chat/completions");
-  curl_setopt_array($ch, [
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_POST           => true,
-    CURLOPT_HTTPHEADER     => [
-      "Content-Type: application/json",
-      "Authorization: Bearer " . $apiKey
-    ],
-    CURLOPT_POSTFIELDS => json_encode($payload),
-    CURLOPT_TIMEOUT    => 30
-  ]);
+        // OpenAI
+        $payload = [
+            "model" => "gpt-4.1-mini",
+            "messages" => $_SESSION[$sessionKey],
+            "temperature" => 0.4
+        ];
 
-  $response = curl_exec($ch);
-  curl_close($ch);
+        $ch = curl_init("https://api.openai.com/v1/chat/completions");
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_HTTPHEADER => [
+                "Content-Type: application/json",
+                "Authorization: Bearer " . $apiKey
+            ],
+            CURLOPT_POSTFIELDS => json_encode($payload)
+        ]);
 
-  // Error de red
-  if ($response === false) {
-    header("Content-Type: text/xml; charset=UTF-8");
-    echo "<Response><Message>Ocurrió un problema técnico. Llámanos al 55 3543-3490.</Message></Response>";
-    exit;
-  }
+        $response = curl_exec($ch);
+        curl_close($ch);
 
-  $data = json_decode($response, true);
+        $dataOpenAI = json_decode($response, true);
 
-  // Error de API (cuota, billing, etc.)
-  if (isset($data["error"])) {
-    header("Content-Type: text/xml; charset=UTF-8");
-    echo "<Response><Message>Nuestro asistente está fuera de servicio. Te atendemos al 55 3543-3490.</Message></Response>";
-    exit;
-  }
+        $reply = $dataOpenAI["choices"][0]["message"]["content"] ?? "¿Quieres agendar cita?";
 
-  $assistantReply = $data["choices"][0]["message"]["content"]
-    ?? "¿Quieres que agendemos tu cita? Llámanos al 55 3543-3490.";
+        $_SESSION[$sessionKey][] = [
+            "role" => "assistant",
+            "content" => $reply
+        ];
 
-  // Guardar respuesta en sesión
-  $_SESSION[$sessionKey][] = [
-    "role"    => "assistant",
-    "content" => $assistantReply
-  ];
+        // ===========================
+        // 📤 RESPUESTA A META
+        // ===========================
+        $META_TOKEN = "AQUI_TU_TOKEN";
+        $META_PHONE_ID = "AQUI_TU_PHONE_ID";
 
-  // Respuesta XML para Twilio
-  header("Content-Type: text/xml; charset=UTF-8");
-  echo "<Response><Message>" . htmlspecialchars($assistantReply) . "</Message></Response>";
-  exit; // ← El flujo web NUNCA llega aquí
+        $url = "https://graph.facebook.com/v18.0/$META_PHONE_ID/messages";
+
+        $payloadMeta = [
+            "messaging_product" => "whatsapp",
+            "to" => $numero,
+            "text" => ["body" => $reply]
+        ];
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            "Authorization: Bearer $META_TOKEN",
+            "Content-Type: application/json"
+        ]);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payloadMeta));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        curl_exec($ch);
+        curl_close($ch);
+    }
+
+    exit; // 🔥 evita que entre al flujo web
 }
 
 // ===========================
-// ██████  FLUJO WEB  ██████
-// Todo lo de abajo es exactamente tu chat.php original.
-// No se cambió ni una línea.
+// 🌐 FLUJO WEB (NO SE TOCA)
 // ===========================
-
 header("Content-Type: application/json; charset=UTF-8");
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 if (!$apiKey) {
   echo json_encode(["reply" => "Error de configuración del servidor."]);
   flush();
-  exit;
+    exit;
 }
 
 // Leer mensaje
@@ -186,21 +198,21 @@ $input       = json_decode(file_get_contents("php://input"), true);
 $userMessage = trim($input["message"] ?? "");
 
 if ($userMessage === "") {
-  echo json_encode(["reply" => "¿En qué puedo ayudarte?"]);
+    echo json_encode(["reply" => "¿En qué puedo ayudarte?"]);
   flush();
-  exit;
+    exit;
 }
 
 // Sesión web (igual que antes, clave "messages")
 if (!isset($_SESSION["messages"])) {
   $_SESSION["messages"] = [
-    ["role" => "system", "content" => $systemPrompt]
-  ];
+        ["role" => "system", "content" => $systemPrompt]
+    ];
 }
 
 $_SESSION["messages"][] = [
   "role"    => "user",
-  "content" => $userMessage
+    "content" => $userMessage
 ];
 
 // ===========================
@@ -209,7 +221,7 @@ $_SESSION["messages"][] = [
 $payload = [
   "model"       => "gpt-4.1-mini",
   "messages"    => $_SESSION["messages"],
-  "temperature" => 0.4
+    "temperature" => 0.4
 ];
 
 // ===========================
@@ -217,12 +229,12 @@ $payload = [
 // ===========================
 $ch = curl_init("https://api.openai.com/v1/chat/completions");
 curl_setopt_array($ch, [
-  CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_RETURNTRANSFER => true,
   CURLOPT_POST           => true,
   CURLOPT_HTTPHEADER     => [
-    "Content-Type: application/json",
-    "Authorization: Bearer " . $apiKey
-  ],
+        "Content-Type: application/json",
+        "Authorization: Bearer " . $apiKey
+    ],
   CURLOPT_POSTFIELDS => json_encode($payload),
   CURLOPT_TIMEOUT    => 30
 ]);
