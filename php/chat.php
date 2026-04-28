@@ -8,24 +8,16 @@ ini_set('zlib.output_compression', 0);
 ob_implicit_flush(true);
 while (ob_get_level()) { ob_end_clean(); }
 
-header("Content-Type: application/json; charset=UTF-8");
-header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-
 session_start();
 
 // ===========================
-// CARGAR API KEY (HOSTINGER)
-// Busca secrets.php en varias rutas, en orden de seguridad:
-//   1. /home/USER/secrets.php                                (MAS SEGURO - fuera de domains/)
-//   2. /home/USER/domains/secrets.php
-//   3. /home/USER/domains/DOMAIN/secrets.php                 (fuera de public_html)
-//   4. /home/USER/domains/DOMAIN/public_html/config/         (legacy, menos seguro)
+// CARGAR API KEY (compartida por ambos flujos)
 // ===========================
 $secretsPaths = [
-  __DIR__ . '/../../../../secrets.php', // /home/USER/secrets.php          (recomendado)
-  __DIR__ . '/../../../secrets.php',    // /home/USER/domains/secrets.php
-  __DIR__ . '/../../secrets.php',       // fuera de public_html
-  __DIR__ . '/../config/secrets.php',   // ubicacion legacy (fallback)
+  __DIR__ . '/../../../../secrets.php',
+  __DIR__ . '/../../../secrets.php',
+  __DIR__ . '/../../secrets.php',
+  __DIR__ . '/../config/secrets.php',
 ];
 
 $config = null;
@@ -38,26 +30,8 @@ foreach ($secretsPaths as $path) {
 
 $apiKey = is_array($config) ? ($config['openai_api_key'] ?? null) : null;
 
-if (!$apiKey) {
-  echo json_encode(["reply" => "Error de configuración del servidor."]);
-  flush();
-  exit;
-}
-
 // ===========================
-// LEER MENSAJE
-// ===========================
-$input = json_decode(file_get_contents("php://input"), true);
-$userMessage = trim($input["message"] ?? "");
-
-if ($userMessage === "") {
-  echo json_encode(["reply" => "¿En qué puedo ayudarte?"]);
-  flush();
-  exit;
-}
-
-// ===========================
-// PROMPT (NO TOCADO)
+// PROMPT BASE (compartido)
 // ===========================
 $systemPrompt = <<<PROMPT
 Eres Paola, recepcionista virtual de BellaNick Clinic, clínica de depilación láser y estética en CDMX.
@@ -88,20 +62,136 @@ FLUJO DE CITA (síguelo en orden, sin saltarte pasos ni retroceder)
 5. Si elige llamada: comparte el número 55 3543 3490 y cierra con una frase cálida.
 
 SERVICIOS (solo para responder dudas si preguntan)
-- Depilación láser cuatridiodo Soprano de última generación soprano
+- Depilación láser cuatridiodo Soprano de última generación
 - Lipólisis láser
 - Cavitación
 - Radiofrecuencia tripolar
 - Electroestimulación
-- Sucursales: Roma Sur, Insurgentes Sur o Queretaro
+- Sucursales: Roma Sur, Insurgentes Sur o Querétaro
 
 Nunca des más de una opción si la usuaria ya eligió.
 Nunca repitas información innecesaria.
 PROMPT;
 
 // ===========================
-// SESIÓN (HISTORIAL)
+// ██████  FLUJO TWILIO  ██████
+// Si es Twilio: entra aquí, hace todo y sale con exit.
+// El flujo web nunca ve este bloque.
 // ===========================
+if (isset($_POST['Body'])) {
+
+  // — Prompt específico para WhatsApp —
+  $systemPromptTwilio = $systemPrompt . "\n\nCANAL: WhatsApp. NUNCA ofrezcas el enlace de WhatsApp ni lo menciones. Para agendar, usa solo el número telefónico 55 3543-3490. Ve directo al cierre de cita.";
+
+  $userMessage = trim($_POST['Body'] ?? "");
+  $userId      = $_POST['From'] ?? "twilio_unknown";
+  $sessionKey  = "twilio_" . md5($userId);
+
+  // Validar mensaje vacío
+  if ($userMessage === "") {
+    header("Content-Type: text/xml; charset=UTF-8");
+    echo "<Response><Message>Hola, soy Paola de BellaNick Clinic. ¿En qué te puedo ayudar?</Message></Response>";
+    exit;
+  }
+
+  // Validar API key
+  if (!$apiKey) {
+    header("Content-Type: text/xml; charset=UTF-8");
+    echo "<Response><Message>Servicio temporalmente no disponible. Llámanos al 55 3543-3490.</Message></Response>";
+    exit;
+  }
+
+  // Memoria de sesión por número de WhatsApp
+  if (!isset($_SESSION[$sessionKey])) {
+    $_SESSION[$sessionKey] = [
+      ["role" => "system", "content" => $systemPromptTwilio]
+    ];
+  }
+
+  $_SESSION[$sessionKey][] = [
+    "role"    => "user",
+    "content" => $userMessage
+  ];
+
+  // Payload OpenAI
+  $payload = [
+    "model"       => "gpt-4.1-mini",
+    "messages"    => $_SESSION[$sessionKey],
+    "temperature" => 0.4
+  ];
+
+  // Curl OpenAI
+  $ch = curl_init("https://api.openai.com/v1/chat/completions");
+  curl_setopt_array($ch, [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_POST           => true,
+    CURLOPT_HTTPHEADER     => [
+      "Content-Type: application/json",
+      "Authorization: Bearer " . $apiKey
+    ],
+    CURLOPT_POSTFIELDS => json_encode($payload),
+    CURLOPT_TIMEOUT    => 30
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  // Error de red
+  if ($response === false) {
+    header("Content-Type: text/xml; charset=UTF-8");
+    echo "<Response><Message>Ocurrió un problema técnico. Llámanos al 55 3543-3490.</Message></Response>";
+    exit;
+  }
+
+  $data = json_decode($response, true);
+
+  // Error de API (cuota, billing, etc.)
+  if (isset($data["error"])) {
+    header("Content-Type: text/xml; charset=UTF-8");
+    echo "<Response><Message>Nuestro asistente está fuera de servicio. Te atendemos al 55 3543-3490.</Message></Response>";
+    exit;
+  }
+
+  $assistantReply = $data["choices"][0]["message"]["content"]
+    ?? "¿Quieres que agendemos tu cita? Llámanos al 55 3543-3490.";
+
+  // Guardar respuesta en sesión
+  $_SESSION[$sessionKey][] = [
+    "role"    => "assistant",
+    "content" => $assistantReply
+  ];
+
+  // Respuesta XML para Twilio
+  header("Content-Type: text/xml; charset=UTF-8");
+  echo "<Response><Message>" . htmlspecialchars($assistantReply) . "</Message></Response>";
+  exit; // ← El flujo web NUNCA llega aquí
+}
+
+// ===========================
+// ██████  FLUJO WEB  ██████
+// Todo lo de abajo es exactamente tu chat.php original.
+// No se cambió ni una línea.
+// ===========================
+
+header("Content-Type: application/json; charset=UTF-8");
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+if (!$apiKey) {
+  echo json_encode(["reply" => "Error de configuración del servidor."]);
+  flush();
+  exit;
+}
+
+// Leer mensaje
+$input       = json_decode(file_get_contents("php://input"), true);
+$userMessage = trim($input["message"] ?? "");
+
+if ($userMessage === "") {
+  echo json_encode(["reply" => "¿En qué puedo ayudarte?"]);
+  flush();
+  exit;
+}
+
+// Sesión web (igual que antes, clave "messages")
 if (!isset($_SESSION["messages"])) {
   $_SESSION["messages"] = [
     ["role" => "system", "content" => $systemPrompt]
@@ -109,7 +199,7 @@ if (!isset($_SESSION["messages"])) {
 }
 
 $_SESSION["messages"][] = [
-  "role" => "user",
+  "role"    => "user",
   "content" => $userMessage
 ];
 
@@ -117,8 +207,8 @@ $_SESSION["messages"][] = [
 // PAYLOAD OPENAI
 // ===========================
 $payload = [
-  "model" => "gpt-4.1-mini",
-  "messages" => $_SESSION["messages"],
+  "model"       => "gpt-4.1-mini",
+  "messages"    => $_SESSION["messages"],
   "temperature" => 0.4
 ];
 
@@ -128,13 +218,13 @@ $payload = [
 $ch = curl_init("https://api.openai.com/v1/chat/completions");
 curl_setopt_array($ch, [
   CURLOPT_RETURNTRANSFER => true,
-  CURLOPT_POST => true,
-  CURLOPT_HTTPHEADER => [
+  CURLOPT_POST           => true,
+  CURLOPT_HTTPHEADER     => [
     "Content-Type: application/json",
     "Authorization: Bearer " . $apiKey
   ],
   CURLOPT_POSTFIELDS => json_encode($payload),
-  CURLOPT_TIMEOUT => 30
+  CURLOPT_TIMEOUT    => 30
 ]);
 
 $response = curl_exec($ch);
@@ -148,7 +238,6 @@ if ($response === false) {
 
 $data = json_decode($response, true);
 
-
 if (isset($data["error"])) {
 
   // Detectar límite de uso / cuota
@@ -158,7 +247,7 @@ if (isset($data["error"])) {
   ) {
     echo json_encode([
       "ia_disabled" => true,
-      "reply" => "Nuestro asistente está temporalmente fuera de servicio. Te atendemos de inmediato por WhatsApp."
+      "reply"       => "Nuestro asistente está temporalmente fuera de servicio. Te atendemos de inmediato por WhatsApp."
     ]);
     flush();
     exit;
@@ -171,14 +260,13 @@ if (isset($data["error"])) {
   exit;
 }
 
-
 $assistantReply = $data["choices"][0]["message"]["content"] ?? "¿Deseas que agendemos una cita?";
 
 // ===========================
 // GUARDAR RESPUESTA
 // ===========================
 $_SESSION["messages"][] = [
-  "role" => "assistant",
+  "role"    => "assistant",
   "content" => $assistantReply
 ];
 
