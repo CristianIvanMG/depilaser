@@ -155,12 +155,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $source = $_POST['source'] ?? 'phone';
         $startAt = trim($_POST['start_at'] ?? '');
         $notesAdmin = trim($_POST['notes_admin'] ?? '');
+        $startTs = $startAt ? strtotime(str_replace('T', ' ', $startAt)) : false;
 
         if (!isset($sourceOptions[$source])) {
             $errors['source'] = 'Selecciona un canal de origen valido.';
         }
         if (!$statusId || !Database::one('SELECT id FROM appointment_statuses WHERE id = ? LIMIT 1', [$statusId])) {
             $errors['status_id'] = 'Selecciona un estado valido.';
+        }
+        if ($startTs && $startTs < time()) {
+            $sameStoredTime = $isEdit && date('Y-m-d H:i', strtotime($appointment['start_at'])) === date('Y-m-d H:i', $startTs);
+            if (!$sameStoredTime) {
+                $errors['start_at'] = 'No se pueden programar citas en una fecha u hora pasada.';
+            }
         }
 
         $schedule = AppointmentService::validateSchedule($branchId, $serviceId, $startAt, $isEdit ? $appointmentId : null);
@@ -360,7 +367,7 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
 
           <div class="col-md-4">
             <label class="bnc-label">Fecha y hora</label>
-            <input type="datetime-local" name="start_at" id="startAtInput" value="<?= e($form['start_at']) ?>" class="form-control <?= isset($errors['start_at']) ? 'is-invalid' : '' ?>">
+            <input type="datetime-local" name="start_at" id="startAtInput" value="<?= e($form['start_at']) ?>" <?= !$isEdit ? 'min="' . e(date('Y-m-d\TH:i')) . '"' : '' ?> class="form-control <?= isset($errors['start_at']) ? 'is-invalid' : '' ?>">
             <?php if (isset($errors['start_at'])): ?><div class="invalid-feedback"><?= e($errors['start_at']) ?></div><?php endif; ?>
           </div>
 
@@ -385,9 +392,13 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
           </div>
 
           <div class="col-12">
-            <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
-              <button type="button" class="btn btn-sm btn-bnc-outline" id="loadSlotsBtn"><i class="bi bi-clock"></i> Ver horarios libres</button>
-              <span class="small text-muted">Usa la fecha capturada para consultar disponibilidad de sucursal y servicio.</span>
+            <div class="d-flex flex-wrap align-items-end gap-2 mb-2">
+              <div>
+                <label class="bnc-label" for="availabilityDateInput">Fecha para disponibilidad</label>
+                <input type="date" id="availabilityDateInput" class="form-control form-control-sm" min="<?= e(date('Y-m-d')) ?>" value="<?= e($form['start_at'] ? substr($form['start_at'], 0, 10) : date('Y-m-d')) ?>">
+              </div>
+              <button type="button" class="btn btn-sm btn-bnc-outline mb-1" id="loadSlotsBtn"><i class="bi bi-clock"></i> Ver horarios libres</button>
+              <span class="small text-muted mb-2">Selecciona un horario para llenar la fecha y hora de la cita.</span>
             </div>
             <div id="slotsBox" class="mb-3"></div>
           </div>
@@ -499,8 +510,10 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
     const branchSelect = document.querySelector('select[name="branch_id"]');
     const serviceSelect = document.querySelector('select[name="service_id"]');
     const startInput = document.getElementById('startAtInput');
+    const availabilityDateInput = document.getElementById('availabilityDateInput');
     const loadSlotsBtn = document.getElementById('loadSlotsBtn');
     const slotsBox = document.getElementById('slotsBox');
+    let slotRequest = null;
 
     function syncClientMode() {
       const mode = document.querySelector('input[name="client_mode"]:checked')?.value || 'existing';
@@ -508,46 +521,126 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
       created.classList.toggle('d-none', mode !== 'new');
     }
 
+    function setFieldState(field, isInvalid) {
+      field.classList.toggle('is-invalid', isInvalid);
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      }[char]));
+    }
+
+    function renderSlotMessage(type, message) {
+      const klass = type === 'danger' ? 'alert-danger' : type === 'success' ? 'alert-success' : 'alert-warning';
+      slotsBox.innerHTML = `<div class="alert ${klass} small py-2 mb-0">${escapeHtml(message)}</div>`;
+    }
+
+    function selectedDate() {
+      return availabilityDateInput.value || (startInput.value || '').slice(0, 10);
+    }
+
+    function localIsoDate(date) {
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${date.getFullYear()}-${month}-${day}`;
+    }
+
+    function resetSlots(message = '') {
+      slotsBox.innerHTML = message ? `<div class="text-muted small">${message}</div>` : '';
+    }
+
     async function loadSlots() {
       const branchId = branchSelect.value;
       const serviceId = serviceSelect.value;
-      const date = (startInput.value || '').slice(0, 10);
+      const date = selectedDate();
+      const todayIso = localIsoDate(new Date());
+
+      setFieldState(branchSelect, !branchId);
+      setFieldState(serviceSelect, !serviceId);
+      setFieldState(availabilityDateInput, !date || date < todayIso);
 
       if (!branchId || !serviceId || !date) {
-        slotsBox.innerHTML = '<div class="alert alert-warning small py-2 mb-0">Selecciona sucursal, servicio y fecha para ver horarios.</div>';
+        renderSlotMessage('warning', 'Selecciona sucursal, servicio y fecha para ver horarios.');
+        return;
+      }
+      if (date < todayIso) {
+        renderSlotMessage('warning', 'Selecciona una fecha actual o futura.');
         return;
       }
 
-      slotsBox.innerHTML = '<div class="text-muted small">Consultando horarios...</div>';
+      if (slotRequest) slotRequest.abort();
+      slotRequest = new AbortController();
+      loadSlotsBtn.disabled = true;
+      loadSlotsBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Consultando';
+      slotsBox.innerHTML = '<div class="text-muted small">Consultando horarios disponibles...</div>';
+
       try {
         const url = new URL('<?= url('api/disponibilidad.php') ?>', window.location.origin);
         url.searchParams.set('branch', branchId);
         url.searchParams.set('service', serviceId);
         url.searchParams.set('date', date);
         <?php if ($isEdit): ?>url.searchParams.set('ignore', '<?= (int) $appointmentId ?>');<?php endif; ?>
-        const response = await fetch(url);
+        const response = await fetch(url, {
+          headers: { 'Accept': 'application/json' },
+          signal: slotRequest.signal
+        });
         const data = await response.json();
-        if (!data.ok || !data.slots || !data.slots.length) {
-          slotsBox.innerHTML = '<div class="alert alert-warning small py-2 mb-0">No hay horarios disponibles para esa fecha.</div>';
+
+        if (!response.ok || !data.ok) {
+          renderSlotMessage('danger', data.error || 'No fue posible consultar la disponibilidad.');
           return;
         }
-        slotsBox.innerHTML = data.slots.map(slot =>
-          `<button type="button" class="btn btn-bnc-outline btn-sm me-1 mb-1 slot-btn" data-start="${slot.start.replace(' ', 'T').slice(0, 16)}">${slot.label}</button>`
-        ).join('');
+        if (!data.slots || !data.slots.length) {
+          renderSlotMessage('warning', data.note || 'No hay horarios disponibles para esa fecha.');
+          return;
+        }
+
+        const currentValue = startInput.value;
+        slotsBox.innerHTML = `
+          <div class="small text-muted mb-2">${data.count || data.slots.length} horario(s) disponible(s). Selecciona uno para llenar fecha y hora.</div>
+          <div class="d-flex flex-wrap gap-1">
+            ${data.slots.map(slot => {
+              const value = slot.start.replace(' ', 'T').slice(0, 16);
+              const active = value === currentValue ? ' btn-bnc-primary active' : '';
+              return `<button type="button" class="btn btn-bnc-outline btn-sm slot-btn${active}" data-start="${escapeHtml(value)}" title="${escapeHtml(slot.label_long || slot.label)}">${escapeHtml(slot.label)}</button>`;
+            }).join('')}
+          </div>
+        `;
         slotsBox.querySelectorAll('.slot-btn').forEach(button => {
           button.addEventListener('click', () => {
             startInput.value = button.dataset.start;
+            availabilityDateInput.value = button.dataset.start.slice(0, 10);
+            startInput.classList.remove('is-invalid');
+            availabilityDateInput.classList.remove('is-invalid');
             slotsBox.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('btn-bnc-primary', 'active'));
             button.classList.add('btn-bnc-primary', 'active');
           });
         });
       } catch (err) {
-        slotsBox.innerHTML = '<div class="alert alert-danger small py-2 mb-0">No fue posible cargar la disponibilidad.</div>';
+        if (err.name !== 'AbortError') {
+          renderSlotMessage('danger', 'No fue posible cargar la disponibilidad. Revisa tu conexion e intenta nuevamente.');
+        }
+      } finally {
+        loadSlotsBtn.disabled = false;
+        loadSlotsBtn.innerHTML = '<i class="bi bi-clock"></i> Ver horarios libres';
       }
     }
 
     radios.forEach(radio => radio.addEventListener('change', syncClientMode));
     loadSlotsBtn.addEventListener('click', loadSlots);
+    [branchSelect, serviceSelect].forEach(field => {
+      field.addEventListener('change', () => resetSlots('La disponibilidad se actualizara al consultar de nuevo.'));
+    });
+    startInput.addEventListener('change', () => {
+      if (startInput.value) availabilityDateInput.value = startInput.value.slice(0, 10);
+      resetSlots('La disponibilidad se actualizara al consultar de nuevo.');
+    });
+    availabilityDateInput.addEventListener('change', () => resetSlots('La disponibilidad se actualizara al consultar de nuevo.'));
     syncClientMode();
   })();
 </script>

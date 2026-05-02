@@ -45,15 +45,30 @@ if (!$dateTs) {
 // Validar rango
 $minTs = strtotime('today') + $cfg['booking_min_hours'] * 3600;
 $maxTs = strtotime('today') + $cfg['booking_max_days'] * 86400;
+if ($dateTs < strtotime('today')) {
+    echo json_encode([
+        'ok' => true,
+        'slots' => [],
+        'count' => 0,
+        'note' => 'No se pueden consultar horarios de fechas pasadas',
+    ]);
+    exit;
+}
 if ($dateTs > $maxTs) {
-    echo json_encode(['ok' => true, 'slots' => [], 'note' => 'Fuera de rango permitido']);
+    echo json_encode([
+        'ok' => true,
+        'slots' => [],
+        'count' => 0,
+        'note' => 'La fecha queda fuera del rango permitido de agenda',
+    ]);
     exit;
 }
 
 // Servicio
 $svc = Database::one('SELECT id, duration_min FROM services WHERE id = ? AND active = 1', [$serviceId]);
 if (!$svc) {
-    echo json_encode(['ok' => false, 'error' => 'Servicio no encontrado']);
+    http_response_code(404);
+    echo json_encode(['ok' => false, 'error' => 'Servicio no encontrado o inactivo']);
     exit;
 }
 $duration = (int) $svc['duration_min'];
@@ -66,6 +81,7 @@ $ofrece = Database::one(
     [$branchId, $serviceId]
 );
 if (!$ofrece) {
+    http_response_code(422);
     echo json_encode(['ok' => false, 'error' => 'Esta sucursal no ofrece ese servicio']);
     exit;
 }
@@ -80,7 +96,12 @@ $baseRows = Database::all(
 );
 
 if (!$baseRows) {
-    echo json_encode(['ok' => true, 'slots' => [], 'note' => 'Sucursal cerrada ese día']);
+    echo json_encode([
+        'ok' => true,
+        'slots' => [],
+        'count' => 0,
+        'note' => 'La sucursal no tiene horario laboral ese dia',
+    ]);
     exit;
 }
 
@@ -94,7 +115,12 @@ $exc = Database::one(
 $windows = [];
 if ($exc) {
     if ($exc['type'] === 'closed') {
-        echo json_encode(['ok' => true, 'slots' => [], 'note' => 'Día cerrado']);
+        echo json_encode([
+            'ok' => true,
+            'slots' => [],
+            'count' => 0,
+            'note' => 'Dia cerrado por excepcion de agenda',
+        ]);
         exit;
     }
     // custom
