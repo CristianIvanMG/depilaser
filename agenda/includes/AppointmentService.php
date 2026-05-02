@@ -241,7 +241,15 @@ final class AppointmentService
     private static function columnExists(string $table, string $column): bool
     {
         try {
-            return (bool) Database::one("SHOW COLUMNS FROM {$table} LIKE ?", [$column]);
+            return (bool) Database::one(
+                'SELECT 1
+                 FROM INFORMATION_SCHEMA.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE()
+                   AND TABLE_NAME = ?
+                   AND COLUMN_NAME = ?
+                 LIMIT 1',
+                [$table, $column]
+            );
         } catch (Throwable $e) {
             return false;
         }

@@ -1,7 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/bootstrap.php';
 Auth::requireSuperAdmin();
-AppointmentService::ensureCabinCapacityColumn();
 
 $errors = [];
 $editingId = 0;
@@ -87,11 +86,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $branches = Database::all(
-    "SELECT b.*,
-            COUNT(DISTINCT a.id) AS appointment_count
+    "SELECT b.id, b.slug, b.name, b.address, b.city, b.state, b.phone, b.whatsapp,
+            b.email, b.gmaps_url, b.cabin_capacity, b.active, b.display_order,
+            b.created_at, b.updated_at,
+            COALESCE(ac.appointment_count, 0) AS appointment_count
      FROM branches b
-     LEFT JOIN appointments a ON a.branch_id = b.id
-     GROUP BY b.id
+     LEFT JOIN (
+        SELECT branch_id, COUNT(*) AS appointment_count
+        FROM appointments
+        GROUP BY branch_id
+     ) ac ON ac.branch_id = b.id
      ORDER BY b.display_order, b.name"
 );
 
