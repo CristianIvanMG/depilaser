@@ -60,8 +60,22 @@
     .barra-confianza{background:var(--cp);color:#fff;text-align:center;padding:10px 20px;font-size:13.5px;font-weight:500;letter-spacing:.3px}
     .barra-confianza span{margin:0 16px}.barra-confianza span:before{content:"\2713  "}
     nav{position:sticky;top:0;z-index:20;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.08)}
-    .nav-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:68px;padding:0 20px}
-    .nav-logo img{height:44px;width:auto}.nav-links{display:flex;gap:18px;align-items:center;font-size:14.5px;font-weight:600;color:var(--ct)}
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 24px;
+      max-width: 1360px;
+      margin: 0 auto;
+      gap: 16px;
+    }
+    .nav-logo img {
+      width: 298px;
+      height: 100px;
+      object-fit: contain;
+      object-position: center;
+      display: block
+    }.nav-links{display:flex;gap:18px;align-items:center;font-size:14.5px;font-weight:600;color:var(--ct)}
     .nav-links a{padding:8px 10px;border-radius:8px}.nav-links a:hover{background:var(--cg);color:var(--cp)}
     .btn-nav{background:var(--cp);color:#fff!important;padding:10px 16px!important;border-radius:8px;box-shadow:0 8px 18px rgba(200,56,107,.18)}
     .skip-link{position:absolute;top:-40px;left:0;background:var(--cp);color:#fff;padding:8px 16px;z-index:10000;border-radius:0 0 4px 0;font-weight:700}.skip-link:focus{top:0}
@@ -92,7 +106,7 @@
   <nav aria-label="Menu principal">
     <div class="nav-inner">
       <a class="nav-logo" href="index.html" aria-label="BellaNick Clinic - Inicio">
-        <img src="assets/img/logo/logo.webp" alt="BellaNick Clinic" width="150" height="44" />
+        <img src="assets/img/logo/logo.webp" alt="BellaNick Clinic" width="298" height="100" />
       </a>
       <div class="nav-links">
         <a href="depilacion-laser.html">Depilaci&oacute;n l&aacute;ser</a>

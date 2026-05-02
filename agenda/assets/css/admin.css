@@ -1,0 +1,120 @@
+/* ============================================================
+   BellaNick — Admin styles  (sidebar + topbar + tables)
+   ============================================================ */
+@import url('app.css');
+
+body.bnc-admin {
+  background: #f6f3f8;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  color: var(--bnc-ink);
+}
+
+.bnc-admin-shell {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  min-height: 100vh;
+}
+
+@media (max-width: 991.98px) {
+  .bnc-admin-shell { grid-template-columns: 1fr; }
+  .bnc-sidebar {
+    position: fixed; inset: 0 auto 0 0;
+    transform: translateX(-100%);
+    transition: transform .3s;
+    z-index: 1040;
+  }
+  .bnc-sidebar.open { transform: translateX(0); box-shadow: 6px 0 30px rgba(0,0,0,.2); }
+}
+
+/* ── SIDEBAR ── */
+.bnc-sidebar {
+  background: linear-gradient(180deg, #2a1029 0%, #3a1638 100%);
+  color: #fff;
+  display: flex; flex-direction: column;
+  width: 250px;
+}
+.bnc-sidebar-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 22px 20px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.bnc-sidebar .bnc-brand {
+  display: flex; align-items: center; gap: 10px;
+  text-decoration: none; color: #fff; font-weight: 800;
+}
+.bnc-sidebar .bnc-brand-text small { color: var(--bnc-pink-soft); }
+
+.bnc-sidebar-nav { padding: 16px 12px; flex-grow: 1; }
+.bnc-nav-section {
+  font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: rgba(255,255,255,.4);
+  padding: 18px 12px 6px;
+}
+.bnc-nav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  color: rgba(255,255,255,.78);
+  text-decoration: none;
+  font-weight: 600; font-size: 14px;
+  margin-bottom: 2px;
+  transition: all .15s;
+}
+.bnc-nav-item i { font-size: 18px; }
+.bnc-nav-item:hover { background: rgba(255,255,255,.08); color: #fff; }
+.bnc-nav-item.active {
+  background: linear-gradient(135deg, var(--bnc-pink-soft), var(--bnc-pink-deep));
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(198, 61, 138, .35);
+}
+
+.bnc-sidebar-foot {
+  padding: 14px 16px;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+.bnc-sidebar-foot .bnc-avatar { background: var(--bnc-pink); }
+
+/* ── TOPBAR ── */
+.bnc-admin-content { display: flex; flex-direction: column; min-width: 0; }
+.bnc-topbar {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; gap: 12px;
+  background: #fff;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--bnc-line);
+}
+
+/* ── MAIN ── */
+.bnc-admin .bnc-main { padding: 24px; }
+@media (max-width: 575px) { .bnc-admin .bnc-main { padding: 16px; } }
+
+/* ── TABLES ── */
+.bnc-table { width: 100%; background: #fff; border-radius: var(--bnc-radius); overflow: hidden; box-shadow: var(--bnc-shadow); }
+.bnc-table th {
+  background: var(--bnc-pink-bg); color: var(--bnc-pink-deep);
+  padding: 14px 16px; font-size: 12px; text-transform: uppercase; letter-spacing: .5px;
+  text-align: left;
+}
+.bnc-table td { padding: 14px 16px; border-top: 1px solid var(--bnc-line); font-size: 14px; vertical-align: middle; }
+.bnc-table tbody tr:hover { background: var(--bnc-pink-bg); }
+
+/* ── KPI CARDS ── */
+.bnc-kpi {
+  background: #fff; border-radius: var(--bnc-radius); padding: 22px;
+  border: 1px solid var(--bnc-line); display: flex; align-items: center; gap: 18px;
+}
+.bnc-kpi-icon {
+  width: 56px; height: 56px; border-radius: 14px;
+  display: grid; place-items: center; font-size: 24px;
+  background: linear-gradient(135deg, var(--bnc-pink-soft), var(--bnc-pink-deep)); color: #fff;
+}
+.bnc-kpi-num { font-size: 28px; font-weight: 800; line-height: 1; }
+.bnc-kpi-label { color: var(--bnc-grey); font-size: 12px; text-transform: uppercase; letter-spacing: .5px; }
+
+/* ── FullCalendar tweaks ── */
+.fc { font-family: inherit !important; }
+.fc-toolbar-title { font-size: 18px !important; font-weight: 800 !important; color: var(--bnc-ink) !important; }
+.fc-button { background: #fff !important; border: 1.5px solid var(--bnc-line) !important; color: var(--bnc-ink) !important; font-weight: 600 !important; box-shadow: none !important; }
+.fc-button:hover { background: var(--bnc-pink-bg) !important; border-color: var(--bnc-pink) !important; color: var(--bnc-pink) !important; }
+.fc-button-primary:not(:disabled).fc-button-active { background: var(--bnc-pink) !important; border-color: var(--bnc-pink) !important; color: #fff !important; }
+.fc-event { border: 0 !important; padding: 2px 6px !important; border-radius: 6px !important; cursor: pointer; }

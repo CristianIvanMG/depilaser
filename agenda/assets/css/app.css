@@ -1,0 +1,218 @@
+/* ============================================================
+   BellaNick — App (cliente) styles
+   Paleta tomada del sitio principal: rosa principal + crema
+   ============================================================ */
+
+:root {
+  --bnc-pink: #c63d8a;
+  --bnc-pink-soft: #ff4fa3;
+  --bnc-pink-deep: #8a2c6e;
+  --bnc-pink-bg: #fff5fa;
+  --bnc-cream: #fff9f4;
+  --bnc-ink: #2a1029;
+  --bnc-grey: #6b6473;
+  --bnc-line: #f0d9e6;
+  --bnc-radius: 14px;
+  --bnc-shadow: 0 8px 30px rgba(198, 61, 138, .08);
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+
+body.bnc-client {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  color: var(--bnc-ink);
+  background: linear-gradient(180deg, var(--bnc-pink-bg) 0%, #ffffff 280px);
+  min-height: 100vh;
+}
+
+/* ── NAVBAR ── */
+.bnc-navbar {
+  background: rgba(255, 255, 255, .92);
+  backdrop-filter: saturate(180%) blur(8px);
+  border-bottom: 1px solid var(--bnc-line);
+  padding: 12px 0;
+}
+.bnc-navbar .navbar-brand { font-weight: 800; font-size: 18px; color: var(--bnc-ink); }
+.bnc-brand-mark {
+  display: inline-grid; place-items: center;
+  width: 36px; height: 36px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--bnc-pink-soft), var(--bnc-pink-deep));
+  color: #fff; font-weight: 800; font-size: 18px;
+  box-shadow: 0 4px 14px rgba(198, 61, 138, .35);
+}
+.bnc-brand-text { line-height: 1.05; }
+.bnc-brand-text small { display: block; font-size: 10px; color: var(--bnc-pink); font-weight: 600; letter-spacing: .8px; text-transform: uppercase; }
+
+.bnc-navbar .nav-link {
+  color: var(--bnc-ink) !important;
+  font-weight: 600; font-size: 14px;
+  border-radius: 10px; padding: 8px 14px !important;
+  transition: all .2s;
+}
+.bnc-navbar .nav-link:hover { background: var(--bnc-pink-bg); color: var(--bnc-pink) !important; }
+.bnc-navbar .nav-link.active { background: var(--bnc-pink); color: #fff !important; }
+
+.bnc-avatar {
+  display: inline-grid; place-items: center;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--bnc-pink-soft), var(--bnc-pink));
+  color: #fff; font-weight: 700; font-size: 14px;
+}
+
+/* ── BUTTONS ── */
+.btn-bnc-primary {
+  background: linear-gradient(135deg, var(--bnc-pink-soft), var(--bnc-pink-deep));
+  color: #fff !important;
+  border: 0; border-radius: 50px;
+  padding: 10px 22px; font-weight: 700; font-size: 14px;
+  box-shadow: 0 4px 14px rgba(198, 61, 138, .35);
+  transition: all .2s;
+}
+.btn-bnc-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(198, 61, 138, .45); color: #fff !important; }
+
+.btn-bnc-outline {
+  background: transparent; color: var(--bnc-pink) !important;
+  border: 2px solid var(--bnc-pink); border-radius: 50px;
+  padding: 9px 20px; font-weight: 700; font-size: 14px;
+  transition: all .2s;
+}
+.btn-bnc-outline:hover { background: var(--bnc-pink); color: #fff !important; }
+
+/* ── CARDS ── */
+.bnc-card {
+  background: #fff;
+  border: 1px solid var(--bnc-line);
+  border-radius: var(--bnc-radius);
+  box-shadow: var(--bnc-shadow);
+  overflow: hidden;
+}
+.bnc-card-header {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--bnc-line);
+  background: linear-gradient(180deg, #fff, var(--bnc-pink-bg));
+}
+.bnc-card-body { padding: 22px; }
+
+/* ── FORMS ── */
+.bnc-label { font-weight: 600; font-size: 13px; color: var(--bnc-ink); margin-bottom: 6px; }
+.form-control, .form-select {
+  border: 1.5px solid var(--bnc-line);
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: 15px;
+  transition: all .15s;
+}
+.form-control:focus, .form-select:focus {
+  border-color: var(--bnc-pink);
+  box-shadow: 0 0 0 4px rgba(198, 61, 138, .12);
+}
+
+/* ── HERO de login/registro ── */
+.bnc-auth-shell {
+  display: grid; grid-template-columns: 1fr; gap: 0;
+  min-height: calc(100vh - 80px); align-items: center;
+  padding: 40px 0;
+}
+@media (min-width: 992px) {
+  .bnc-auth-shell { grid-template-columns: 1.1fr 1fr; }
+}
+.bnc-auth-aside {
+  display: none;
+  background: linear-gradient(135deg, var(--bnc-pink) 0%, var(--bnc-pink-deep) 100%);
+  color: #fff;
+  border-radius: var(--bnc-radius);
+  padding: 50px;
+  position: relative;
+  overflow: hidden;
+}
+@media (min-width: 992px) { .bnc-auth-aside { display: block; } }
+.bnc-auth-aside::before {
+  content: "";
+  position: absolute; inset: -40% -10% auto auto;
+  width: 60%; aspect-ratio: 1; border-radius: 50%;
+  background: rgba(255, 255, 255, .08);
+}
+.bnc-auth-aside h2 { font-weight: 800; font-size: 36px; margin-bottom: 18px; line-height: 1.15; }
+.bnc-auth-aside p { font-size: 16px; opacity: .92; line-height: 1.55; }
+.bnc-auth-aside ul { list-style: none; padding: 0; margin: 24px 0 0; }
+.bnc-auth-aside ul li { padding: 8px 0 8px 32px; position: relative; font-size: 15px; }
+.bnc-auth-aside ul li::before {
+  content: "✓"; position: absolute; left: 0;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: rgba(255, 255, 255, .25);
+  display: grid; place-items: center; font-weight: 800; font-size: 12px;
+}
+
+/* ── HOME dashboard cards ── */
+.bnc-stat-card {
+  display: flex; align-items: center; gap: 16px;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid var(--bnc-line);
+  border-radius: var(--bnc-radius);
+}
+.bnc-stat-icon {
+  width: 50px; height: 50px; border-radius: 12px;
+  display: grid; place-items: center;
+  background: var(--bnc-pink-bg); color: var(--bnc-pink);
+  font-size: 22px;
+}
+.bnc-stat-num { font-size: 24px; font-weight: 800; line-height: 1; }
+.bnc-stat-label { font-size: 12px; color: var(--bnc-grey); text-transform: uppercase; letter-spacing: .5px; }
+
+/* ── Appointment list items ── */
+.bnc-appt {
+  display: flex; gap: 16px; padding: 16px 0;
+  border-bottom: 1px solid var(--bnc-line);
+}
+.bnc-appt:last-child { border-bottom: 0; }
+.bnc-appt-date {
+  flex: 0 0 70px;
+  text-align: center; padding: 10px;
+  background: var(--bnc-pink-bg);
+  border-radius: 10px;
+  color: var(--bnc-pink);
+}
+.bnc-appt-date .day  { font-size: 22px; font-weight: 800; line-height: 1; }
+.bnc-appt-date .mon  { font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
+.bnc-appt-date .time { font-size: 12px; margin-top: 4px; color: var(--bnc-pink-deep); font-weight: 600; }
+
+.bnc-status {
+  display: inline-block; padding: 3px 10px; border-radius: 50px;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+}
+.bnc-status.programada { background: #cfe2ff; color: #084298; }
+.bnc-status.confirmada { background: #d1e7dd; color: #0f5132; }
+.bnc-status.atendida   { background: #e2e3e5; color: #495057; }
+.bnc-status.cancelada  { background: #f8d7da; color: #842029; }
+.bnc-status.no_asistio { background: #fff3cd; color: #664d03; }
+
+/* ── Wizard pasos ── */
+.bnc-stepper {
+  display: flex; gap: 8px; margin-bottom: 30px;
+}
+.bnc-step {
+  flex: 1; padding: 14px 16px;
+  background: #fff; border: 1.5px solid var(--bnc-line);
+  border-radius: 10px;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 14px; color: var(--bnc-grey);
+}
+.bnc-step .num {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--bnc-line); color: var(--bnc-grey);
+  display: grid; place-items: center; font-weight: 700; font-size: 13px;
+}
+.bnc-step.active { border-color: var(--bnc-pink); color: var(--bnc-ink); font-weight: 700; }
+.bnc-step.active .num { background: var(--bnc-pink); color: #fff; }
+.bnc-step.done .num { background: #198754; color: #fff; }
+
+/* ── Footer ── */
+.bnc-footer { border-top: 1px solid var(--bnc-line); background: #fff; }
+
+/* ── Responsive tweaks ── */
+@media (max-width: 575px) {
+  .bnc-card-body { padding: 18px; }
+  .bnc-auth-shell { padding: 20px 0; }
+}
