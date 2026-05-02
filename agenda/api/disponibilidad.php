@@ -163,19 +163,26 @@ foreach ($windows as $w) {
         if ($dateRaw === $today && $t < $now + $cfg['booking_min_hours'] * 3600) continue;
 
         // ¿Choca con alguna cita?
-        $busy = false;
+        $busyCount = 0;
         foreach ($busyRanges as [$bs, $be]) {
-            if ($t < $be && $slotEnd > $bs) { $busy = true; break; }
+            if ($t < $be && $slotEnd > $bs) { $busyCount++; }
         }
-        if ($busy) continue;
+        $availableCabins = AppointmentService::branchCabinCapacity($branchId) - $busyCount;
+        if ($availableCabins <= 0) continue;
 
         $slots[] = [
             'start'      => date('Y-m-d H:i:s', $t),
             'end'        => date('Y-m-d H:i:s', $slotEnd),
             'label'      => date('H:i', $t),
             'label_long' => fmt_dt(date('Y-m-d H:i:s', $t)),
+            'available_cabins' => $availableCabins,
         ];
     }
 }
 
-echo json_encode(['ok' => true, 'slots' => $slots, 'count' => count($slots)]);
+echo json_encode([
+    'ok' => true,
+    'slots' => $slots,
+    'count' => count($slots),
+    'cabin_capacity' => AppointmentService::branchCabinCapacity($branchId),
+]);

@@ -69,7 +69,7 @@ final class AppointmentService
         }
 
         if (self::hasConflict($branchId, $startSql, $endSql, $ignoreAppointmentId)) {
-            return ['ok' => false, 'errors' => ['start_at' => 'Ese horario ya esta ocupado por otra cita.']];
+            return ['ok' => false, 'errors' => ['start_at' => 'Ese horario ya no tiene cabinas disponibles.']];
         }
 
         return [
@@ -97,17 +97,52 @@ final class AppointmentService
         }
 
         $lockSql = $forUpdate ? ' FOR UPDATE' : '';
-        $row = Database::one(
+        $lockSql = $forUpdate ? ' FOR UPDATE' : '';
+        $rows = Database::all(
             "SELECT id FROM appointments
              WHERE branch_id = ?
                AND status_id IN (SELECT id FROM appointment_statuses WHERE slug IN ('programada','confirmada','atendida'))
                AND start_at < ? AND end_at > ?
                {$ignoreSql}
-             LIMIT 1{$lockSql}",
+             {$lockSql}",
             $params
         );
 
-        return (bool) $row;
+        return count($rows) >= self::branchCabinCapacity($branchId);
+    }
+
+    public static function availableCabins(
+        int $branchId,
+        string $startSql,
+        string $endSql,
+        ?int $ignoreAppointmentId = null
+    ): int {
+        $params = [$branchId, $endSql, $startSql];
+        $ignoreSql = '';
+        if ($ignoreAppointmentId) {
+            $ignoreSql = ' AND a.id <> ?';
+            $params[] = $ignoreAppointmentId;
+        }
+
+        $row = Database::one(
+            "SELECT COUNT(*) AS n
+             FROM appointments a
+             JOIN appointment_statuses st ON st.id = a.status_id
+             WHERE a.branch_id = ?
+               AND st.slug IN ('programada','confirmada','atendida')
+               AND a.start_at < ? AND a.end_at > ?
+               {$ignoreSql}",
+            $params
+        );
+
+        return max(0, self::branchCabinCapacity($branchId) - (int) ($row['n'] ?? 0));
+    }
+
+    public static function branchCabinCapacity(int $branchId): int
+    {
+        $branch = Database::one('SELECT slug, name FROM branches WHERE id = ? LIMIT 1', [$branchId]);
+        $key = mb_strtolower(($branch['slug'] ?? '') . ' ' . ($branch['name'] ?? ''));
+        return (str_contains($key, 'queretaro') || str_contains($key, 'querétaro')) ? 2 : 3;
     }
 
     public static function availabilityError(int $branchId, string $date, int $startTs, int $endTs): ?string

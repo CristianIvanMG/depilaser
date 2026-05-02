@@ -607,7 +607,8 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
             ${data.slots.map(slot => {
               const value = slot.start.replace(' ', 'T').slice(0, 16);
               const active = value === currentValue ? ' btn-bnc-primary active' : '';
-              return `<button type="button" class="btn btn-bnc-outline btn-sm slot-btn${active}" data-start="${escapeHtml(value)}" title="${escapeHtml(slot.label_long || slot.label)}">${escapeHtml(slot.label)}</button>`;
+              const cabins = slot.available_cabins ? ` · ${slot.available_cabins} cabina(s)` : '';
+              return `<button type="button" class="btn btn-bnc-outline btn-sm slot-btn${active}" data-start="${escapeHtml(value)}" title="${escapeHtml((slot.label_long || slot.label) + cabins)}">${escapeHtml(slot.label)}${escapeHtml(cabins)}</button>`;
             }).join('')}
           </div>
         `;
