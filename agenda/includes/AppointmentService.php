@@ -97,7 +97,6 @@ final class AppointmentService
         }
 
         $lockSql = $forUpdate ? ' FOR UPDATE' : '';
-        $lockSql = $forUpdate ? ' FOR UPDATE' : '';
         $rows = Database::all(
             "SELECT id FROM appointments
              WHERE branch_id = ?
@@ -140,9 +139,21 @@ final class AppointmentService
 
     public static function branchCabinCapacity(int $branchId): int
     {
-        $branch = Database::one('SELECT slug, name FROM branches WHERE id = ? LIMIT 1', [$branchId]);
+        $select = self::columnExists('branches', 'cabin_capacity') ? 'slug, name, cabin_capacity' : 'slug, name';
+        $branch = Database::one("SELECT {$select} FROM branches WHERE id = ? LIMIT 1", [$branchId]);
+        if (isset($branch['cabin_capacity']) && (int) $branch['cabin_capacity'] > 0) {
+            return (int) $branch['cabin_capacity'];
+        }
         $key = mb_strtolower(($branch['slug'] ?? '') . ' ' . ($branch['name'] ?? ''));
         return (str_contains($key, 'queretaro') || str_contains($key, 'querétaro')) ? 2 : 3;
+    }
+
+    public static function ensureCabinCapacityColumn(): void
+    {
+        if (!self::columnExists('branches', 'cabin_capacity')) {
+            Database::exec('ALTER TABLE branches ADD COLUMN cabin_capacity TINYINT UNSIGNED NOT NULL DEFAULT 3 AFTER gmaps_url');
+            Database::exec("UPDATE branches SET cabin_capacity = 2 WHERE LOWER(CONCAT(slug, ' ', name)) LIKE '%queretaro%' OR LOWER(CONCAT(slug, ' ', name)) LIKE '%querétaro%'");
+        }
     }
 
     public static function availabilityError(int $branchId, string $date, int $startTs, int $endTs): ?string
@@ -224,6 +235,15 @@ final class AppointmentService
             return $matches[1] ?? [];
         } catch (Throwable $e) {
             return [];
+        }
+    }
+
+    private static function columnExists(string $table, string $column): bool
+    {
+        try {
+            return (bool) Database::one("SHOW COLUMNS FROM {$table} LIKE ?", [$column]);
+        } catch (Throwable $e) {
+            return false;
         }
     }
 }
