@@ -27,6 +27,7 @@ $cfg = $CONFIG['business'];
 $branchId  = (int) ($_GET['branch']  ?? 0);
 $serviceId = (int) ($_GET['service'] ?? 0);
 $dateRaw   = (string) ($_GET['date'] ?? '');
+$ignoreId  = Auth::isAdmin() ? (int) ($_GET['ignore'] ?? 0) : 0;
 
 if (!$branchId || !$serviceId || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateRaw)) {
     http_response_code(400);
@@ -107,13 +108,16 @@ if ($exc) {
 }
 
 // 3) Citas existentes que ocupan slots
-$busy = Database::all(
-    "SELECT start_at, end_at FROM appointments
-     WHERE branch_id = ?
-       AND DATE(start_at) = ?
-       AND status_id IN (SELECT id FROM appointment_statuses WHERE slug NOT IN ('cancelada','no_asistio'))",
-    [$branchId, $dateRaw]
-);
+$busySql = "SELECT start_at, end_at FROM appointments
+            WHERE branch_id = ?
+              AND DATE(start_at) = ?
+              AND status_id IN (SELECT id FROM appointment_statuses WHERE slug NOT IN ('cancelada','no_asistio'))";
+$busyArgs = [$branchId, $dateRaw];
+if ($ignoreId > 0) {
+    $busySql .= ' AND id <> ?';
+    $busyArgs[] = $ignoreId;
+}
+$busy = Database::all($busySql, $busyArgs);
 
 $busyRanges = array_map(fn($b) => [strtotime($b['start_at']), strtotime($b['end_at'])], $busy);
 
