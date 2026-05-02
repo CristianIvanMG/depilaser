@@ -13,10 +13,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $result = Auth::register($_POST);
 
     if ($result['ok']) {
-        // Auto-login
         Auth::attempt($_POST['email'], $_POST['password']);
-        flash('success', '¡Cuenta creada! Bienvenida a BellaNick.');
-        redirect('');
+        $verification = $result['verification'] ?? ['ok' => true, 'message' => 'Te enviamos un correo para confirmar tu cuenta.'];
+        flash(!empty($verification['mail_sent']) ? 'success' : 'warning', $verification['message']);
+        redirect('verificar-email.php');
     }
 
     $errors = $result['errors'];
@@ -40,7 +40,7 @@ require __DIR__ . '/includes/layouts/header_client.php';
       <ul>
         <li>Agenda en cualquier momento, desde donde estés</li>
         <li>Cancela o reprograma con 1 clic (mín. 24 h antes)</li>
-        <li>Tu información está protegida (LFPDPPP)</li>
+        <li>Tu información está protegida</li>
         <li>Soporte por WhatsApp en horario de clínica</li>
       </ul>
     </aside>

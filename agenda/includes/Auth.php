@@ -23,7 +23,7 @@ final class Auth
         if (isset($_SESSION['user_cache'])) return $_SESSION['user_cache'];
 
         $u = Database::one(
-            'SELECT u.id, u.role_id, u.name, u.email, u.phone, u.active, r.slug AS role_slug
+            'SELECT u.id, u.role_id, u.name, u.email, u.phone, u.email_verified, u.active, r.slug AS role_slug
              FROM users u
              JOIN roles r ON r.id = u.role_id
              WHERE u.id = ? LIMIT 1',
@@ -33,6 +33,7 @@ final class Auth
             self::logout();
             return null;
         }
+        $u['email_verified'] = (int) ($u['email_verified'] ?? 0);
         $_SESSION['user_cache'] = $u;
         return $u;
     }
@@ -56,6 +57,12 @@ final class Auth
     public static function isClient(): bool
     {
         return self::role() === self::ROLE_CLIENT;
+    }
+
+    public static function emailVerified(): bool
+    {
+        $u = self::user();
+        return !$u || self::isAdmin() || (int) ($u['email_verified'] ?? 0) === 1;
     }
 
     /* ───────── LOGIN / LOGOUT ───────── */
@@ -107,6 +114,7 @@ final class Auth
             'name'      => $u['name'],
             'email'     => $u['email'],
             'phone'     => $u['phone'],
+            'email_verified' => (int) ($u['email_verified'] ?? 0),
             'active'    => (int) $u['active'],
             'role_slug' => $u['role_slug'],
         ];
@@ -147,9 +155,11 @@ final class Auth
 
         $roleId = (int) Database::one("SELECT id FROM roles WHERE slug = 'cliente' LIMIT 1")['id'];
 
+        EmailVerification::ensureSchema();
+
         Database::exec(
-            'INSERT INTO users (role_id, name, email, phone, password_hash, active)
-             VALUES (?, ?, ?, ?, ?, 1)',
+            'INSERT INTO users (role_id, name, email, phone, password_hash, email_verified, active)
+             VALUES (?, ?, ?, ?, ?, 0, 1)',
             [
                 $roleId,
                 trim($data['name']),
@@ -160,8 +170,9 @@ final class Auth
         );
         $uid = Database::lastId();
         self::audit('register', 'user', $uid);
+        $verification = EmailVerification::issueAndSend($uid, true);
 
-        return ['ok' => true, 'errors' => [], 'user_id' => $uid];
+        return ['ok' => true, 'errors' => [], 'user_id' => $uid, 'verification' => $verification];
     }
 
     /* ───────── GUARDS (proteger páginas) ───────── */
@@ -191,6 +202,15 @@ final class Auth
         if (!self::isSuperAdmin()) {
             http_response_code(403);
             die('Acceso restringido (solo super-admin).');
+        }
+    }
+
+    public static function requireVerifiedEmail(): void
+    {
+        self::requireLogin();
+        if (self::isClient() && !self::emailVerified()) {
+            flash('warning', 'Confirma tu correo electrónico para continuar.');
+            redirect('verificar-email.php?next=' . urlencode($_SERVER['REQUEST_URI'] ?? url('')));
         }
     }
 

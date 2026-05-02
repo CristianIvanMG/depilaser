@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/includes/bootstrap.php';
 Auth::requireLogin();
+Auth::requireVerifiedEmail();
 $user = Auth::user();
 
 global $CONFIG;

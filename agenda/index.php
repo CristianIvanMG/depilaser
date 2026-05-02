@@ -11,6 +11,10 @@ if (Auth::isAdmin()) {
     redirect('admin/');
 }
 
+if (!Auth::emailVerified()) {
+    redirect('verificar-email.php');
+}
+
 // Cliente → dashboard simple
 $user = Auth::user();
 

@@ -20,6 +20,11 @@ if (!Auth::check()) {
     echo json_encode(['ok' => false, 'error' => 'No autenticado']);
     exit;
 }
+if (Auth::isClient() && !Auth::emailVerified()) {
+    http_response_code(403);
+    echo json_encode(['ok' => false, 'error' => 'Confirma tu correo para consultar disponibilidad']);
+    exit;
+}
 
 global $CONFIG;
 $cfg = $CONFIG['business'];

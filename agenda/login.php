@@ -3,6 +3,9 @@ require_once __DIR__ . '/includes/bootstrap.php';
 
 // Si ya está logueado, redirige a su área
 if (Auth::check()) {
+    if (Auth::isClient() && !Auth::emailVerified()) {
+        redirect('verificar-email.php');
+    }
     redirect(Auth::isAdmin() ? 'admin/' : '');
 }
 
@@ -17,6 +20,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = Auth::attempt($_POST['email'] ?? '', $_POST['password'] ?? '');
         if ($user) {
             clear_old();
+            if (($user['role_slug'] ?? '') === 'cliente' && (int) ($user['email_verified'] ?? 0) !== 1) {
+                redirect('verificar-email.php?next=' . urlencode($next ?: url('')));
+            }
             // Si nos pasaron ?next=, validar que sea local
             if ($next && str_starts_with($next, '/')) {
                 redirect($next);
