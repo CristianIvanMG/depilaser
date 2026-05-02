@@ -60,4 +60,6 @@ spl_autoload_register(function (string $class): void {
 require_once __DIR__ . '/functions.php';
 
 // 9. Conexión BD lista para usar como `Database::pdo()`
-Database::init($CONFIG['db']);
+//    Las credenciales se leen del MISMO /config/secrets.php que usa el resto del sitio.
+//    No es necesario pasar $CONFIG['db'] — Database::init() lo localiza solo.
+Database::init();
