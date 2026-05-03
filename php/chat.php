@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // ===========================
 // 🔐 VERIFICACIÓN META (DEBE IR PRIMERO)
 // ===========================
@@ -395,4 +395,3 @@ echo json_encode(
 );
 flush();
 exit;
-

@@ -17,6 +17,7 @@ function admin_appointment_form_nonce(): string
 
 // Asegura schema de Profesionales (auto-migracion suave)
 AppointmentService::ensureProfessionalSchema();
+EmailNotificationService::ensureSchema();
 
 $statuses = Database::all('SELECT id, slug, name FROM appointment_statuses ORDER BY id');
 $statusBySlug = [];
@@ -164,6 +165,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             Auth::audit('appointment_cancel_admin', 'appointment', $appointmentId, [
                 'reason' => trim($_POST['cancel_reason'] ?? ''),
             ]);
+            EmailNotificationService::sendForAppointment($appointmentId, 'appointment_cancelled');
             flash('success', 'Cita cancelada. El horario quedo liberado.');
             redirect('admin/cita-form.php?id=' . $appointmentId);
         }
@@ -275,6 +277,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'start_at' => $appointment['start_at'],
                         'end_at' => $appointment['end_at'],
                     ];
+                    $resetsReminder = $appointment['start_at'] !== $schedule['start_sql']
+                        || $appointment['end_at'] !== $schedule['end_sql']
+                        || (int) $appointment['branch_id'] !== $branchId
+                        || (int) $appointment['service_id'] !== $serviceId;
+                    $reminderSql = $resetsReminder
+                        ? ', email_reminder_sent = 0, email_reminder_sent_at = NULL, email_reminder_attempts = 0, email_reminder_last_error = NULL'
+                        : '';
                     $updateParams = [
                         $userId,
                         $professionalId ?: null,
@@ -291,7 +300,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'UPDATE appointments
                          SET user_id = ?, professional_id = ?, branch_id = ?, service_id = ?, status_id = ?,
                              start_at = ?, end_at = ?, source = ?, notes_admin = ?
-                             ' . $cancelSql . '
+                             ' . $cancelSql . $reminderSql . '
                          WHERE id = ?',
                         $updateParams
                     );
@@ -307,6 +316,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             'end_at' => $schedule['end_sql'],
                         ],
                     ]);
+                    if ($previousStatusId !== $statusId) {
+                        $emailType = match ($statusSlug) {
+                            'confirmada' => 'appointment_confirmed',
+                            'cancelada' => 'appointment_cancelled',
+                            'no_asistio' => 'appointment_no_show',
+                            'atendida' => 'appointment_attended',
+                            default => 'appointment_status_changed',
+                        };
+                        EmailNotificationService::sendForAppointment($appointmentId, $emailType);
+                    }
                     flash('success', 'Cita actualizada correctamente.');
                     redirect('admin/cita-form.php?id=' . $appointmentId);
                 }
@@ -351,6 +370,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $newId = Database::lastId();
                 $pdo->commit();
                 Auth::audit('appointment_create_admin', 'appointment', $newId, ['code' => $code]);
+                $emailType = $statusSlug === 'confirmada' ? 'appointment_confirmed' : 'appointment_created';
+                EmailNotificationService::sendForAppointment($newId, $emailType);
                 flash('success', 'Cita registrada correctamente. Código: ' . $code);
                 redirect('admin/citas.php');
             } catch (Throwable $e) {

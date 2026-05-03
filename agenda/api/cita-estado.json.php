@@ -7,13 +7,11 @@
  *   appointment_id  : int
  *   to              : 'confirmada' | 'atendida' | 'no_asistio' | 'cancelada'
  *   reason          : string (opcional)
- *   send_email      : '1' opcional (envía recibo si pasa a atendida o correo empático si cancela / no_asistio)
+ *   send_email      : '1' opcional (envia recibo si pasa a atendida)
  *
  * Respuesta JSON:
  *   { ok: bool, error?: string, status?: { slug,name,color }, receipt_folio?: string,
- *     receipt_sent?: bool, empathy_sent?: bool }
- *
- * Solo admin. Toda la lógica de validación está en AppointmentService::transitionStatus().
+ *     status_email_sent?: bool, receipt_sent?: bool }
  */
 declare(strict_types=1);
 
@@ -22,7 +20,7 @@ header('Content-Type: application/json; charset=utf-8');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
-    echo json_encode(['ok' => false, 'error' => 'Método no permitido.']);
+    echo json_encode(['ok' => false, 'error' => 'Metodo no permitido.']);
     exit;
 }
 
@@ -32,7 +30,6 @@ if (!Auth::isAdmin()) {
     exit;
 }
 
-// Acepta JSON body además de form-data
 $payload = $_POST;
 if (empty($payload) && !empty($_SERVER['CONTENT_TYPE']) && stripos($_SERVER['CONTENT_TYPE'], 'application/json') !== false) {
     $raw = file_get_contents('php://input') ?: '';
@@ -43,7 +40,7 @@ if (empty($payload) && !empty($_SERVER['CONTENT_TYPE']) && stripos($_SERVER['CON
 $token = (string) ($payload[Csrf::FIELD] ?? '');
 if (!Csrf::valid($token)) {
     http_response_code(419);
-    echo json_encode(['ok' => false, 'error' => 'Token CSRF inválido. Recarga la página.']);
+    echo json_encode(['ok' => false, 'error' => 'Token CSRF invalido. Recarga la pagina.']);
     exit;
 }
 
@@ -54,7 +51,7 @@ $sendEmail     = !empty($payload['send_email']);
 
 if (!$appointmentId || !$to) {
     http_response_code(400);
-    echo json_encode(['ok' => false, 'error' => 'Parámetros incompletos.']);
+    echo json_encode(['ok' => false, 'error' => 'Parametros incompletos.']);
     exit;
 }
 
@@ -78,20 +75,24 @@ $response = [
     'receipt_folio' => $result['receipt_folio'] ?? null,
 ];
 
-// Disparos automáticos de correo cuando aplica
-if ($sendEmail) {
-    if ($to === 'atendida') {
-        $sent = ReceiptService::emailReceipt($appointmentId, false);
-        $response['receipt_sent'] = $sent['ok'];
-        if (!$sent['ok']) {
-            $response['receipt_warning'] = $sent['error'] ?? null;
-        }
-    } elseif (in_array($to, ['cancelada', 'no_asistio'], true)) {
-        $sent = ReceiptService::emailEmpathy($appointmentId, false);
-        $response['empathy_sent'] = $sent['ok'];
-        if (!$sent['ok']) {
-            $response['empathy_warning'] = $sent['error'] ?? null;
-        }
+$emailType = match ($to) {
+    'confirmada' => 'appointment_confirmed',
+    'cancelada' => 'appointment_cancelled',
+    'no_asistio' => 'appointment_no_show',
+    'atendida' => 'appointment_attended',
+    default => 'appointment_status_changed',
+};
+$statusMail = EmailNotificationService::sendForAppointment($appointmentId, $emailType);
+$response['status_email_sent'] = !empty($statusMail['sent']);
+if (!$response['status_email_sent'] && empty($statusMail['duplicate']) && empty($statusMail['skipped'])) {
+    $response['status_email_warning'] = $statusMail['error'] ?? 'No fue posible enviar la notificacion.';
+}
+
+if ($sendEmail && $to === 'atendida') {
+    $sent = ReceiptService::emailReceipt($appointmentId, false);
+    $response['receipt_sent'] = $sent['ok'];
+    if (!$sent['ok']) {
+        $response['receipt_warning'] = $sent['error'] ?? null;
     }
 }
 

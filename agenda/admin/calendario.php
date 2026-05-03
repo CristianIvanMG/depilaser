@@ -296,9 +296,9 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         t.innerHTML = orig; t.disabled = false; t.dataset.busy = '';
         if (!body.ok) { toast('danger', body.error || 'No fue posible cambiar el estado.'); return; }
         if (body.receipt_warning) toast('warning', 'Estado cambiado, recibo no enviado: ' + body.receipt_warning);
-        else if (body.empathy_warning) toast('warning', 'Estado cambiado, correo no enviado: ' + body.empathy_warning);
+        else if (body.status_email_warning) toast('warning', 'Estado cambiado, notificación no enviada: ' + body.status_email_warning);
         else if (body.receipt_sent) toast('success', '¡Atendida! Recibo enviado al cliente.');
-        else if (body.empathy_sent) toast('success', 'Estado actualizado y correo enviado al cliente.');
+        else if (body.status_email_sent) toast('success', 'Estado actualizado y notificación enviada al cliente.');
         else toast('success', 'Estado actualizado a “' + (body.status?.name || t.dataset.to) + '”.');
         // Cierra modal y refresca eventos
         bootstrap.Modal.getInstance(document.getElementById('apptModal'))?.hide();
