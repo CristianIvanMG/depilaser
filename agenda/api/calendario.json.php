@@ -11,9 +11,10 @@ header('Content-Type: application/json; charset=utf-8');
 try { AppointmentService::ensureProfessionalSchema(); } catch (\Throwable $e) { /* silencioso */ }
 try { AppointmentService::ensureReceiptSchema(); } catch (\Throwable $e) { /* silencioso */ }
 
-if (!Auth::isAdmin()) {
+Auth::enforceSessionTimeout();
+if (!Auth::isAdmin() && !Auth::isProfessional()) {
     http_response_code(403);
-    echo json_encode(['ok' => false, 'error' => 'Solo admin']);
+    echo json_encode(['ok' => false, 'error' => 'Acceso restringido']);
     exit;
 }
 
@@ -42,6 +43,10 @@ $sql = "SELECT a.id, a.code, a.start_at, a.end_at, a.notes_client, a.notes_admin
         LEFT JOIN users pr ON pr.id = a.professional_id
         WHERE a.start_at >= ? AND a.start_at < ?";
 $args = [$from, $to];
+if (Auth::isProfessional() && !Auth::isAdmin()) {
+    $sql .= " AND a.professional_id = ?";
+    $args[] = (int) (Auth::user()['id'] ?? 0);
+}
 if ($branchId) {
     $sql .= " AND a.branch_id = ?";
     $args[] = $branchId;

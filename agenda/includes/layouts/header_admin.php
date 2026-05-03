@@ -2,6 +2,7 @@
 /** @var string $pageTitle */
 $pageTitle = $pageTitle ?? 'Panel BellaNick';
 $user = Auth::user();
+$adminHome = Auth::isAdmin() ? url('admin/') : url('admin/calendario.php');
 ?><!DOCTYPE html>
 <html lang="es-MX">
 <head>
@@ -23,7 +24,7 @@ $user = Auth::user();
   <!-- SIDEBAR -->
   <aside class="bnc-sidebar" id="bncSidebar">
     <div class="bnc-sidebar-header">
-      <a href="<?= url('admin/') ?>" class="bnc-brand">
+      <a href="<?= $adminHome ?>" class="bnc-brand">
         <span class="bnc-brand-mark">B</span>
         <span class="bnc-brand-text">BellaNick<small>Admin</small></span>
       </a>
@@ -31,12 +32,15 @@ $user = Auth::user();
     </div>
 
     <nav class="bnc-sidebar-nav">
-      <a href="<?= url('admin/') ?>" class="bnc-nav-item <?= basename($_SERVER['SCRIPT_NAME']) === 'index.php' && str_contains($_SERVER['REQUEST_URI'], '/admin') ? 'active' : '' ?>">
-        <i class="bi bi-speedometer2"></i><span>Dashboard</span>
-      </a>
+      <?php if (Auth::isAdmin()): ?>
+        <a href="<?= url('admin/') ?>" class="bnc-nav-item <?= basename($_SERVER['SCRIPT_NAME']) === 'index.php' && str_contains($_SERVER['REQUEST_URI'], '/admin') ? 'active' : '' ?>">
+          <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+        </a>
+      <?php endif; ?>
       <a href="<?= url('admin/calendario.php') ?>" class="bnc-nav-item <?= is_active('calendario') ?>">
         <i class="bi bi-calendar3"></i><span>Calendario</span>
       </a>
+      <?php if (Auth::isAdmin()): ?>
       <a href="<?= url('admin/citas.php') ?>" class="bnc-nav-item <?= is_active('citas') ?>">
         <i class="bi bi-list-check"></i><span>Citas</span>
       </a>
@@ -58,6 +62,7 @@ $user = Auth::user();
           <i class="bi bi-shop"></i><span>Sucursales</span>
         </a>
       <?php endif; ?>
+      <?php endif; ?>
     </nav>
 
     <div class="bnc-sidebar-foot">
@@ -78,9 +83,11 @@ $user = Auth::user();
       <button class="btn btn-outline-secondary d-lg-none me-2" id="bncSidebarOpen"><i class="bi bi-list"></i></button>
       <h1 class="h5 mb-0"><?= e($pageTitle) ?></h1>
       <div class="ms-auto d-flex align-items-center gap-2">
-        <a href="<?= url('admin/cita-form.php') ?>" class="btn btn-bnc-primary btn-sm">
-          <i class="bi bi-plus-lg"></i> Nueva cita
-        </a>
+        <?php if (Auth::isAdmin()): ?>
+          <a href="<?= url('admin/cita-form.php') ?>" class="btn btn-bnc-primary btn-sm">
+            <i class="bi bi-plus-lg"></i> Nueva cita
+          </a>
+        <?php endif; ?>
       </div>
     </header>
 

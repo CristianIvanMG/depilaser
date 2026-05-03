@@ -3,8 +3,8 @@ require_once __DIR__ . '/includes/bootstrap.php';
 Auth::requireLogin();
 
 $user = Auth::user();
-$next = $_GET['next'] ?? '';
-$safeNext = ($next && str_starts_with($next, '/')) ? $next : url('');
+$rawNext  = $_POST['next'] ?? $_GET['next'] ?? '';
+$safeNext = safe_next($rawNext) ?? Auth::defaultLanding(Auth::role());
 
 if (Auth::emailVerified()) {
     flash('success', 'Tu correo ya fue confirmado correctamente.');
@@ -40,6 +40,7 @@ require __DIR__ . '/includes/layouts/header_client.php';
 
       <form method="POST" class="d-inline-block">
         <?= Csrf::input() ?>
+        <input type="hidden" name="next" value="<?= e($safeNext) ?>">
         <button class="btn btn-bnc-primary" type="submit"><i class="bi bi-send"></i> Reenviar correo</button>
       </form>
       <a href="<?= url('logout.php') ?>" class="btn btn-bnc-outline ms-2">Salir</a>

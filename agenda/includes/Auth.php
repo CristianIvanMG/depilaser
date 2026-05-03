@@ -11,6 +11,9 @@ final class Auth
     public const ROLE_PROFESSIONAL = 'professional';
     public const ROLE_CLIENT       = 'cliente';
 
+    /** Idle por defecto si no se puede leer de config: 2 horas. */
+    private const DEFAULT_IDLE_SEC = 7200;
+
     /* ───────── ESTADO ───────── */
 
     public static function check(): bool
@@ -124,6 +127,11 @@ final class Auth
             'active'    => (int) $u['active'],
             'role_slug' => $u['role_slug'],
         ];
+        $_SESSION['last_activity'] = time();
+        $_SESSION['login_at']      = time();
+
+        // Limpiar cualquier next o flag obsoleto que haya quedado de sesiones previas
+        unset($_SESSION['intended_next']);
 
         Database::exec('UPDATE users SET last_login_at = NOW() WHERE id = ?', [$u['id']]);
         self::audit('login', 'user', (int) $u['id']);
@@ -204,13 +212,111 @@ final class Auth
 
     /* ───────── GUARDS (proteger páginas) ───────── */
 
-    /** Llamar al inicio de páginas que requieren login */
+    /** Tope de inactividad en segundos (lee config['session']['lifetime']). */
+    public static function idleLimit(): int
+    {
+        global $CONFIG;
+        $sec = (int) ($CONFIG['session']['lifetime'] ?? self::DEFAULT_IDLE_SEC);
+        return $sec > 60 ? $sec : self::DEFAULT_IDLE_SEC;
+    }
+
+    /**
+     * Página por defecto a la que redirigir tras login según el rol.
+     * Devuelve URL absoluta lista para `redirect()`.
+     */
+    public static function defaultLanding(?string $roleSlug): string
+    {
+        return match ($roleSlug) {
+            self::ROLE_SUPERADMIN, self::ROLE_ADMIN => url('admin/'),
+            self::ROLE_PROFESSIONAL                 => url('admin/calendario.php'),
+            self::ROLE_CLIENT                       => url('mis-citas.php'),
+            default                                 => url(''),
+        };
+    }
+
+    /**
+     * Caduca la sesión por inactividad: audita, drop de identidad,
+     * rota id de sesión y deja un flash claro para mostrar tras el login.
+     * NO destruye la cookie — necesitamos la sesión viva para entregar el flash.
+     */
+    private static function expireSession(): void
+    {
+        try { self::audit('session_expired', 'user', (int) ($_SESSION['uid'] ?? 0)); } catch (\Throwable $e) {}
+        unset(
+            $_SESSION['uid'],
+            $_SESSION['user_cache'],
+            $_SESSION['last_activity'],
+            $_SESSION['login_at'],
+            $_SESSION['old']
+        );
+        // ID nuevo para evitar fixation tras la expiración
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_regenerate_id(true);
+        }
+        flash('warning', 'Tu sesión expiró por inactividad. Por favor inicia sesión nuevamente.');
+    }
+
+    /**
+     * Si la sesión sigue viva, comprueba inactividad. Devuelve true si
+     * la sesión fue expirada en esta llamada.
+     */
+    private static function enforceIdleTimeout(): bool
+    {
+        if (!self::check()) return false;
+        $last = (int) ($_SESSION['last_activity'] ?? 0);
+        if ($last <= 0) {
+            $_SESSION['last_activity'] = time();
+            return false;
+        }
+        if ((time() - $last) > self::idleLimit()) {
+            self::expireSession();
+            return true;
+        }
+        $_SESSION['last_activity'] = time();
+        return false;
+    }
+
+    /** Permite que pantallas públicas como login limpien sesiones viejas. */
+    public static function enforceSessionTimeout(): bool
+    {
+        return self::enforceIdleTimeout();
+    }
+
+    /** Construye `?next=` saneado a partir del REQUEST_URI actual. */
+    private static function intendedNextParam(): string
+    {
+        $uri  = $_SERVER['REQUEST_URI'] ?? '';
+        $next = safe_next($uri);
+        return $next ? '?next=' . urlencode($next) : '';
+    }
+
+    /** Redirección segura al login, conservando next saneado. */
+    private static function bounceToLogin(): never
+    {
+        // Solo capturamos el next en GETs idempotentes — no tiene sentido
+        // bouncear un POST (perdería el body) ni un endpoint API.
+        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+        $params = $method === 'GET' ? self::intendedNextParam() : '';
+        header('Location: ' . url('login.php') . $params, true, 302);
+        exit;
+    }
+
+    /** Llamar al inicio de páginas que requieren login. */
     public static function requireLogin(): void
     {
+        // 1) sesión viva pero inactiva → expirar con flash
+        if (self::enforceIdleTimeout()) {
+            self::bounceToLogin();
+        }
+        // 2) nunca logueado → flash neutro y redirección
         if (!self::check()) {
-            $_SESSION['flash_error'] = 'Necesitas iniciar sesión para continuar.';
-            header('Location: ' . APP_BASE_URL . '/login.php?next=' . urlencode($_SERVER['REQUEST_URI']));
-            exit;
+            // Solo añadimos el flash si el usuario INTENTÓ acceder a algo,
+            // no en visitas frescas a /login.php (que ya lo manejamos arriba).
+            $hasFlash = !empty($_SESSION['flash']);
+            if (!$hasFlash) {
+                flash('info', 'Necesitas iniciar sesión para continuar.');
+            }
+            self::bounceToLogin();
         }
     }
 
@@ -237,7 +343,8 @@ final class Auth
         self::requireLogin();
         if (self::isClient() && !self::emailVerified()) {
             flash('warning', 'Confirma tu correo electrónico para continuar.');
-            redirect('verificar-email.php?next=' . urlencode($_SERVER['REQUEST_URI'] ?? url('')));
+            $next = safe_next($_SERVER['REQUEST_URI'] ?? '');
+            redirect('verificar-email.php' . ($next ? '?next=' . urlencode($next) : ''));
         }
     }
 

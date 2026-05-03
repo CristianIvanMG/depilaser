@@ -1,7 +1,12 @@
 <?php
 require_once __DIR__ . '/../includes/bootstrap.php';
-Auth::requireAdmin();
+Auth::requireLogin();
+if (!Auth::isAdmin() && !Auth::isProfessional()) {
+    http_response_code(403);
+    die('Acceso restringido.');
+}
 
+$canManageCalendar = Auth::isAdmin();
 $branches = Database::all('SELECT id, name FROM branches WHERE active=1 ORDER BY display_order, name');
 $pageTitle = 'Calendario';
 require __DIR__ . '/../includes/layouts/header_admin.php';
@@ -25,7 +30,9 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         <option value="<?= (int) $b['id'] ?>"><?= e($b['name']) ?></option>
       <?php endforeach; ?>
     </select>
-    <a href="<?= url('admin/cita-form.php') ?>" class="btn btn-sm btn-bnc-primary"><i class="bi bi-plus-lg"></i> Nueva cita</a>
+    <?php if ($canManageCalendar): ?>
+      <a href="<?= url('admin/cita-form.php') ?>" class="btn btn-sm btn-bnc-primary"><i class="bi bi-plus-lg"></i> Nueva cita</a>
+    <?php endif; ?>
   </div>
   <div class="bnc-card-body">
     <div id="calendar"></div>
@@ -40,9 +47,13 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
       <div class="modal-body" id="apptModalBody">Cargando...</div>
       <div class="modal-footer flex-column align-items-stretch gap-2">
-        <div id="apptQuickActions" class="d-flex flex-wrap gap-2 justify-content-end w-100"></div>
+        <?php if ($canManageCalendar): ?>
+          <div id="apptQuickActions" class="d-flex flex-wrap gap-2 justify-content-end w-100"></div>
+        <?php endif; ?>
         <div class="d-flex justify-content-between w-100 pt-2">
-          <a href="#" id="apptEditLink" class="btn btn-light btn-sm"><i class="bi bi-pencil"></i> Editar</a>
+          <?php if ($canManageCalendar): ?>
+            <a href="#" id="apptEditLink" class="btn btn-light btn-sm"><i class="bi bi-pencil"></i> Editar</a>
+          <?php endif; ?>
           <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button>
         </div>
       </div>
@@ -57,6 +68,7 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
   document.addEventListener('DOMContentLoaded', function () {
     const el = document.getElementById('calendar');
     const branchFilter = document.getElementById('branchFilter');
+    const canManageCalendar = <?= $canManageCalendar ? 'true' : 'false' ?>;
 
     function escapeHtml(value) {
       return String(value ?? '').replace(/[&<>"']/g, function (char) {
@@ -184,8 +196,10 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
             ${a.notes_admin ? `<div class="bnc-detail-note"><span class="bnc-detail-label">Nota interna</span>${nl2br(a.notes_admin)}</div>` : ''}
           </div>
         `;
-        document.getElementById('apptEditLink').href = '<?= url('admin/cita-form.php') ?>?id=' + id;
-        document.getElementById('apptQuickActions').innerHTML = buildQuickActions(id, a);
+        const editLink = document.getElementById('apptEditLink');
+        if (editLink) editLink.href = '<?= url('admin/cita-form.php') ?>?id=' + id;
+        const quickActions = document.getElementById('apptQuickActions');
+        if (quickActions) quickActions.innerHTML = canManageCalendar ? buildQuickActions(id, a) : '';
         new bootstrap.Modal(document.getElementById('apptModal')).show();
       }
     });

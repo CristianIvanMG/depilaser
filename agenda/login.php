@@ -1,16 +1,22 @@
 <?php
 require_once __DIR__ . '/includes/bootstrap.php';
 
-// Si ya está logueado, redirige a su área
+Auth::enforceSessionTimeout();
+
+// `next` saneado: válido solo si pertenece a la app y no apunta a /login|/logout.
+// Lo aceptamos por GET (el guard lo añade) o por POST (hidden input para sobrevivir submit).
+$rawNext = $_POST['next'] ?? $_GET['next'] ?? '';
+$next    = safe_next($rawNext);   // string|null
+
+// Si ya está logueado, redirige a su área (respetando next si es válido)
 if (Auth::check()) {
     if (Auth::isClient() && !Auth::emailVerified()) {
-        redirect('verificar-email.php');
+        redirect('verificar-email.php' . ($next ? '?next=' . urlencode($next) : ''));
     }
-    redirect(Auth::isAdmin() ? 'admin/' : '');
+    redirect($next ?? Auth::defaultLanding(Auth::role()));
 }
 
 $errors = [];
-$next = $_GET['next'] ?? '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::check($_POST[Csrf::FIELD] ?? '');
@@ -20,14 +26,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = Auth::attempt($_POST['email'] ?? '', $_POST['password'] ?? '');
         if ($user) {
             clear_old();
-            if (($user['role_slug'] ?? '') === 'cliente' && (int) ($user['email_verified'] ?? 0) !== 1) {
-                redirect('verificar-email.php?next=' . urlencode($next ?: url('')));
+            $role = $user['role_slug'] ?? '';
+
+            // Cliente sin verificar correo → primero verificar
+            if ($role === Auth::ROLE_CLIENT && (int) ($user['email_verified'] ?? 0) !== 1) {
+                redirect('verificar-email.php' . ($next ? '?next=' . urlencode($next) : ''));
             }
-            // Si nos pasaron ?next=, validar que sea local
-            if ($next && str_starts_with($next, '/')) {
+
+            // Si trajimos un next válido y el rol tiene permisos para esa ruta,
+            // úsalo. Si no, default landing por rol.
+            //
+            // Heurística simple: las rutas /agenda/admin/* requieren rol admin/super.
+            $base = app_base_path();
+            $isAdminPath = $next && str_starts_with($next, $base . '/admin/');
+            $canAdmin = in_array($role, [Auth::ROLE_ADMIN, Auth::ROLE_SUPERADMIN], true);
+            $isProfessionalAgenda = $next === $base . '/admin/calendario.php';
+            $canProfessionalAgenda = $role === Auth::ROLE_PROFESSIONAL && $isProfessionalAgenda;
+
+            if ($next && (!$isAdminPath || $canAdmin || $canProfessionalAgenda)) {
                 redirect($next);
             }
-            redirect(in_array($user['role_slug'], ['admin','superadmin'], true) ? 'admin/' : '');
+            redirect(Auth::defaultLanding($role));
         }
         $errors['_'] = 'Correo o contraseña incorrectos. Si fallas 5 veces, tu IP se bloqueará 10 minutos.';
         set_old(['email' => $_POST['email'] ?? '']);
@@ -65,6 +84,9 @@ require __DIR__ . '/includes/layouts/header_client.php';
 
         <form method="POST" novalidate>
           <?= Csrf::input() ?>
+          <?php if ($next): ?>
+            <input type="hidden" name="next" value="<?= e($next) ?>">
+          <?php endif; ?>
 
           <div class="mb-3">
             <label class="bnc-label" for="email">Correo electrónico</label>
