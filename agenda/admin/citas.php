@@ -4,8 +4,15 @@ Auth::requireAdmin();
 
 $admin = Auth::user();
 
+// Asegura columna professional_id (idempotente)
+AppointmentService::ensureProfessionalSchema();
+
 $branches = Database::all('SELECT id, name FROM branches WHERE active = 1 ORDER BY display_order, name');
 $statuses = Database::all('SELECT id, slug, name FROM appointment_statuses ORDER BY id');
+$professionals = Database::all(
+    "SELECT u.id, u.name FROM users u JOIN roles r ON r.id = u.role_id
+     WHERE r.slug = 'professional' AND u.active = 1 ORDER BY u.name"
+);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::check($_POST[Csrf::FIELD] ?? '');
@@ -57,6 +64,7 @@ $dateFrom = trim($_GET['from'] ?? date('Y-m-d'));
 $dateTo = trim($_GET['to'] ?? date('Y-m-d', strtotime('+14 days')));
 $branchId = (int) ($_GET['branch_id'] ?? 0);
 $statusId = (int) ($_GET['status_id'] ?? 0);
+$professionalId = (int) ($_GET['professional_id'] ?? 0);
 $q = trim($_GET['q'] ?? '');
 
 if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateFrom)) $dateFrom = date('Y-m-d');
@@ -73,6 +81,10 @@ if ($statusId) {
     $where[] = 'a.status_id = ?';
     $params[] = $statusId;
 }
+if ($professionalId) {
+    $where[] = 'a.professional_id = ?';
+    $params[] = $professionalId;
+}
 if ($q !== '') {
     $where[] = '(u.name LIKE ? OR u.email LIKE ? OR u.phone LIKE ? OR a.code LIKE ?)';
     $like = '%' . $q . '%';
@@ -82,9 +94,11 @@ if ($q !== '') {
 $appointments = Database::all(
     "SELECT a.*, u.name AS client_name, u.email AS client_email, u.phone AS client_phone,
             s.name AS service_name, s.duration_min, b.name AS branch_name,
-            st.slug AS status_slug, st.name AS status_name
+            st.slug AS status_slug, st.name AS status_name,
+            pr.name AS professional_name
      FROM appointments a
      JOIN users u ON u.id = a.user_id
+     LEFT JOIN users pr ON pr.id = a.professional_id
      JOIN services s ON s.id = a.service_id
      JOIN branches b ON b.id = a.branch_id
      JOIN appointment_statuses st ON st.id = a.status_id
@@ -134,6 +148,15 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         </select>
       </div>
       <div class="col-md-3">
+        <label class="bnc-label">Profesional</label>
+        <select name="professional_id" class="form-select">
+          <option value="">Todos</option>
+          <?php foreach ($professionals as $p): ?>
+            <option value="<?= (int) $p['id'] ?>" <?= $professionalId === (int) $p['id'] ? 'selected' : '' ?>><?= e($p['name']) ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="col-md-3">
         <label class="bnc-label">Cliente o código</label>
         <input name="q" class="form-control" value="<?= e($q) ?>" placeholder="Nombre, correo, teléfono o código">
       </div>
@@ -158,6 +181,7 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
           <th>Cliente</th>
           <th>Servicio</th>
           <th>Sucursal</th>
+          <th>Profesional</th>
           <th>Estado</th>
           <th>Origen</th>
           <th class="text-end">Acciones</th>
@@ -165,7 +189,7 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
       </thead>
       <tbody>
         <?php if (!$appointments): ?>
-          <tr><td colspan="7" class="text-center text-muted py-4">No hay citas con esos filtros.</td></tr>
+          <tr><td colspan="8" class="text-center text-muted py-4">No hay citas con esos filtros.</td></tr>
         <?php else: foreach ($appointments as $a): ?>
           <tr>
             <td>
@@ -178,6 +202,13 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
             </td>
             <td><?= e($a['service_name']) ?><br><small class="text-muted"><?= (int) $a['duration_min'] ?> min</small></td>
             <td><?= e($a['branch_name']) ?></td>
+            <td>
+              <?php if (!empty($a['professional_name'])): ?>
+                <?= e($a['professional_name']) ?>
+              <?php else: ?>
+                <span class="text-muted small fst-italic">Sin asignar</span>
+              <?php endif; ?>
+            </td>
             <td><span class="bnc-status <?= e($a['status_slug']) ?>"><?= e($a['status_name']) ?></span></td>
             <td><?= e(ucfirst((string) $a['source'])) ?></td>
             <td class="text-end">
@@ -204,6 +235,7 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
                   <div class="mb-2"><strong>Cliente:</strong> <?= e($a['client_name']) ?><br><small class="text-muted"><?= e($a['client_phone']) ?> <?= e($a['client_email']) ?></small></div>
                   <div class="mb-2"><strong>Servicio:</strong> <?= e($a['service_name']) ?></div>
                   <div class="mb-2"><strong>Sucursal:</strong> <?= e($a['branch_name']) ?></div>
+                  <div class="mb-2"><strong>Profesional:</strong> <?= !empty($a['professional_name']) ? e($a['professional_name']) : '<span class="text-muted">Sin asignar</span>' ?></div>
                   <div class="mb-2"><strong>Fecha:</strong> <?= e(fmt_dt($a['start_at'])) ?></div>
                   <div class="mb-2"><strong>Estado:</strong> <span class="bnc-status <?= e($a['status_slug']) ?>"><?= e($a['status_name']) ?></span></div>
                   <?php if ($a['notes_admin']): ?><hr><strong>Nota interna:</strong><br><?= nl2br(e($a['notes_admin'])) ?><?php endif; ?>

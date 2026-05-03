@@ -156,6 +156,161 @@ final class AppointmentService
         }
     }
 
+    /**
+     * Auto-migracion de la fase 3 (profesionales). Idempotente.
+     * Se llama desde admin/profesionales.php y desde admin/cita-form.php
+     * por si el usuario olvido correr phase3_professionals.sql.
+     */
+    public static function ensureProfessionalSchema(): void
+    {
+        // 1) Rol professional
+        if (!Database::one("SELECT id FROM roles WHERE slug = 'professional' LIMIT 1")) {
+            Database::exec(
+                "INSERT INTO roles (slug, name, description) VALUES
+                 ('professional', 'Profesional / Especialista', 'Realiza tratamientos, atiende citas en cabina, pertenece a una o mas sucursales.')"
+            );
+        }
+
+        // 2) Tabla user_branches
+        if (!self::tableExists('user_branches')) {
+            Database::exec(
+                "CREATE TABLE user_branches (
+                    user_id    INT UNSIGNED NOT NULL,
+                    branch_id  SMALLINT UNSIGNED NOT NULL,
+                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (user_id, branch_id),
+                    INDEX idx_ub_branch (branch_id),
+                    CONSTRAINT fk_ub_user   FOREIGN KEY (user_id)   REFERENCES users(id)    ON DELETE CASCADE,
+                    CONSTRAINT fk_ub_branch FOREIGN KEY (branch_id) REFERENCES branches(id) ON DELETE CASCADE
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+            );
+        }
+
+        // 3) Columna appointments.professional_id
+        if (!self::columnExists('appointments', 'professional_id')) {
+            Database::exec(
+                'ALTER TABLE appointments
+                   ADD COLUMN professional_id INT UNSIGNED NULL AFTER user_id,
+                   ADD INDEX idx_appt_prof_start (professional_id, start_at),
+                   ADD CONSTRAINT fk_appt_prof FOREIGN KEY (professional_id) REFERENCES users(id) ON DELETE SET NULL'
+            );
+        }
+    }
+
+    /**
+     * Devuelve true si el profesional ya tiene OTRA cita activa que solape
+     * el rango [startSql, endSql].
+     */
+    public static function professionalHasConflict(
+        int $professionalId,
+        string $startSql,
+        string $endSql,
+        ?int $ignoreAppointmentId = null,
+        bool $forUpdate = false
+    ): bool {
+        if ($professionalId <= 0) return false;
+        if (!self::columnExists('appointments', 'professional_id')) return false;
+
+        $params = [$professionalId, $endSql, $startSql];
+        $ignoreSql = '';
+        if ($ignoreAppointmentId) {
+            $ignoreSql = ' AND id <> ?';
+            $params[] = $ignoreAppointmentId;
+        }
+        $lockSql = $forUpdate ? ' FOR UPDATE' : '';
+
+        $row = Database::one(
+            "SELECT id FROM appointments
+             WHERE professional_id = ?
+               AND status_id IN (SELECT id FROM appointment_statuses WHERE slug IN ('programada','confirmada','atendida'))
+               AND start_at < ? AND end_at > ?
+               {$ignoreSql}
+             LIMIT 1{$lockSql}",
+            $params
+        );
+        return (bool) $row;
+    }
+
+    /**
+     * Valida que un profesional pueda ser asignado a una cita.
+     * Reglas:
+     *  - Existe y tiene rol 'professional'
+     *  - Esta activo
+     *  - Pertenece a la sucursal de la cita (via user_branches)
+     *  - No tiene otra cita que solape ese horario
+     */
+    public static function validateProfessionalAssignment(
+        int $professionalId,
+        int $branchId,
+        string $startSql,
+        string $endSql,
+        ?int $ignoreAppointmentId = null
+    ): array {
+        if ($professionalId <= 0) {
+            return ['ok' => false, 'error' => 'Selecciona un profesional.'];
+        }
+
+        $prof = Database::one(
+            "SELECT u.id, u.name, u.active
+             FROM users u
+             JOIN roles r ON r.id = u.role_id
+             WHERE u.id = ? AND r.slug = 'professional' LIMIT 1",
+            [$professionalId]
+        );
+        if (!$prof) {
+            return ['ok' => false, 'error' => 'El profesional seleccionado no existe.'];
+        }
+        if (!(int) $prof['active']) {
+            return ['ok' => false, 'error' => 'No se pueden asignar citas a profesionales inactivos.'];
+        }
+
+        if (!self::tableExists('user_branches')) {
+            self::ensureProfessionalSchema();
+        }
+
+        $belongs = Database::one(
+            'SELECT 1 FROM user_branches WHERE user_id = ? AND branch_id = ? LIMIT 1',
+            [$professionalId, $branchId]
+        );
+        if (!$belongs) {
+            return ['ok' => false, 'error' => 'El profesional no atiende en esta sucursal.'];
+        }
+
+        if (self::professionalHasConflict($professionalId, $startSql, $endSql, $ignoreAppointmentId)) {
+            return ['ok' => false, 'error' => 'El profesional ya tiene otra cita en ese horario.'];
+        }
+
+        return ['ok' => true, 'professional' => $prof];
+    }
+
+    /** Lista de profesionales activos asignados a una sucursal. */
+    public static function professionalsByBranch(int $branchId): array
+    {
+        if (!self::tableExists('user_branches')) return [];
+        return Database::all(
+            "SELECT u.id, u.name, u.email, u.phone
+             FROM users u
+             JOIN roles r ON r.id = u.role_id
+             JOIN user_branches ub ON ub.user_id = u.id
+             WHERE r.slug = 'professional' AND u.active = 1 AND ub.branch_id = ?
+             ORDER BY u.name",
+            [$branchId]
+        );
+    }
+
+    private static function tableExists(string $table): bool
+    {
+        try {
+            return (bool) Database::one(
+                'SELECT 1 FROM INFORMATION_SCHEMA.TABLES
+                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? LIMIT 1',
+                [$table]
+            );
+        } catch (Throwable $e) {
+            return false;
+        }
+    }
+
     public static function availabilityError(int $branchId, string $date, int $startTs, int $endTs): ?string
     {
         $exception = Database::one(

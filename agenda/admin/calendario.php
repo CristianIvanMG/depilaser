@@ -159,6 +159,10 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
               <strong>${escapeHtml(a.branch)}</strong>
             </div>
             <div>
+              <span class="bnc-detail-label">Profesional</span>
+              <strong>${a.professional ? escapeHtml(a.professional) : '<span class="text-muted">Sin asignar</span>'}</strong>
+            </div>
+            <div>
               <span class="bnc-detail-label">Fecha y hora</span>
               <strong>${escapeHtml(a.when)}</strong>
             </div>

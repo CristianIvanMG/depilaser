@@ -15,6 +15,9 @@ function admin_appointment_form_nonce(): string
     return $_SESSION['admin_appointment_form_nonce'];
 }
 
+// Asegura schema de Profesionales (auto-migracion suave)
+AppointmentService::ensureProfessionalSchema();
+
 $statuses = Database::all('SELECT id, slug, name FROM appointment_statuses ORDER BY id');
 $statusBySlug = [];
 foreach ($statuses as $status) {
@@ -22,6 +25,31 @@ foreach ($statuses as $status) {
 }
 
 $branches = Database::all('SELECT id, name FROM branches WHERE active = 1 ORDER BY display_order, name');
+
+// Profesionales activos con sus sucursales (para selector dinamico via JS)
+$professionalsRows = Database::all(
+    "SELECT u.id, u.name
+     FROM users u
+     JOIN roles r ON r.id = u.role_id
+     WHERE r.slug = 'professional' AND u.active = 1
+     ORDER BY u.name"
+);
+$proBranchRows = $professionalsRows
+    ? Database::all(
+        "SELECT user_id, branch_id FROM user_branches
+         WHERE user_id IN (" . implode(',', array_fill(0, count($professionalsRows), '?')) . ")",
+        array_column($professionalsRows, 'id')
+      )
+    : [];
+$proBranches = [];
+foreach ($proBranchRows as $r) {
+    $proBranches[(int) $r['user_id']][] = (int) $r['branch_id'];
+}
+$professionals = array_map(fn($p) => [
+    'id'       => (int) $p['id'],
+    'name'     => $p['name'],
+    'branches' => $proBranches[(int) $p['id']] ?? [],
+], $professionalsRows);
 $services = Database::all(
     'SELECT id, name, duration_min, price_mxn FROM services WHERE active = 1 ORDER BY display_order, name'
 );
@@ -61,6 +89,7 @@ $form = [
     'client_phone' => $_POST['client_phone'] ?? '',
     'branch_id' => $_POST['branch_id'] ?? ($appointment['branch_id'] ?? ($branches[0]['id'] ?? '')),
     'service_id' => $_POST['service_id'] ?? ($appointment['service_id'] ?? ''),
+    'professional_id' => $_POST['professional_id'] ?? ($appointment['professional_id'] ?? ''),
     'status_id' => $_POST['status_id'] ?? ($appointment['status_id'] ?? ($statusBySlug['programada'] ?? '')),
     'source' => $_POST['source'] ?? ($appointment['source'] ?? 'phone'),
     'start_at' => $_POST['start_at'] ?? ($appointment ? date('Y-m-d\TH:i', strtotime($appointment['start_at'])) : ''),
@@ -193,6 +222,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errors = array_merge($errors, $schedule['errors']);
         }
 
+        // Validacion de profesional (obligatorio si status = confirmada o atendida)
+        $professionalId = (int) ($_POST['professional_id'] ?? 0);
+        $statusSlug = '';
+        foreach ($statuses as $st) { if ((int) $st['id'] === $statusId) { $statusSlug = $st['slug']; break; } }
+        $professionalRequired = in_array($statusSlug, ['confirmada','atendida'], true);
+
+        if ($professionalId > 0 && $schedule['ok']) {
+            $vp = AppointmentService::validateProfessionalAssignment(
+                $professionalId,
+                $branchId,
+                $schedule['start_sql'],
+                $schedule['end_sql'],
+                $isEdit ? $appointmentId : null
+            );
+            if (!$vp['ok']) {
+                $errors['professional_id'] = $vp['error'];
+            }
+        } elseif ($professionalRequired) {
+            $errors['professional_id'] = 'Asigna un profesional para confirmar la cita.';
+        }
+
         if (!$errors) {
             $pdo = Database::pdo();
             $pdo->beginTransaction();
@@ -227,6 +277,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ];
                     $updateParams = [
                         $userId,
+                        $professionalId ?: null,
                         $branchId,
                         $serviceId,
                         $statusId,
@@ -238,7 +289,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $updateParams = array_merge($updateParams, $cancelParams, [$appointmentId]);
                     Database::exec(
                         'UPDATE appointments
-                         SET user_id = ?, branch_id = ?, service_id = ?, status_id = ?,
+                         SET user_id = ?, professional_id = ?, branch_id = ?, service_id = ?, status_id = ?,
                              start_at = ?, end_at = ?, source = ?, notes_admin = ?
                              ' . $cancelSql . '
                          WHERE id = ?',
@@ -281,11 +332,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 Database::exec(
                     'INSERT INTO appointments
-                       (code, user_id, branch_id, service_id, status_id, start_at, end_at, source, notes_admin, created_by_user_id)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                       (code, user_id, professional_id, branch_id, service_id, status_id, start_at, end_at, source, notes_admin, created_by_user_id)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                     [
                         $code,
                         $userId,
+                        $professionalId ?: null,
                         $branchId,
                         $serviceId,
                         $statusId,
@@ -435,6 +487,33 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
           </div>
 
           <div class="col-12">
+            <label class="bnc-label">
+              Profesional asignado
+              <span class="text-muted small">(obligatorio para Confirmada / Atendida)</span>
+            </label>
+            <select name="professional_id" id="professionalSelect" class="form-select <?= isset($errors['professional_id']) ? 'is-invalid' : '' ?>">
+              <option value="">Sin asignar</option>
+              <?php foreach ($professionals as $p): ?>
+                <option value="<?= $p['id'] ?>"
+                        data-branches="<?= e(implode(',', $p['branches'])) ?>"
+                        <?= (int) $form['professional_id'] === $p['id'] ? 'selected' : '' ?>>
+                  <?= e($p['name']) ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+            <?php if (isset($errors['professional_id'])): ?>
+              <div class="invalid-feedback"><?= e($errors['professional_id']) ?></div>
+            <?php else: ?>
+              <div class="form-text">Solo se muestran los profesionales asignados a la sucursal seleccionada. Los inactivos no aparecen.</div>
+            <?php endif; ?>
+            <?php if (!$professionals): ?>
+              <div class="alert alert-warning small mt-2 mb-0">
+                Aun no hay profesionales registrados. <a href="<?= url('admin/profesionales.php') ?>">Crea el primero</a>.
+              </div>
+            <?php endif; ?>
+          </div>
+
+          <div class="col-12">
             <div class="d-flex flex-wrap align-items-end gap-2 mb-2">
               <div>
                 <label class="bnc-label" for="availabilityDateInput">Fecha para disponibilidad</label>
@@ -483,6 +562,21 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
           <div class="mb-3">
             <small class="text-muted text-uppercase d-block">Estado</small>
             <span class="bnc-status <?= e($appointment['status_slug']) ?>"><?= e($appointment['status_name']) ?></span>
+          </div>
+          <?php
+            $assignedProName = null;
+            if (!empty($appointment['professional_id'])) {
+                $rowProf = Database::one('SELECT name FROM users WHERE id = ? LIMIT 1', [(int) $appointment['professional_id']]);
+                $assignedProName = $rowProf['name'] ?? null;
+            }
+          ?>
+          <div class="mb-3">
+            <small class="text-muted text-uppercase d-block">Profesional</small>
+            <?php if ($assignedProName): ?>
+              <strong><?= e($assignedProName) ?></strong>
+            <?php else: ?>
+              <span class="text-muted">Sin asignar</span>
+            <?php endif; ?>
           </div>
           <?php if ($appointment['cancel_reason']): ?>
             <div class="alert alert-warning small mb-0"><strong>Motivo de cancelacion:</strong><br><?= e($appointment['cancel_reason']) ?></div>
@@ -676,6 +770,30 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         loadSlotsBtn.disabled = false;
         loadSlotsBtn.innerHTML = '<i class="bi bi-clock"></i> Ver horarios libres';
       }
+    }
+
+    // Filtra profesionales segun la sucursal seleccionada
+    const professionalSelect = document.getElementById('professionalSelect');
+    function syncProfessionals() {
+      if (!professionalSelect) return;
+      const branchId = String(branchSelect.value || '');
+      const current  = professionalSelect.value;
+      let firstVisible = null;
+      Array.from(professionalSelect.options).forEach(opt => {
+        if (!opt.value) { opt.hidden = false; return; }
+        const list = (opt.dataset.branches || '').split(',').filter(Boolean);
+        const visible = !branchId || list.includes(branchId);
+        opt.hidden = !visible;
+        opt.disabled = !visible;
+        if (visible && firstVisible === null) firstVisible = opt.value;
+      });
+      // Si el profesional actual ya no es valido para esa sucursal, lo limpia
+      const curOpt = professionalSelect.querySelector(`option[value="${current}"]`);
+      if (current && curOpt && curOpt.hidden) professionalSelect.value = '';
+    }
+    if (branchSelect && professionalSelect) {
+      branchSelect.addEventListener('change', syncProfessionals);
+      syncProfessionals();
     }
 
     radios.forEach(radio => radio.addEventListener('change', syncClientMode));

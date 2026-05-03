@@ -6,9 +6,10 @@ declare(strict_types=1);
  */
 final class Auth
 {
-    public const ROLE_SUPERADMIN = 'superadmin';
-    public const ROLE_ADMIN      = 'admin';
-    public const ROLE_CLIENT     = 'cliente';
+    public const ROLE_SUPERADMIN   = 'superadmin';
+    public const ROLE_ADMIN        = 'admin';
+    public const ROLE_PROFESSIONAL = 'professional';
+    public const ROLE_CLIENT       = 'cliente';
 
     /* ───────── ESTADO ───────── */
 
@@ -57,6 +58,11 @@ final class Auth
     public static function isClient(): bool
     {
         return self::role() === self::ROLE_CLIENT;
+    }
+
+    public static function isProfessional(): bool
+    {
+        return self::role() === self::ROLE_PROFESSIONAL;
     }
 
     public static function emailVerified(): bool

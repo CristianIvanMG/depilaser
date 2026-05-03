@@ -7,6 +7,9 @@
 require_once __DIR__ . '/../includes/bootstrap.php';
 header('Content-Type: application/json; charset=utf-8');
 
+// Asegura que exista el esquema de profesionales (rol, tabla pivote y columna professional_id)
+try { AppointmentService::ensureProfessionalSchema(); } catch (\Throwable $e) { /* silencioso */ }
+
 if (!Auth::isAdmin()) {
     http_response_code(403);
     echo json_encode(['ok' => false, 'error' => 'Solo admin']);
@@ -27,12 +30,14 @@ $sql = "SELECT a.id, a.code, a.start_at, a.end_at, a.notes_client, a.notes_admin
                u.name AS client, u.phone,
                s.name AS service,
                b.name AS branch,
-               st.slug AS status_slug, st.name AS status, st.color_hex
+               st.slug AS status_slug, st.name AS status, st.color_hex,
+               pr.name AS professional
         FROM appointments a
         JOIN users u ON u.id = a.user_id
         JOIN services s ON s.id = a.service_id
         JOIN branches b ON b.id = a.branch_id
         JOIN appointment_statuses st ON st.id = a.status_id
+        LEFT JOIN users pr ON pr.id = a.professional_id
         WHERE a.start_at >= ? AND a.start_at < ?";
 $args = [$from, $to];
 if ($branchId) {
@@ -69,6 +74,7 @@ $events = array_map(fn($r) => [
         'phone'        => $r['phone'],
         'service'      => $r['service'],
         'branch'       => $r['branch'],
+        'professional' => $r['professional'] ?? null,
         'status'       => $r['status'],
         'status_slug'  => $r['status_slug'],
         'status_color' => $r['color_hex'] ?: '#d63b93',
