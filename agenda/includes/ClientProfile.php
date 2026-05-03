@@ -1,0 +1,152 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * ClientProfile — utilidades para los campos extendidos del cliente
+ * (fecha de nacimiento, sexo, dirección).
+ *
+ * - ensureSchema(): aplica fase 5 si falta (idempotente)
+ * - genderOptions(): lista controlada slug => label
+ * - genderLabel(slug): traducción para mostrar
+ * - normalize(array $input): saneo de los 3 campos a partir de $_POST
+ * - validate(array $clean): errores por campo (solo para los 3 nuevos)
+ * - hasColumn(name): atajo para condicionar SELECT/UPDATE
+ */
+final class ClientProfile
+{
+    public const GENDERS = [
+        'femenino'          => 'Femenino',
+        'masculino'         => 'Masculino',
+        'no_binario'        => 'No binario',
+        'prefiero_no_decir' => 'Prefiero no decir',
+    ];
+
+    /** Opciones controladas para selects (slug => label). */
+    public static function genderOptions(): array
+    {
+        return self::GENDERS;
+    }
+
+    /** Etiqueta legible o cadena vacía si no aplica. */
+    public static function genderLabel(?string $slug): string
+    {
+        if (!$slug) return '';
+        return self::GENDERS[$slug] ?? '';
+    }
+
+    /** Auto-migración fase 5. Idempotente. */
+    public static function ensureSchema(): void
+    {
+        $cols = [
+            'birth_date' => 'DATE NULL',
+            'gender'     => "ENUM('femenino','masculino','no_binario','prefiero_no_decir') NULL",
+            'address'    => 'VARCHAR(255) NULL',
+        ];
+        foreach ($cols as $name => $def) {
+            if (!self::hasColumn($name)) {
+                try {
+                    Database::exec("ALTER TABLE users ADD COLUMN {$name} {$def}");
+                } catch (\Throwable $e) {
+                    error_log('[client-profile] no pude crear ' . $name . ': ' . $e->getMessage());
+                }
+            }
+        }
+    }
+
+    /** ¿Existe la columna en users? Cachea por petición. */
+    public static function hasColumn(string $col): bool
+    {
+        static $cache = [];
+        if (array_key_exists($col, $cache)) return $cache[$col];
+        try {
+            $row = Database::one(
+                'SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ? LIMIT 1',
+                ['users', $col]
+            );
+            return $cache[$col] = (bool) $row;
+        } catch (\Throwable $e) {
+            return $cache[$col] = false;
+        }
+    }
+
+    /**
+     * Normaliza los 3 campos opcionales desde $_POST (o array similar).
+     * Devuelve ['birth_date' => string|null, 'gender' => string|null, 'address' => string|null].
+     */
+    public static function normalize(array $input): array
+    {
+        $bd = trim((string) ($input['birth_date'] ?? ''));
+        $gn = trim((string) ($input['gender'] ?? ''));
+        $ad = trim((string) ($input['address'] ?? ''));
+
+        return [
+            'birth_date' => $bd !== '' ? $bd : null,
+            'gender'     => $gn !== '' ? $gn : null,
+            'address'    => $ad !== '' ? mb_substr($ad, 0, 255) : null,
+        ];
+    }
+
+    /**
+     * Valida los 3 campos opcionales. Devuelve errores asociativos.
+     * No exige nada — solo bloquea valores inválidos.
+     */
+    public static function validate(array $clean): array
+    {
+        $errors = [];
+        if (!empty($clean['birth_date'])) {
+            $ts = strtotime($clean['birth_date']);
+            $today = strtotime('today');
+            if (!$ts) {
+                $errors['birth_date'] = 'Fecha de nacimiento inválida.';
+            } elseif ($ts > $today) {
+                $errors['birth_date'] = 'La fecha de nacimiento no puede ser futura.';
+            } elseif ($ts < strtotime('1900-01-01')) {
+                $errors['birth_date'] = 'Fecha demasiado antigua.';
+            }
+        }
+        if (!empty($clean['gender']) && !array_key_exists($clean['gender'], self::GENDERS)) {
+            $errors['gender'] = 'Selecciona una opción válida.';
+        }
+        if (!empty($clean['address']) && mb_strlen($clean['address']) > 255) {
+            $errors['address'] = 'La dirección excede 255 caracteres.';
+        }
+        return $errors;
+    }
+
+    /**
+     * Devuelve el fragmento SQL ", birth_date = ?, gender = ?, address = ?" + valores
+     * únicamente para las columnas que existen en la tabla users. Útil para
+     * INSERT y UPDATE sin romper despliegues anteriores a fase 5.
+     *
+     * @return array{set: string, cols: string[], placeholders: string, values: list<mixed>}
+     */
+    public static function sqlFragment(array $clean): array
+    {
+        $cols = [];
+        $vals = [];
+        foreach (['birth_date', 'gender', 'address'] as $c) {
+            if (self::hasColumn($c)) {
+                $cols[] = $c;
+                $vals[] = $clean[$c] ?? null;
+            }
+        }
+        return [
+            'cols'         => $cols,
+            'placeholders' => $cols ? str_repeat('?, ', count($cols) - 1) . '?' : '',
+            'set'          => $cols ? implode(' = ?, ', $cols) . ' = ?' : '',
+            'values'       => $vals,
+        ];
+    }
+
+    /** Selecciona estos 3 campos (con SELECT NULL como fallback) para SELECTs cómodos. */
+    public static function selectExpr(string $alias = ''): string
+    {
+        $a = $alias ? rtrim($alias, '.') . '.' : '';
+        $parts = [];
+        foreach (['birth_date', 'gender', 'address'] as $c) {
+            $parts[] = self::hasColumn($c) ? ($a . $c) : ('NULL AS ' . $c);
+        }
+        return implode(', ', $parts);
+    }
+}

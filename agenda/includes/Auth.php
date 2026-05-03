@@ -148,10 +148,22 @@ final class Auth
 
     /**
      * Crea un cliente nuevo. Retorna ['ok'=>bool, 'errors'=>[], 'user_id'=>?int].
+     *
+     * Acepta los 3 campos opcionales de fase 5 si vienen en $data:
+     *   birth_date (Y-m-d), gender (slug ClientProfile), address (texto).
      */
     public static function register(array $data): array
     {
         $errors = Validator::registration($data);
+
+        // Auto-migración fase 5 + validación de campos opcionales
+        ClientProfile::ensureSchema();
+        $extra = ClientProfile::normalize($data);
+        $extraErrors = ClientProfile::validate($extra);
+        if ($extraErrors) {
+            $errors = array_merge($errors, $extraErrors);
+        }
+
         if ($errors) return ['ok' => false, 'errors' => $errors, 'user_id' => null];
 
         // ¿Email ya existe?
@@ -163,16 +175,25 @@ final class Auth
 
         EmailVerification::ensureSchema();
 
+        // INSERT dinámico — solo agrega columnas opcionales que ya existan en la tabla
+        $frag = ClientProfile::sqlFragment($extra);
+        $extraCols = $frag['cols'] ? ', ' . implode(', ', $frag['cols']) : '';
+        $extraPh   = $frag['cols'] ? ', ' . $frag['placeholders'] : '';
+
+        $params = [
+            $roleId,
+            trim($data['name']),
+            strtolower(trim($data['email'])),
+            preg_replace('/\D+/', '', $data['phone'] ?? ''),
+            password_hash($data['password'], PASSWORD_DEFAULT),
+        ];
+        $params = array_merge($params, $frag['values']);
+
         Database::exec(
-            'INSERT INTO users (role_id, name, email, phone, password_hash, email_verified, active)
-             VALUES (?, ?, ?, ?, ?, 0, 1)',
-            [
-                $roleId,
-                trim($data['name']),
-                strtolower(trim($data['email'])),
-                preg_replace('/\D+/', '', $data['phone'] ?? ''),
-                password_hash($data['password'], PASSWORD_DEFAULT),
-            ]
+            'INSERT INTO users (role_id, name, email, phone, password_hash, email_verified, active'
+                . $extraCols .
+            ') VALUES (?, ?, ?, ?, ?, 0, 1' . $extraPh . ')',
+            $params
         );
         $uid = Database::lastId();
         self::audit('register', 'user', $uid);

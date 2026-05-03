@@ -2,16 +2,21 @@
 require_once __DIR__ . '/../includes/bootstrap.php';
 Auth::requireAdmin();
 
+// Asegura columnas birth_date / gender / address (idempotente)
+ClientProfile::ensureSchema();
+
 $errors = [];
 $editingId = 0;
+$genderOptions = ClientProfile::genderOptions();
 
 function admin_client_payload(array $data): array
 {
-    return [
+    $base = [
         'name' => trim($data['name'] ?? ''),
         'email' => strtolower(trim($data['email'] ?? '')),
         'phone' => preg_replace('/\D+/', '', $data['phone'] ?? ''),
     ];
+    return array_merge($base, ClientProfile::normalize($data));
 }
 
 function admin_validate_client(array $data, int $ignoreId = 0): array
@@ -49,6 +54,9 @@ function admin_validate_client(array $data, int $ignoreId = 0): array
         }
     }
 
+    // Validaciones de los 3 campos extendidos (todas opcionales)
+    $errors = array_merge($errors, ClientProfile::validate($client));
+
     return ['ok' => !$errors, 'errors' => $errors, 'client' => $client];
 }
 
@@ -62,19 +70,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $validated = admin_validate_client($_POST, $clientId);
         if ($validated['ok']) {
             $client = $validated['client'];
+            $extra = ClientProfile::sqlFragment($client);  // cols, set, placeholders, values
             if ($clientId) {
-                Database::exec(
-                    'UPDATE users SET name = ?, email = ?, phone = ? WHERE id = ?',
-                    [$client['name'], $client['email'], $client['phone'], $clientId]
-                );
+                $sql = 'UPDATE users SET name = ?, email = ?, phone = ?';
+                $params = [$client['name'], $client['email'], $client['phone']];
+                if ($extra['set']) {
+                    $sql .= ', ' . $extra['set'];
+                    $params = array_merge($params, $extra['values']);
+                }
+                $sql .= ' WHERE id = ?';
+                $params[] = $clientId;
+                Database::exec($sql, $params);
                 Auth::audit('admin_client_update', 'user', $clientId);
                 flash('success', 'Cliente actualizado correctamente.');
             } else {
                 $roleId = (int) Database::one("SELECT id FROM roles WHERE slug = 'cliente' LIMIT 1")['id'];
+                $cols = ['role_id', 'name', 'email', 'phone'];
+                $vals = [$roleId, $client['name'], $client['email'], $client['phone']];
+                foreach ($extra['cols'] as $i => $c) { $cols[] = $c; $vals[] = $extra['values'][$i]; }
+                $cols[] = 'password_hash'; $vals[] = password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT);
+                $cols[] = 'email_verified'; $vals[] = 1;
+                $cols[] = 'active'; $vals[] = 1;
+                $placeholders = implode(', ', array_fill(0, count($cols), '?'));
                 Database::exec(
-                    'INSERT INTO users (role_id, name, email, phone, password_hash, email_verified, active)
-                     VALUES (?, ?, ?, ?, ?, 1, 1)',
-                    [$roleId, $client['name'], $client['email'], $client['phone'], password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT)]
+                    'INSERT INTO users (' . implode(', ', $cols) . ') VALUES (' . $placeholders . ')',
+                    $vals
                 );
                 $clientId = Database::lastId();
                 Auth::audit('admin_client_create', 'user', $clientId);
@@ -116,8 +136,9 @@ if ($q !== '') {
     array_push($params, $like, $like, $like);
 }
 
+$profileCols = ClientProfile::selectExpr('u');
 $clients = Database::all(
-    "SELECT u.id, u.name, u.email, u.phone, u.active, u.created_at,
+    "SELECT u.id, u.name, u.email, u.phone, u.active, u.created_at, {$profileCols},
             COUNT(a.id) AS appointment_count,
             SUM(CASE WHEN a.start_at >= NOW() AND st.slug IN ('programada','confirmada') THEN 1 ELSE 0 END) AS active_appointments
      FROM users u
@@ -248,9 +269,35 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
           </div>
           <div class="mb-3">
             <label class="bnc-label">Teléfono</label>
-            <input name="phone" class="form-control <?= isset($errors['phone']) && !$editingId ? 'is-invalid' : '' ?>" value="<?= !$editingId ? e($_POST['phone'] ?? '') : '' ?>">
+            <input name="phone" class="form-control <?= isset($errors['phone']) && !$editingId ? 'is-invalid' : '' ?>" value="<?= !$editingId ? e($_POST['phone'] ?? '') : '' ?>" inputmode="tel">
             <?php if (isset($errors['phone']) && !$editingId): ?><div class="invalid-feedback"><?= e($errors['phone']) ?></div><?php endif; ?>
           </div>
+
+          <details class="bnc-extra-fields mb-1">
+            <summary class="bnc-label" style="cursor:pointer;list-style:disclosure-closed">Datos adicionales (opcionales)</summary>
+            <div class="row g-3 mt-1">
+              <div class="col-md-6">
+                <label class="bnc-label">Fecha de nacimiento</label>
+                <input type="date" name="birth_date" class="form-control <?= isset($errors['birth_date']) && !$editingId ? 'is-invalid' : '' ?>" value="<?= !$editingId ? e($_POST['birth_date'] ?? '') : '' ?>" max="<?= date('Y-m-d') ?>">
+                <?php if (isset($errors['birth_date']) && !$editingId): ?><div class="invalid-feedback"><?= e($errors['birth_date']) ?></div><?php endif; ?>
+              </div>
+              <div class="col-md-6">
+                <label class="bnc-label">Sexo</label>
+                <select name="gender" class="form-select <?= isset($errors['gender']) && !$editingId ? 'is-invalid' : '' ?>">
+                  <option value="">— Sin especificar —</option>
+                  <?php foreach ($genderOptions as $slug => $label): ?>
+                    <option value="<?= e($slug) ?>" <?= (!$editingId && ($_POST['gender'] ?? '') === $slug) ? 'selected' : '' ?>><?= e($label) ?></option>
+                  <?php endforeach; ?>
+                </select>
+                <?php if (isset($errors['gender']) && !$editingId): ?><div class="invalid-feedback"><?= e($errors['gender']) ?></div><?php endif; ?>
+              </div>
+              <div class="col-12">
+                <label class="bnc-label">Dirección</label>
+                <input name="address" class="form-control <?= isset($errors['address']) && !$editingId ? 'is-invalid' : '' ?>" value="<?= !$editingId ? e($_POST['address'] ?? '') : '' ?>" maxlength="255" placeholder="Calle, número, colonia, ciudad">
+                <?php if (isset($errors['address']) && !$editingId): ?><div class="invalid-feedback"><?= e($errors['address']) ?></div><?php endif; ?>
+              </div>
+            </div>
+          </details>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
@@ -286,8 +333,36 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
             </div>
             <div class="mb-3">
               <label class="bnc-label">Teléfono</label>
-              <input name="phone" class="form-control <?= isset($errors['phone']) && $editingId === (int) $client['id'] ? 'is-invalid' : '' ?>" value="<?= e($editingId === (int) $client['id'] ? ($_POST['phone'] ?? $client['phone']) : $client['phone']) ?>">
+              <input name="phone" class="form-control <?= isset($errors['phone']) && $editingId === (int) $client['id'] ? 'is-invalid' : '' ?>" value="<?= e($editingId === (int) $client['id'] ? ($_POST['phone'] ?? $client['phone']) : $client['phone']) ?>" inputmode="tel">
               <?php if (isset($errors['phone']) && $editingId === (int) $client['id']): ?><div class="invalid-feedback"><?= e($errors['phone']) ?></div><?php endif; ?>
+            </div>
+
+            <hr class="my-3">
+            <div class="bnc-label mb-2 text-uppercase" style="letter-spacing:1.5px;font-size:11px">Datos adicionales (opcionales)</div>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="bnc-label">Fecha de nacimiento</label>
+                <?php $bdVal = $editingId === (int) $client['id'] ? ($_POST['birth_date'] ?? ($client['birth_date'] ?? '')) : ($client['birth_date'] ?? ''); ?>
+                <input type="date" name="birth_date" class="form-control <?= isset($errors['birth_date']) && $editingId === (int) $client['id'] ? 'is-invalid' : '' ?>" value="<?= e($bdVal) ?>" max="<?= date('Y-m-d') ?>">
+                <?php if (isset($errors['birth_date']) && $editingId === (int) $client['id']): ?><div class="invalid-feedback"><?= e($errors['birth_date']) ?></div><?php endif; ?>
+              </div>
+              <div class="col-md-6">
+                <label class="bnc-label">Sexo</label>
+                <?php $gnVal = $editingId === (int) $client['id'] ? ($_POST['gender'] ?? ($client['gender'] ?? '')) : ($client['gender'] ?? ''); ?>
+                <select name="gender" class="form-select <?= isset($errors['gender']) && $editingId === (int) $client['id'] ? 'is-invalid' : '' ?>">
+                  <option value="">— Sin especificar —</option>
+                  <?php foreach ($genderOptions as $slug => $label): ?>
+                    <option value="<?= e($slug) ?>" <?= $gnVal === $slug ? 'selected' : '' ?>><?= e($label) ?></option>
+                  <?php endforeach; ?>
+                </select>
+                <?php if (isset($errors['gender']) && $editingId === (int) $client['id']): ?><div class="invalid-feedback"><?= e($errors['gender']) ?></div><?php endif; ?>
+              </div>
+              <div class="col-12">
+                <label class="bnc-label">Dirección</label>
+                <?php $adVal = $editingId === (int) $client['id'] ? ($_POST['address'] ?? ($client['address'] ?? '')) : ($client['address'] ?? ''); ?>
+                <input name="address" class="form-control <?= isset($errors['address']) && $editingId === (int) $client['id'] ? 'is-invalid' : '' ?>" value="<?= e($adVal) ?>" maxlength="255" placeholder="Calle, número, colonia, ciudad">
+                <?php if (isset($errors['address']) && $editingId === (int) $client['id']): ?><div class="invalid-feedback"><?= e($errors['address']) ?></div><?php endif; ?>
+              </div>
             </div>
           </div>
           <div class="modal-footer">
@@ -303,10 +378,41 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
     <div class="modal-dialog modal-dialog-centered modal-lg">
       <div class="modal-content" style="border-radius:16px">
         <div class="modal-header">
-          <h5 class="modal-title">Historial de <?= e($client['name']) ?></h5>
+          <h5 class="modal-title">Detalle de <?= e($client['name']) ?></h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
+          <div class="row g-3 mb-4">
+            <div class="col-md-4">
+              <div class="bnc-label text-uppercase small text-muted">Correo</div>
+              <div><?= e($client['email']) ?></div>
+            </div>
+            <div class="col-md-4">
+              <div class="bnc-label text-uppercase small text-muted">Teléfono</div>
+              <div><?= e($client['phone']) ?: '<span class="text-muted">—</span>' ?></div>
+            </div>
+            <div class="col-md-4">
+              <div class="bnc-label text-uppercase small text-muted">Alta</div>
+              <div><?= e(fmt_dt_short($client['created_at'])) ?></div>
+            </div>
+            <div class="col-md-4">
+              <div class="bnc-label text-uppercase small text-muted">Fecha de nacimiento</div>
+              <div><?= !empty($client['birth_date']) ? e(fmt_dt_short($client['birth_date'] . ' 00:00:00')) : '<span class="text-muted">—</span>' ?></div>
+            </div>
+            <div class="col-md-4">
+              <div class="bnc-label text-uppercase small text-muted">Sexo</div>
+              <div><?= !empty($client['gender']) ? e(ClientProfile::genderLabel($client['gender'])) : '<span class="text-muted">—</span>' ?></div>
+            </div>
+            <div class="col-md-4">
+              <div class="bnc-label text-uppercase small text-muted">Estado</div>
+              <div><?= $client['active'] ? '<span class="badge bg-success">Activo</span>' : '<span class="badge bg-secondary">Inactivo</span>' ?></div>
+            </div>
+            <div class="col-12">
+              <div class="bnc-label text-uppercase small text-muted">Dirección</div>
+              <div><?= !empty($client['address']) ? e($client['address']) : '<span class="text-muted">—</span>' ?></div>
+            </div>
+          </div>
+          <h6 class="mb-3">Historial de citas</h6>
           <?php if (!$history): ?>
             <p class="text-muted mb-0">Este cliente aún no tiene citas registradas.</p>
           <?php else: ?>

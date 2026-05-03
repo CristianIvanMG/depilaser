@@ -21,9 +21,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $errors = $result['errors'];
     set_old([
-        'name'  => $_POST['name']  ?? '',
-        'email' => $_POST['email'] ?? '',
-        'phone' => $_POST['phone'] ?? '',
+        'name'       => $_POST['name']       ?? '',
+        'email'      => $_POST['email']      ?? '',
+        'phone'      => $_POST['phone']      ?? '',
+        'birth_date' => $_POST['birth_date'] ?? '',
+        'gender'     => $_POST['gender']     ?? '',
+        'address'    => $_POST['address']    ?? '',
     ]);
 }
 
@@ -74,6 +77,37 @@ require __DIR__ . '/includes/layouts/header_client.php';
               <?php if (isset($errors['phone'])): ?><div class="invalid-feedback"><?= e($errors['phone']) ?></div><?php endif; ?>
             </div>
           </div>
+
+          <details class="mb-3 bnc-details-soft<?= (isset($errors['birth_date']) || isset($errors['gender']) || isset($errors['address'])) ? ' open-by-error' : '' ?>"
+                   <?= (isset($errors['birth_date']) || isset($errors['gender']) || isset($errors['address']) || old('birth_date') !== '' || old('gender') !== '' || old('address') !== '') ? 'open' : '' ?>>
+            <summary class="small text-muted" style="cursor:pointer;user-select:none">
+              <i class="bi bi-plus-circle me-1"></i> Datos adicionales (opcionales)
+            </summary>
+            <div class="row g-3 mt-1">
+              <div class="col-12 col-md-6">
+                <label class="bnc-label" for="birth_date">Fecha de nacimiento</label>
+                <input type="date" class="form-control <?= isset($errors['birth_date']) ? 'is-invalid' : '' ?>"
+                       id="birth_date" name="birth_date" value="<?= old('birth_date') ?>" max="<?= date('Y-m-d') ?>">
+                <?php if (isset($errors['birth_date'])): ?><div class="invalid-feedback"><?= e($errors['birth_date']) ?></div><?php endif; ?>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="bnc-label" for="gender">Sexo</label>
+                <select class="form-select <?= isset($errors['gender']) ? 'is-invalid' : '' ?>" id="gender" name="gender">
+                  <option value="">— Selecciona —</option>
+                  <?php foreach (ClientProfile::genderOptions() as $slug => $label): ?>
+                    <option value="<?= e($slug) ?>" <?= old('gender') === $slug ? 'selected' : '' ?>><?= e($label) ?></option>
+                  <?php endforeach; ?>
+                </select>
+                <?php if (isset($errors['gender'])): ?><div class="invalid-feedback"><?= e($errors['gender']) ?></div><?php endif; ?>
+              </div>
+              <div class="col-12">
+                <label class="bnc-label" for="address">Dirección</label>
+                <input type="text" class="form-control <?= isset($errors['address']) ? 'is-invalid' : '' ?>"
+                       id="address" name="address" value="<?= old('address') ?>" maxlength="255" placeholder="Calle, número, colonia, ciudad">
+                <?php if (isset($errors['address'])): ?><div class="invalid-feedback"><?= e($errors['address']) ?></div><?php endif; ?>
+              </div>
+            </div>
+          </details>
 
           <div class="mb-3">
             <label class="bnc-label" for="password">Contraseña</label>

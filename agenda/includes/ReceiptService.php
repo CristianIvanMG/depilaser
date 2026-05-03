@@ -277,16 +277,27 @@ final class ReceiptService
         return $html;
     }
 
-    /** HTML del correo empático (cancelada / no asistió). */
+    /**
+     * HTML del correo empático (cancelada / no asistió).
+     *
+     * IMPORTANTE: por política clínica este correo NO debe contener bloque
+     * ni enlace de reseñas Google. La invitación a reseñar solo aplica a
+     * correos positivos (recibo / confirmación). Aquí la omitimos siempre.
+     */
     public static function renderEmpathy(int $appointmentId): string
     {
         $d = self::hydrate($appointmentId);
         if (!$d) return '';
+        // Doble candado: este flujo solo aplica a citas en estados terminales
+        // negativos. Si por alguna razón se invocara con otro estado,
+        // devolvemos cadena vacía para evitar mezclas indebidas.
+        if (!in_array($d['status_slug'] ?? '', ['cancelada', 'no_asistio'], true)) {
+            return '';
+        }
         $H = function ($s) { return e($s); };
         $isCancel = ($d['status_slug'] === 'cancelada');
         $title = $isCancel ? 'Lamentamos que no hayamos podido vernos' : 'Te extrañamos en tu cita';
         $when = fmt_dt($d['start_at']);
-        $reviewsUrl = self::googleReviewsUrl($d);
 
         $body  = '<div style="font-family:Segoe UI,Arial,sans-serif;background:#f4f1ee;padding:28px 12px">';
         $body .= '<div style="max-width:620px;margin:0 auto;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.06)">';
@@ -314,11 +325,11 @@ final class ReceiptService
         $body .= '</div>';
         $body .= '<p style="margin-top:22px">Con todo nuestro afecto,<br><strong>El equipo BellaNick Clinic</strong></p>';
         $body .= '</div>';
-        // Mini bloque reseñas (suave, no invasivo)
-        $body .= '<div style="background:#fff5f9;padding:18px 28px;text-align:center;font-size:12.5px;color:#6b4860">';
-        $body .= 'Si en visitas anteriores te sentiste cuidada, <a href="' . $H($reviewsUrl) . '" style="color:#a4276c;font-weight:700">comparte tu experiencia en Google</a>. Nos ayudará a seguir mejorando.';
-        $body .= '</div>';
-        $body .= '<div style="padding:14px 28px;text-align:center;font-size:11px;color:#9b6f86">' . $H($d['branch_name']) . ' · ' . $H($d['branch_phone'] ?? '') . '</div>';
+        // NOTA: en este correo (cancelada / no asistió) intencionalmente NO
+        // incluimos el módulo de reseñas Google. La sección de reseñas se
+        // mantiene únicamente en los correos de servicio realizado (recibo)
+        // y en otros correos positivos del sistema.
+        $body .= '<div style="padding:18px 28px;text-align:center;font-size:11px;color:#9b6f86;background:#fdfcfb;border-top:1px solid #f1e5ec">' . $H($d['branch_name']) . ' · ' . $H($d['branch_phone'] ?? '') . '</div>';
         $body .= '</div></div>';
         return $body;
     }
