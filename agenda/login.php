@@ -3,12 +3,10 @@ require_once __DIR__ . '/includes/bootstrap.php';
 
 Auth::enforceSessionTimeout();
 
-// `next` saneado: válido solo si pertenece a la app y no apunta a /login|/logout.
-// Lo aceptamos por GET (el guard lo añade) o por POST (hidden input para sobrevivir submit).
+$botScope = 'login';
 $rawNext = $_POST['next'] ?? $_GET['next'] ?? '';
-$next    = safe_next($rawNext);   // string|null
+$next = safe_next($rawNext);
 
-// Si ya está logueado, redirige a su área (respetando next si es válido)
 if (Auth::check()) {
     if (Auth::isClient() && !Auth::emailVerified()) {
         redirect('verificar-email.php' . ($next ? '?next=' . urlencode($next) : ''));
@@ -22,21 +20,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::check($_POST[Csrf::FIELD] ?? '');
 
     $errors = Validator::login($_POST);
+    $humanOk = BotProtection::validate($botScope, $_POST);
+
+    if (BotProtection::isLocked($botScope)) {
+        $errors['_'] = BotProtection::lockedMessage($botScope);
+    } elseif (!$humanOk) {
+        $errors['_'] = 'No pudimos validar el acceso. Revisa tus datos e intenta nuevamente.';
+    }
+
     if (!$errors) {
         $user = Auth::attempt($_POST['email'] ?? '', $_POST['password'] ?? '');
         if ($user) {
+            BotProtection::reset($botScope);
             clear_old();
             $role = $user['role_slug'] ?? '';
 
-            // Cliente sin verificar correo → primero verificar
             if ($role === Auth::ROLE_CLIENT && (int) ($user['email_verified'] ?? 0) !== 1) {
                 redirect('verificar-email.php' . ($next ? '?next=' . urlencode($next) : ''));
             }
 
-            // Si trajimos un next válido y el rol tiene permisos para esa ruta,
-            // úsalo. Si no, default landing por rol.
-            //
-            // Heurística simple: las rutas /agenda/admin/* requieren rol admin/super.
             $base = app_base_path();
             $isAdminPath = $next && str_starts_with($next, $base . '/admin/');
             $canAdmin = in_array($role, [Auth::ROLE_ADMIN, Auth::ROLE_SUPERADMIN], true);
@@ -48,13 +50,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             redirect(Auth::defaultLanding($role));
         }
-        $errors['_'] = 'Correo o contraseña incorrectos. Si fallas 5 veces, tu IP se bloqueará 10 minutos.';
+        $errors['_'] = 'No pudimos iniciar sesión. Revisa tus datos e intenta nuevamente.';
         set_old(['email' => $_POST['email'] ?? '']);
     } else {
         set_old(['email' => $_POST['email'] ?? '']);
     }
 }
 
+$botChallenge = BotProtection::challenge($botScope);
 $pageTitle = 'Iniciar sesión';
 require __DIR__ . '/includes/layouts/header_client.php';
 ?>
@@ -87,6 +90,12 @@ require __DIR__ . '/includes/layouts/header_client.php';
           <?php if ($next): ?>
             <input type="hidden" name="next" value="<?= e($next) ?>">
           <?php endif; ?>
+          <input type="hidden" name="bot_token" value="<?= e($botChallenge['token']) ?>">
+
+          <div style="position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden" aria-hidden="true">
+            <label for="company_site">Sitio web</label>
+            <input type="text" id="company_site" name="company_site" tabindex="-1" autocomplete="off">
+          </div>
 
           <div class="mb-3">
             <label class="bnc-label" for="email">Correo electrónico</label>
@@ -107,6 +116,20 @@ require __DIR__ . '/includes/layouts/header_client.php';
             <?php if (isset($errors['password'])): ?>
               <div class="invalid-feedback"><?= e($errors['password']) ?></div>
             <?php endif; ?>
+          </div>
+
+          <div class="mb-3">
+            <label class="bnc-label" for="bot_answer">Verificación</label>
+            <div class="p-3 rounded-3" style="background:var(--bnc-pink-bg);border:1px solid var(--bnc-line)">
+              <div class="small text-muted mb-2">Confirma que no eres bot para iniciar sesión.</div>
+              <div class="d-flex flex-wrap align-items-center gap-2">
+                <strong><?= e($botChallenge['question']) ?></strong>
+                <input type="text" inputmode="numeric" pattern="[0-9]*"
+                       class="form-control form-control-sm"
+                       id="bot_answer" name="bot_answer" required autocomplete="off"
+                       style="max-width:120px" aria-label="Respuesta de verificación">
+              </div>
+            </div>
           </div>
 
           <button type="submit" class="btn btn-bnc-primary w-100 mt-3 py-2">Entrar</button>
