@@ -312,7 +312,8 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         });
         t.innerHTML = orig; t.disabled = false; t.dataset.busy = '';
         if (!body.ok) { toast('danger', body.error || 'No fue posible cambiar el estado.'); return; }
-        if (body.receipt_warning) toast('warning', 'Estado cambiado, recibo no enviado: ' + body.receipt_warning);
+        if (body.waitlist?.ok) toast('success', 'Estado actualizado. Se promovió automáticamente a un cliente de la lista de espera.');
+        else if (body.receipt_warning) toast('warning', 'Estado cambiado, recibo no enviado: ' + body.receipt_warning);
         else if (body.status_email_warning) toast('warning', 'Estado cambiado, notificación no enviada: ' + body.status_email_warning);
         else if (body.receipt_sent) toast('success', '¡Atendida! Recibo enviado al cliente.');
         else if (body.status_email_sent) toast('success', 'Estado actualizado y notificación enviada al cliente.');

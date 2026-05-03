@@ -57,16 +57,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $pdo = Database::pdo();
                 $pdo->beginTransaction();
                 try {
-                    // Lock pesimista: bloquea filas que pudieran solapar
-                    $stmt = $pdo->prepare(
-                        "SELECT id FROM appointments
-                         WHERE branch_id = ?
-                           AND status_id IN (SELECT id FROM appointment_statuses WHERE slug NOT IN ('cancelada','no_asistio'))
-                           AND start_at < ? AND end_at > ?
-                         FOR UPDATE"
-                    );
-                    $stmt->execute([$branchId, $endSql, $startSql]);
-                    if ($stmt->fetch()) {
+                    // Lock pesimista + capacidad real de cabinas por sucursal.
+                    if (AppointmentService::hasConflict($branchId, $startSql, $endSql, null, true)) {
                         throw new RuntimeException('SLOT_TAKEN');
                     }
 
@@ -89,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } catch (Throwable $e) {
                     $pdo->rollBack();
                     if ($e->getMessage() === 'SLOT_TAKEN') {
-                        $errors['_'] = 'Ese horario acaba de ser tomado. Por favor elige otro.';
+                        $errors['_'] = 'Ese horario acaba de ser tomado. Puedes elegir otro o agregarte a la lista de espera.';
                     } else {
                         error_log('[agendar] ' . $e->getMessage());
                         $errors['_'] = 'Hubo un problema. Intenta de nuevo en unos segundos.';
@@ -263,6 +255,9 @@ require __DIR__ . '/includes/layouts/header_client.php';
     <script>
       (function () {
         const apiBase = '<?= url('api/disponibilidad.php') ?>';
+        const waitlistApi = '<?= url('api/lista-espera.json.php') ?>';
+        const csrfField = <?= json_encode(Csrf::FIELD) ?>;
+        const csrfToken = <?= json_encode(Csrf::token()) ?>;
         const branchId = <?= (int) $selectedBranch ?>;
         const serviceId = <?= (int) $selectedService ?>;
         const dateInput = document.getElementById('bookingDate');
@@ -277,7 +272,21 @@ require __DIR__ . '/includes/layouts/header_client.php';
             const r = await fetch(`${apiBase}?branch=${branchId}&service=${serviceId}&date=${encodeURIComponent(d)}`);
             const j = await r.json();
             if (!j.ok || !j.slots.length) {
-              slotsBox.innerHTML = '<div class="alert alert-warning small mb-0">No hay horarios disponibles ese día. Prueba con otra fecha.</div>';
+              slotsBox.innerHTML = `
+                <div class="alert alert-warning small">
+                  No hay horarios disponibles ese día. Puedes probar otra fecha o agregarte a la lista de espera.
+                </div>
+                <div class="bnc-card border mb-0">
+                  <div class="bnc-card-body p-3">
+                    <label class="bnc-label" for="waitlistZone">Zona de tratamiento (opcional)</label>
+                    <input class="form-control form-control-sm mb-2" id="waitlistZone" maxlength="120" placeholder="Ej. axila, bikini, piernas">
+                    <button type="button" class="btn btn-bnc-outline btn-sm" id="joinWaitlistBtn">
+                      <i class="bi bi-hourglass-split"></i> Unirme a lista de espera
+                    </button>
+                    <div class="small text-muted mt-2">Si se libera un espacio para esta fecha, registraremos tu cita y te avisaremos por correo.</div>
+                  </div>
+                </div>`;
+              document.getElementById('joinWaitlistBtn')?.addEventListener('click', joinWaitlist);
               form.classList.add('d-none');
               return;
             }
@@ -296,6 +305,32 @@ require __DIR__ . '/includes/layouts/header_client.php';
             });
           } catch (err) {
             slotsBox.innerHTML = '<div class="alert alert-danger small mb-0">Error al cargar horarios. Recarga la página.</div>';
+          }
+        }
+
+        async function joinWaitlist() {
+          const btn = document.getElementById('joinWaitlistBtn');
+          const zone = document.getElementById('waitlistZone')?.value || '';
+          if (!btn) return;
+          btn.disabled = true;
+          const original = btn.innerHTML;
+          btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Guardando';
+          try {
+            const fd = new FormData();
+            fd.append(csrfField, csrfToken);
+            fd.append('branch_id', String(branchId));
+            fd.append('service_id', String(serviceId));
+            fd.append('preferred_date', dateInput.value);
+            fd.append('zone', zone);
+            const r = await fetch(waitlistApi, { method: 'POST', body: fd, credentials: 'same-origin' });
+            const j = await r.json();
+            if (!r.ok || !j.ok) throw new Error(j.error || 'No fue posible agregarte a la lista de espera.');
+            slotsBox.innerHTML = `<div class="alert alert-success small mb-0">${j.message}</div>`;
+          } catch (err) {
+            btn.disabled = false;
+            btn.innerHTML = original;
+            const msg = err.message || 'No fue posible agregarte a la lista de espera.';
+            slotsBox.insertAdjacentHTML('beforeend', `<div class="alert alert-danger small mt-2 mb-0">${msg}</div>`);
           }
         }
 

@@ -74,6 +74,9 @@ $response = [
     ],
     'receipt_folio' => $result['receipt_folio'] ?? null,
 ];
+if (!empty($result['waitlist'])) {
+    $response['waitlist'] = $result['waitlist'];
+}
 
 $emailType = match ($to) {
     'confirmada' => 'appointment_confirmed',

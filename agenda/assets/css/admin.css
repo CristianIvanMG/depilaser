@@ -319,6 +319,9 @@ body.bnc-admin {
 .bnc-status-atendida { background: #eff0f2; color: #53585e; }
 .bnc-status-cancelada { background: #ffe9ec; color: #9c3e48; }
 .bnc-status-no-asistio { background: #fff2cf; color: #856011; }
+.bnc-status.waiting { background: #fff2cf; color: #856011; }
+.bnc-status.promoted { background: #e7f7ec; color: #2f7040; }
+.bnc-status.cancelled { background: #ffe9ec; color: #9c3e48; }
 
 @media (max-width: 767.98px) {
   #calendar { min-height: 560px; }

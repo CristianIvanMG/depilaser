@@ -37,18 +37,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($appointment['status_slug'] === 'cancelada') {
             flash('warning', 'La cita ya se encuentra cancelada.');
         } else {
-            $cancelStatus = Database::one("SELECT id FROM appointment_statuses WHERE slug = 'cancelada' LIMIT 1");
-            Database::exec(
-                'UPDATE appointments
-                 SET status_id = ?, cancelled_at = NOW(), cancelled_by_user_id = ?, cancel_reason = ?
-                 WHERE id = ?',
-                [(int) $cancelStatus['id'], $admin['id'], trim($_POST['cancel_reason'] ?? '') ?: null, $appointmentId]
+            $result = AppointmentService::transitionStatus(
+                $appointmentId,
+                'cancelada',
+                (int) $admin['id'],
+                trim($_POST['cancel_reason'] ?? '') ?: null
             );
-            Auth::audit('appointment_cancel_admin', 'appointment', $appointmentId, [
-                'code' => $appointment['code'],
-                'reason' => trim($_POST['cancel_reason'] ?? ''),
-            ]);
-            flash('success', 'Cita cancelada correctamente. El horario queda disponible si hay cabina.');
+            if (!$result['ok']) {
+                flash('danger', $result['error'] ?? 'No fue posible cancelar la cita.');
+            } else {
+                EmailNotificationService::sendForAppointment($appointmentId, 'appointment_cancelled');
+                $msg = 'Cita cancelada correctamente. El horario queda disponible si hay cabina.';
+                if (!empty($result['waitlist']['ok'])) {
+                    $msg = 'Cita cancelada correctamente. Se promovió automáticamente a un cliente de la lista de espera.';
+                }
+                flash('success', $msg);
+            }
         }
         redirect('admin/citas.php?' . http_build_query($_GET));
     }
@@ -411,7 +415,8 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         toast('danger', body.error || 'No fue posible cambiar el estado.');
         return;
       }
-      if (body.receipt_warning) toast('warning', 'Estado cambiado, pero el recibo no pudo enviarse: ' + body.receipt_warning);
+      if (body.waitlist?.ok) toast('success', 'Estado actualizado. Se promovió automáticamente a un cliente de la lista de espera.');
+      else if (body.receipt_warning) toast('warning', 'Estado cambiado, pero el recibo no pudo enviarse: ' + body.receipt_warning);
       else if (body.empathy_warning) toast('warning', 'Estado cambiado, pero el correo empático no pudo enviarse: ' + body.empathy_warning);
       else if (body.receipt_sent) toast('success', '¡Atendida! Recibo enviado al cliente.');
       else if (body.empathy_sent) toast('success', 'Estado actualizado y correo enviado al cliente.');

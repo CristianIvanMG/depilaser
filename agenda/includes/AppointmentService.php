@@ -428,10 +428,16 @@ final class AppointmentService
             'reason' => $reason,
         ]);
 
+        $waitlist = null;
+        if ($toSlug === 'cancelada') {
+            $waitlist = WaitlistService::promoteForCancelledAppointment($appointmentId);
+        }
+
         return [
             'ok' => true,
             'appointment'   => $appt,
             'receipt_folio' => $appt['receipt_folio'] ?? null,
+            'waitlist' => $waitlist,
         ];
     }
 

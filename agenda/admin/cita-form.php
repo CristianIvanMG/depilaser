@@ -152,21 +152,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($action === 'cancel' && $isEdit) {
-        $cancelId = $statusBySlug['cancelada'] ?? 0;
-        if (!$cancelId) {
-            $errors['_'] = 'No existe el estado Cancelada.';
+        $result = AppointmentService::transitionStatus(
+            $appointmentId,
+            'cancelada',
+            (int) $admin['id'],
+            trim($_POST['cancel_reason'] ?? '') ?: null
+        );
+        if (!$result['ok']) {
+            $errors['_'] = $result['error'] ?? 'No fue posible cancelar la cita.';
         } else {
-            Database::exec(
-                'UPDATE appointments
-                 SET status_id = ?, cancelled_at = NOW(), cancelled_by_user_id = ?, cancel_reason = ?
-                 WHERE id = ?',
-                [$cancelId, $admin['id'], trim($_POST['cancel_reason'] ?? '') ?: null, $appointmentId]
-            );
-            Auth::audit('appointment_cancel_admin', 'appointment', $appointmentId, [
-                'reason' => trim($_POST['cancel_reason'] ?? ''),
-            ]);
             EmailNotificationService::sendForAppointment($appointmentId, 'appointment_cancelled');
-            flash('success', 'Cita cancelada. El horario quedo liberado.');
+            $msg = 'Cita cancelada. El horario quedó liberado.';
+            if (!empty($result['waitlist']['ok'])) {
+                $msg = 'Cita cancelada. Se promovió automáticamente a un cliente de la lista de espera.';
+            }
+            flash('success', $msg);
             redirect('admin/cita-form.php?id=' . $appointmentId);
         }
     }
@@ -325,6 +325,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             default => 'appointment_status_changed',
                         };
                         EmailNotificationService::sendForAppointment($appointmentId, $emailType);
+                        if ($statusSlug === 'cancelada') {
+                            WaitlistService::promoteForCancelledAppointment($appointmentId);
+                        }
                     }
                     flash('success', 'Cita actualizada correctamente.');
                     redirect('admin/cita-form.php?id=' . $appointmentId);
