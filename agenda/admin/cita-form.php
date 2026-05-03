@@ -7,6 +7,14 @@ $appointmentId = (int) ($_GET['id'] ?? $_POST['appointment_id'] ?? 0);
 $isEdit = $appointmentId > 0;
 $errors = [];
 
+function admin_appointment_form_nonce(): string
+{
+    if (empty($_SESSION['admin_appointment_form_nonce'])) {
+        $_SESSION['admin_appointment_form_nonce'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['admin_appointment_form_nonce'];
+}
+
 $statuses = Database::all('SELECT id, slug, name FROM appointment_statuses ORDER BY id');
 $statusBySlug = [];
 foreach ($statuses as $status) {
@@ -133,6 +141,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($action === 'save') {
+        if (!$isEdit) {
+            $submittedNonce = (string) ($_POST['form_nonce'] ?? '');
+            $sessionNonce = (string) ($_SESSION['admin_appointment_form_nonce'] ?? '');
+            if (!$submittedNonce || !$sessionNonce || !hash_equals($sessionNonce, $submittedNonce)) {
+                flash('warning', 'Esta cita ya fue procesada o el formulario expiró. Revisa el listado antes de crear una nueva.');
+                redirect('admin/citas.php');
+            }
+            unset($_SESSION['admin_appointment_form_nonce']);
+        }
+
         $clientMode = $_POST['client_mode'] ?? 'existing';
         $userId = (int) ($_POST['user_id'] ?? 0);
 
@@ -243,6 +261,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
 
                 $code = generate_appointment_code();
+                $duplicate = Database::one(
+                    "SELECT a.id, a.code
+                     FROM appointments a
+                     JOIN appointment_statuses st ON st.id = a.status_id
+                     WHERE a.user_id = ?
+                       AND a.branch_id = ?
+                       AND a.service_id = ?
+                       AND a.start_at = ?
+                       AND a.end_at = ?
+                       AND st.slug NOT IN ('cancelada','no_asistio')
+                     LIMIT 1
+                     FOR UPDATE",
+                    [$userId, $branchId, $serviceId, $schedule['start_sql'], $schedule['end_sql']]
+                );
+                if ($duplicate) {
+                    throw new RuntimeException('DUPLICATE_APPOINTMENT');
+                }
+
                 Database::exec(
                     'INSERT INTO appointments
                        (code, user_id, branch_id, service_id, status_id, start_at, end_at, source, notes_admin, created_by_user_id)
@@ -263,12 +299,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $newId = Database::lastId();
                 $pdo->commit();
                 Auth::audit('appointment_create_admin', 'appointment', $newId, ['code' => $code]);
-                flash('success', 'Cita creada correctamente. Codigo: ' . $code);
-                redirect('admin/cita-form.php?id=' . $newId);
+                flash('success', 'Cita registrada correctamente. Código: ' . $code);
+                redirect('admin/citas.php');
             } catch (Throwable $e) {
                 $pdo->rollBack();
                 if ($e->getMessage() === 'SLOT_TAKEN') {
-                    $errors['start_at'] = 'Ese horario acaba de ser ocupado por otra cita.';
+                    $errors['start_at'] = 'Ese horario ya no tiene cabinas disponibles.';
+                } elseif ($e->getMessage() === 'DUPLICATE_APPOINTMENT') {
+                    $errors['_'] = 'Ya existe una cita igual para ese cliente, servicio y horario. Revisa el listado antes de crear otra.';
                 } else {
                     error_log('[admin/cita-form] ' . $e->getMessage());
                     $errors['_'] = 'No fue posible guardar la cita. Intenta nuevamente.';
@@ -276,6 +314,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     }
+}
+
+if (!$isEdit && empty($_SESSION['admin_appointment_form_nonce'])) {
+    admin_appointment_form_nonce();
 }
 
 $pageTitle = $isEdit ? 'Editar cita' : 'Nueva cita';
@@ -297,6 +339,7 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
       <?= Csrf::input() ?>
       <input type="hidden" name="action" value="save">
       <?php if ($isEdit): ?><input type="hidden" name="appointment_id" value="<?= (int) $appointmentId ?>"><?php endif; ?>
+      <?php if (!$isEdit): ?><input type="hidden" name="form_nonce" value="<?= e(admin_appointment_form_nonce()) ?>"><?php endif; ?>
 
       <div class="bnc-card-header">
         <h2 class="h6 fw-bold mb-0"><?= $isEdit ? 'Datos de la cita' : 'Crear cita administrativa' ?></h2>
@@ -410,7 +453,7 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         </div>
       </div>
       <div class="bnc-card-body border-top d-flex flex-wrap gap-2 justify-content-between">
-        <button type="submit" class="btn btn-bnc-primary"><i class="bi bi-check2-circle"></i> Guardar cita</button>
+        <button type="submit" class="btn btn-bnc-primary" id="saveAppointmentBtn"><i class="bi bi-check2-circle"></i> Guardar cita</button>
         <?php if ($isEdit): ?>
           <div class="d-flex flex-wrap gap-2">
             <?php if (($appointment['status_slug'] ?? '') !== 'cancelada'): ?>
@@ -512,8 +555,11 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
     const startInput = document.getElementById('startAtInput');
     const availabilityDateInput = document.getElementById('availabilityDateInput');
     const loadSlotsBtn = document.getElementById('loadSlotsBtn');
+    const appointmentForm = document.getElementById('appointmentForm');
+    const saveAppointmentBtn = document.getElementById('saveAppointmentBtn');
     const slotsBox = document.getElementById('slotsBox');
     let slotRequest = null;
+    let appointmentSubmitting = false;
 
     function syncClientMode() {
       const mode = document.querySelector('input[name="client_mode"]:checked')?.value || 'existing';
@@ -633,6 +679,21 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
     }
 
     radios.forEach(radio => radio.addEventListener('change', syncClientMode));
+    appointmentForm.addEventListener('submit', function (event) {
+      if (appointmentSubmitting) {
+        event.preventDefault();
+        return;
+      }
+      if (!appointmentForm.checkValidity()) {
+        return;
+      }
+      appointmentSubmitting = true;
+      saveAppointmentBtn.disabled = true;
+      saveAppointmentBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Guardando...';
+      appointmentForm.querySelectorAll('button, input, select, textarea').forEach(control => {
+        if (control !== saveAppointmentBtn && control.type !== 'hidden') control.readOnly = true;
+      });
+    });
     loadSlotsBtn.addEventListener('click', loadSlots);
     [branchSelect, serviceSelect].forEach(field => {
       field.addEventListener('change', () => resetSlots('La disponibilidad se actualizara al consultar de nuevo.'));
