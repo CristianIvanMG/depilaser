@@ -326,3 +326,65 @@ body.bnc-admin {
   .fc .fc-toolbar-chunk { display: flex; justify-content: center; width: 100%; }
   .fc-button { padding: 6px 9px !important; }
 }
+
+/* Reportes ejecutivos */
+.bnc-report-hero {
+  align-items: center;
+  background:
+    linear-gradient(135deg, rgba(42, 16, 41, .96) 0%, rgba(68, 24, 61, .94) 58%, rgba(255, 246, 251, .95) 100%);
+  border: 1px solid rgba(234, 214, 226, .8);
+  border-radius: 18px;
+  box-shadow: 0 22px 48px rgba(42, 16, 41, .14);
+  color: #fff;
+  display: flex;
+  gap: 22px;
+  justify-content: space-between;
+  overflow: hidden;
+  padding: 28px 30px;
+}
+.bnc-report-hero h2 {
+  font-size: clamp(24px, 3vw, 34px);
+  font-weight: 900;
+  letter-spacing: 0;
+  margin: 0 0 8px;
+}
+.bnc-report-hero p {
+  color: #f5dcea;
+  font-size: 15px;
+  margin: 0;
+  max-width: 720px;
+}
+.bnc-report-eyebrow {
+  color: #ffbde1;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+.bnc-report-chart .bnc-card-body {
+  height: 320px;
+  padding: 18px;
+}
+.bnc-report-chart canvas {
+  min-height: 260px;
+}
+.bnc-report-hero .btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+@media (max-width: 767.98px) {
+  .bnc-report-hero {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 24px;
+  }
+  .bnc-report-hero .btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .bnc-report-chart .bnc-card-body {
+    height: 280px;
+  }
+}
