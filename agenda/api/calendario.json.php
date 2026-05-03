@@ -43,13 +43,26 @@ $sql .= " ORDER BY a.start_at";
 
 $rows = Database::all($sql, $args);
 
+$statusClassMap = [
+    'programada' => 'bnc-fc-status-programada',
+    'confirmada' => 'bnc-fc-status-confirmada',
+    'cancelada' => 'bnc-fc-status-cancelada',
+    'atendida' => 'bnc-fc-status-atendida',
+    'no_asistio' => 'bnc-fc-status-no-asistio',
+    'no-asistio' => 'bnc-fc-status-no-asistio',
+];
+
 $events = array_map(fn($r) => [
     'id'              => $r['id'],
-    'title'           => $r['client'] . ' · ' . $r['service'],
+    'title'           => $r['client'] . ' - ' . $r['service'],
     'start'           => str_replace(' ', 'T', $r['start_at']),
     'end'             => str_replace(' ', 'T', $r['end_at']),
-    'backgroundColor' => $r['color_hex'],
-    'borderColor'     => $r['color_hex'],
+    'backgroundColor' => '#ffffff',
+    'borderColor'     => $r['color_hex'] ?: '#d63b93',
+    'classNames'      => [
+        'bnc-fc-event',
+        $statusClassMap[$r['status_slug']] ?? 'bnc-fc-status-programada',
+    ],
     'extendedProps'   => [
         'code'         => $r['code'],
         'client'       => $r['client'],
@@ -57,7 +70,11 @@ $events = array_map(fn($r) => [
         'service'      => $r['service'],
         'branch'       => $r['branch'],
         'status'       => $r['status'],
+        'status_slug'  => $r['status_slug'],
+        'status_color' => $r['color_hex'] ?: '#d63b93',
         'when'         => fmt_dt($r['start_at']),
+        'start_time'   => date('H:i', strtotime($r['start_at'])),
+        'end_time'     => date('H:i', strtotime($r['end_at'])),
         'notes_client' => $r['notes_client'],
         'notes_admin'  => $r['notes_admin'],
     ],
