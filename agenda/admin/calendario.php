@@ -30,6 +30,9 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         <option value="<?= (int) $b['id'] ?>"><?= e($b['name']) ?></option>
       <?php endforeach; ?>
     </select>
+    <button type="button" id="calendarRefreshBtn" class="btn btn-sm btn-bnc-outline" title="Recargar calendario">
+      <i class="bi bi-arrow-clockwise"></i> Recargar
+    </button>
     <?php if ($canManageCalendar): ?>
       <a href="<?= url('admin/cita-form.php') ?>" class="btn btn-sm btn-bnc-primary"><i class="bi bi-plus-lg"></i> Nueva cita</a>
     <?php endif; ?>
@@ -68,6 +71,7 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
   document.addEventListener('DOMContentLoaded', function () {
     const el = document.getElementById('calendar');
     const branchFilter = document.getElementById('branchFilter');
+    const refreshBtn = document.getElementById('calendarRefreshBtn');
     const canManageCalendar = <?= $canManageCalendar ? 'true' : 'false' ?>;
 
     function escapeHtml(value) {
@@ -205,6 +209,19 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
     });
     cal.render();
     branchFilter.addEventListener('change', () => cal.refetchEvents());
+    refreshBtn?.addEventListener('click', function () {
+      if (refreshBtn.dataset.busy === '1') return;
+      refreshBtn.dataset.busy = '1';
+      const original = refreshBtn.innerHTML;
+      refreshBtn.disabled = true;
+      refreshBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Recargando';
+      cal.refetchEvents();
+      window.setTimeout(function () {
+        refreshBtn.innerHTML = original;
+        refreshBtn.disabled = false;
+        refreshBtn.dataset.busy = '';
+      }, 600);
+    });
     window.addEventListener('resize', () => cal.setOption('height', calendarHeight()));
 
     // ─── Botones contextuales según estado ───
