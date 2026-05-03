@@ -7,8 +7,9 @@
 require_once __DIR__ . '/../includes/bootstrap.php';
 header('Content-Type: application/json; charset=utf-8');
 
-// Asegura que exista el esquema de profesionales (rol, tabla pivote y columna professional_id)
+// Asegura que exista el esquema de profesionales y de recibos
 try { AppointmentService::ensureProfessionalSchema(); } catch (\Throwable $e) { /* silencioso */ }
+try { AppointmentService::ensureReceiptSchema(); } catch (\Throwable $e) { /* silencioso */ }
 
 if (!Auth::isAdmin()) {
     http_response_code(403);
@@ -27,6 +28,7 @@ if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $from) || !preg_match('/^\d{4}-\d{2}-\d
 }
 
 $sql = "SELECT a.id, a.code, a.start_at, a.end_at, a.notes_client, a.notes_admin,
+               a.professional_id, a.receipt_folio, a.receipt_sent,
                u.name AS client, u.phone,
                s.name AS service,
                b.name AS branch,
@@ -75,6 +77,9 @@ $events = array_map(fn($r) => [
         'service'      => $r['service'],
         'branch'       => $r['branch'],
         'professional' => $r['professional'] ?? null,
+        'professional_id' => $r['professional_id'] ? (int) $r['professional_id'] : null,
+        'receipt_folio'   => $r['receipt_folio'] ?? null,
+        'receipt_sent'    => (int) ($r['receipt_sent'] ?? 0),
         'status'       => $r['status'],
         'status_slug'  => $r['status_slug'],
         'status_color' => $r['color_hex'] ?: '#d63b93',

@@ -283,6 +283,170 @@ final class AppointmentService
         return ['ok' => true, 'professional' => $prof];
     }
 
+    /**
+     * Auto-migracion de la fase 4 (recibos / nota de venta + correo empatico).
+     * Anade columnas en appointments si faltan. Idempotente.
+     */
+    public static function ensureReceiptSchema(): void
+    {
+        $cols = [
+            'receipt_folio'         => 'VARCHAR(24) NULL',
+            'receipt_sent'          => 'TINYINT(1) NOT NULL DEFAULT 0',
+            'receipt_sent_at'       => 'DATETIME NULL',
+            'attended_at'           => 'DATETIME NULL',
+            'confirmed_at'          => 'DATETIME NULL',
+            'empathy_email_sent'    => 'TINYINT(1) NOT NULL DEFAULT 0',
+            'empathy_email_sent_at' => 'DATETIME NULL',
+        ];
+        foreach ($cols as $name => $def) {
+            if (!self::columnExists('appointments', $name)) {
+                Database::exec("ALTER TABLE appointments ADD COLUMN {$name} {$def}");
+            }
+        }
+        // UNIQUE en folio si la columna existe pero no tiene indice
+        if (self::columnExists('appointments', 'receipt_folio')) {
+            $idx = Database::one(
+                "SELECT 1 FROM INFORMATION_SCHEMA.STATISTICS
+                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'appointments'
+                   AND COLUMN_NAME = 'receipt_folio' LIMIT 1"
+            );
+            if (!$idx) {
+                try { Database::exec('ALTER TABLE appointments ADD UNIQUE INDEX uq_appt_receipt_folio (receipt_folio)'); } catch (\Throwable $e) { /* noop */ }
+            }
+        }
+    }
+
+    /**
+     * Devuelve los slugs de transiciones permitidas desde un estado dado.
+     * Reglas clinicas:
+     *   programada  -> confirmada | cancelada
+     *   confirmada  -> atendida   | no_asistio | cancelada
+     *   atendida    -> (terminal, solo recibo)
+     *   cancelada   -> (terminal)
+     *   no_asistio  -> (terminal)
+     */
+    public static function allowedTransitions(string $fromSlug): array
+    {
+        $map = [
+            'programada' => ['confirmada', 'cancelada'],
+            'confirmada' => ['atendida', 'no_asistio', 'cancelada'],
+            'atendida'   => [],
+            'cancelada'  => [],
+            'no_asistio' => [],
+        ];
+        return $map[$fromSlug] ?? [];
+    }
+
+    /**
+     * Cambia el estado de una cita validando reglas clinicas. Devuelve
+     * ['ok' => bool, 'error' => string?, 'appointment' => array?, 'receipt_folio' => string?].
+     */
+    public static function transitionStatus(int $appointmentId, string $toSlug, int $actorUserId, ?string $reason = null): array
+    {
+        self::ensureReceiptSchema();
+
+        $appt = Database::one(
+            "SELECT a.*, st.slug AS status_slug, st.name AS status_name
+             FROM appointments a
+             JOIN appointment_statuses st ON st.id = a.status_id
+             WHERE a.id = ? LIMIT 1",
+            [$appointmentId]
+        );
+        if (!$appt) {
+            return ['ok' => false, 'error' => 'La cita no existe.'];
+        }
+
+        $from = (string) $appt['status_slug'];
+        if ($from === $toSlug) {
+            return ['ok' => false, 'error' => 'La cita ya se encuentra en ese estado.'];
+        }
+
+        $allowed = self::allowedTransitions($from);
+        if (!in_array($toSlug, $allowed, true)) {
+            return ['ok' => false, 'error' => 'Transición no válida desde "' . $from . '".'];
+        }
+
+        $newStatus = Database::one('SELECT id FROM appointment_statuses WHERE slug = ? LIMIT 1', [$toSlug]);
+        if (!$newStatus) {
+            return ['ok' => false, 'error' => 'Estado destino no encontrado.'];
+        }
+
+        // Reglas adicionales
+        if ($toSlug === 'atendida') {
+            if (empty($appt['professional_id'])) {
+                return ['ok' => false, 'error' => 'Asigna primero un profesional para marcar la cita como Atendida.'];
+            }
+        }
+        if ($toSlug === 'confirmada') {
+            if (self::columnExists('appointments', 'professional_id') && empty($appt['professional_id'])) {
+                return ['ok' => false, 'error' => 'Asigna un profesional antes de confirmar la cita.'];
+            }
+        }
+
+        $sets = ['status_id = ?'];
+        $params = [(int) $newStatus['id']];
+
+        if ($toSlug === 'confirmada') {
+            $sets[] = 'confirmed_at = NOW()';
+        }
+        if ($toSlug === 'atendida') {
+            $sets[] = 'attended_at = NOW()';
+            // Asigna folio si no existe
+            if (empty($appt['receipt_folio'])) {
+                $folio = self::nextReceiptFolio();
+                $sets[] = 'receipt_folio = ?';
+                $params[] = $folio;
+            }
+        }
+        if ($toSlug === 'cancelada') {
+            $sets[] = 'cancelled_at = NOW()';
+            $sets[] = 'cancelled_by_user_id = ?';
+            $params[] = $actorUserId;
+            $sets[] = 'cancel_reason = ?';
+            $params[] = $reason ?: null;
+        }
+
+        $params[] = $appointmentId;
+        Database::exec(
+            'UPDATE appointments SET ' . implode(', ', $sets) . ' WHERE id = ?',
+            $params
+        );
+
+        // Recarga con datos completos para devolver al caller
+        $appt = Database::one(
+            "SELECT a.*, st.slug AS status_slug, st.name AS status_name, st.color_hex
+             FROM appointments a
+             JOIN appointment_statuses st ON st.id = a.status_id
+             WHERE a.id = ? LIMIT 1",
+            [$appointmentId]
+        );
+
+        Auth::audit('appointment_transition', 'appointment', $appointmentId, [
+            'code'   => $appt['code'] ?? null,
+            'from'   => $from,
+            'to'     => $toSlug,
+            'reason' => $reason,
+        ]);
+
+        return [
+            'ok' => true,
+            'appointment'   => $appt,
+            'receipt_folio' => $appt['receipt_folio'] ?? null,
+        ];
+    }
+
+    /** Genera un folio de recibo único: BNC-NV-YYYY-NNNNN */
+    public static function nextReceiptFolio(): string
+    {
+        for ($i = 0; $i < 6; $i++) {
+            $candidate = sprintf('BNC-NV-%d-%05d', (int) date('Y'), random_int(1, 99999));
+            $exists = Database::one('SELECT 1 FROM appointments WHERE receipt_folio = ? LIMIT 1', [$candidate]);
+            if (!$exists) return $candidate;
+        }
+        // Fallback con microtime si todos los random colisionan
+        return 'BNC-NV-' . date('Ymd') . '-' . substr((string) microtime(true), -6);
+    }
+
     /** Lista de profesionales activos asignados a una sucursal. */
     public static function professionalsByBranch(int $branchId): array
     {

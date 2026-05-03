@@ -39,8 +39,12 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
       <div class="modal-header"><h5 class="modal-title">Detalle de cita</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
       <div class="modal-body" id="apptModalBody">Cargando...</div>
-      <div class="modal-footer">
-        <a href="#" id="apptEditLink" class="btn btn-bnc-primary">Editar</a>
+      <div class="modal-footer flex-column align-items-stretch gap-2">
+        <div id="apptQuickActions" class="d-flex flex-wrap gap-2 justify-content-end w-100"></div>
+        <div class="d-flex justify-content-between w-100 pt-2">
+          <a href="#" id="apptEditLink" class="btn btn-light btn-sm"><i class="bi bi-pencil"></i> Editar</a>
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button>
+        </div>
       </div>
     </div>
   </div>
@@ -142,9 +146,10 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
       },
       eventClick: function (info) {
         const a = info.event.extendedProps;
+        const id = info.event.id;
         const statusClass = 'bnc-status-' + String(a.status_slug || 'programada').replace(/_/g, '-');
         document.getElementById('apptModalBody').innerHTML = `
-          <div class="bnc-appt-detail">
+          <div class="bnc-appt-detail" data-appt-id="${id}" data-status-slug="${escapeHtml(a.status_slug || '')}">
             <div>
               <span class="bnc-detail-label">Cliente</span>
               <strong>${escapeHtml(a.client)}</strong>
@@ -168,23 +173,142 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
             </div>
             <div>
               <span class="bnc-detail-label">Estado</span>
-              <span class="bnc-status-pill ${statusClass}">${escapeHtml(a.status)}</span>
+              <span class="bnc-status-pill ${statusClass}" data-status-pill>${escapeHtml(a.status)}</span>
             </div>
             <div>
               <span class="bnc-detail-label">Código</span>
               <code>${escapeHtml(a.code)}</code>
             </div>
+            ${a.receipt_folio ? `<div><span class="bnc-detail-label">Folio recibo</span><code>${escapeHtml(a.receipt_folio)}</code> ${a.receipt_sent ? '<span class="badge bg-success ms-1"><i class=\"bi bi-envelope-check\"></i> Enviado</span>' : ''}</div>` : ''}
             ${a.notes_client ? `<div class="bnc-detail-note"><span class="bnc-detail-label">Nota cliente</span>${nl2br(a.notes_client)}</div>` : ''}
             ${a.notes_admin ? `<div class="bnc-detail-note"><span class="bnc-detail-label">Nota interna</span>${nl2br(a.notes_admin)}</div>` : ''}
           </div>
         `;
-        document.getElementById('apptEditLink').href = '<?= url('admin/cita-form.php') ?>?id=' + info.event.id;
+        document.getElementById('apptEditLink').href = '<?= url('admin/cita-form.php') ?>?id=' + id;
+        document.getElementById('apptQuickActions').innerHTML = buildQuickActions(id, a);
         new bootstrap.Modal(document.getElementById('apptModal')).show();
       }
     });
     cal.render();
     branchFilter.addEventListener('change', () => cal.refetchEvents());
     window.addEventListener('resize', () => cal.setOption('height', calendarHeight()));
+
+    // ─── Botones contextuales según estado ───
+    const ALLOWED = {
+      programada: ['confirmada', 'cancelada'],
+      confirmada: ['atendida', 'no_asistio', 'cancelada'],
+      atendida:   [],
+      cancelada:  [],
+      no_asistio: []
+    };
+    const RECIBO_URL = <?= json_encode(url('api/cita-recibo.php')) ?>;
+
+    function buildQuickActions(id, a) {
+      const slug = a.status_slug || 'programada';
+      const list = ALLOWED[slug] || [];
+      let html = '';
+      if (list.includes('confirmada')) {
+        html += `<button type="button" class="btn btn-success btn-sm bnc-transition" data-id="${id}" data-to="confirmada" data-confirm="¿Confirmar la cita?"><i class="bi bi-check2-circle"></i> Confirmar</button>`;
+      }
+      if (list.includes('atendida')) {
+        html += `<button type="button" class="btn btn-bnc-primary btn-sm bnc-transition" data-id="${id}" data-to="atendida" data-confirm="¿Marcar como atendida y generar recibo?" data-send-email="ask"><i class="bi bi-clipboard2-check"></i> Atender</button>`;
+      }
+      if (list.includes('no_asistio')) {
+        html += `<button type="button" class="btn btn-warning btn-sm bnc-transition" data-id="${id}" data-to="no_asistio" data-confirm="¿Marcar como NO asistió? Se enviará un correo empático al cliente." data-send-email="auto"><i class="bi bi-person-x"></i> No asistió</button>`;
+      }
+      if (list.includes('cancelada')) {
+        html += `<button type="button" class="btn btn-outline-danger btn-sm bnc-transition" data-id="${id}" data-to="cancelada" data-prompt-reason="1" data-send-email="auto"><i class="bi bi-calendar-x"></i> Cancelar</button>`;
+      }
+      if (slug === 'atendida') {
+        html += `<a class="btn btn-success btn-sm" href="${RECIBO_URL}?id=${id}" target="_blank" rel="noopener"><i class="bi bi-receipt"></i> Ver recibo</a>`;
+        const sent = !!a.receipt_sent;
+        html += `<button type="button" class="btn btn-outline-success btn-sm bnc-send-receipt" data-id="${id}" data-already="${sent ? '1' : '0'}"><i class="bi bi-envelope-paper${sent ? '-fill' : ''}"></i> ${sent ? 'Reenviar recibo' : 'Enviar recibo'}</button>`;
+      }
+      if (!html) html = '<small class="text-muted me-auto">Cita en estado terminal — sin acciones rápidas.</small>';
+      return html;
+    }
+
+    // ─── Wiring de botones rápidos (transición + recibo) ───
+    const csrfToken = <?= json_encode(Csrf::token()) ?>;
+    const csrfField = <?= json_encode(Csrf::FIELD) ?>;
+    const ENDPOINTS = {
+      transition:  <?= json_encode(url('api/cita-estado.json.php')) ?>,
+      sendReceipt: <?= json_encode(url('api/cita-recibo-enviar.json.php')) ?>
+    };
+
+    function toast(type, msg) {
+      const wrap = document.createElement('div');
+      wrap.className = 'position-fixed top-0 end-0 p-3';
+      wrap.style.zIndex = 1090;
+      wrap.innerHTML = `<div class="toast align-items-center text-bg-${type} border-0 show" role="alert">
+        <div class="d-flex"><div class="toast-body">${msg}</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div>`;
+      document.body.appendChild(wrap);
+      setTimeout(() => wrap.remove(), 4500);
+    }
+
+    async function postJson(url, data) {
+      const fd = new FormData();
+      Object.entries(data).forEach(([k, v]) => { if (v !== null && v !== undefined) fd.append(k, v); });
+      fd.append(csrfField, csrfToken);
+      const r = await fetch(url, { method: 'POST', body: fd, credentials: 'same-origin' });
+      let json = null; try { json = await r.json(); } catch(e) { json = { ok:false, error:'Respuesta no válida.' }; }
+      return json;
+    }
+
+    document.body.addEventListener('click', async function (ev) {
+      const t = ev.target.closest('.bnc-transition');
+      const r = ev.target.closest('.bnc-send-receipt');
+      if (t) {
+        ev.preventDefault();
+        if (t.dataset.busy === '1') return;
+        const sendMode = t.dataset.sendEmail || '';
+        let reason = null;
+        if (t.dataset.promptReason === '1') {
+          reason = window.prompt('Motivo (opcional):', '');
+          if (reason === null) return;
+          reason = reason.trim();
+        }
+        if (t.dataset.confirm && !window.confirm(t.dataset.confirm)) return;
+        let sendEmail = '';
+        if (sendMode === 'auto') sendEmail = '1';
+        if (sendMode === 'ask') sendEmail = window.confirm('¿Enviar recibo por correo al cliente ahora?') ? '1' : '';
+        t.dataset.busy = '1';
+        const orig = t.innerHTML;
+        t.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'; t.disabled = true;
+        const body = await postJson(ENDPOINTS.transition, {
+          appointment_id: t.dataset.id, to: t.dataset.to, reason: reason || '', send_email: sendEmail
+        });
+        t.innerHTML = orig; t.disabled = false; t.dataset.busy = '';
+        if (!body.ok) { toast('danger', body.error || 'No fue posible cambiar el estado.'); return; }
+        if (body.receipt_warning) toast('warning', 'Estado cambiado, recibo no enviado: ' + body.receipt_warning);
+        else if (body.empathy_warning) toast('warning', 'Estado cambiado, correo no enviado: ' + body.empathy_warning);
+        else if (body.receipt_sent) toast('success', '¡Atendida! Recibo enviado al cliente.');
+        else if (body.empathy_sent) toast('success', 'Estado actualizado y correo enviado al cliente.');
+        else toast('success', 'Estado actualizado a “' + (body.status?.name || t.dataset.to) + '”.');
+        // Cierra modal y refresca eventos
+        bootstrap.Modal.getInstance(document.getElementById('apptModal'))?.hide();
+        cal.refetchEvents();
+        return;
+      }
+      if (r) {
+        ev.preventDefault();
+        if (r.dataset.busy === '1') return;
+        const already = r.dataset.already === '1';
+        const ok = window.confirm(already ? 'Este recibo ya fue enviado. ¿Reenviar al cliente?' : '¿Enviar recibo al correo del cliente?');
+        if (!ok) return;
+        r.dataset.busy = '1';
+        const orig = r.innerHTML;
+        r.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'; r.disabled = true;
+        const body = await postJson(ENDPOINTS.sendReceipt, {
+          appointment_id: r.dataset.id, force: already ? '1' : ''
+        });
+        r.innerHTML = orig; r.disabled = false; r.dataset.busy = '';
+        if (body.ok) { toast('success', 'Recibo enviado.'); r.dataset.already = '1'; cal.refetchEvents(); }
+        else { toast('danger', body.error || 'No fue posible enviar el recibo.'); }
+        return;
+      }
+    });
   });
 </script>
 

@@ -4,8 +4,9 @@ Auth::requireAdmin();
 
 $admin = Auth::user();
 
-// Asegura columna professional_id (idempotente)
+// Asegura columnas profesionales y de recibo (idempotente)
 AppointmentService::ensureProfessionalSchema();
+AppointmentService::ensureReceiptSchema();
 
 $branches = Database::all('SELECT id, name FROM branches WHERE active = 1 ORDER BY display_order, name');
 $statuses = Database::all('SELECT id, slug, name FROM appointment_statuses ORDER BY id');
@@ -107,6 +108,10 @@ $appointments = Database::all(
      LIMIT 300",
     $params
 );
+
+// Mapa de estados (slug → name) para los botones rápidos del modal
+$statusMap = [];
+foreach ($statuses as $st) { $statusMap[$st['slug']] = $st['name']; }
 
 $pageTitle = 'Citas';
 require __DIR__ . '/../includes/layouts/header_admin.php';
@@ -213,16 +218,30 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
             <td><?= e(ucfirst((string) $a['source'])) ?></td>
             <td class="text-end">
               <div class="btn-group btn-group-sm">
-                <button type="button" class="btn btn-bnc-outline" data-bs-toggle="modal" data-bs-target="#detailModal-<?= (int) $a['id'] ?>"><i class="bi bi-eye"></i></button>
-                <a class="btn btn-bnc-outline" href="<?= url('admin/cita-form.php?id=' . (int) $a['id']) ?>"><i class="bi bi-pencil"></i></a>
-                <?php if ($a['status_slug'] !== 'cancelada'): ?>
-                  <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelModal-<?= (int) $a['id'] ?>"><i class="bi bi-calendar-x"></i></button>
+                <button type="button" class="btn btn-bnc-outline"
+                        data-bs-toggle="modal"
+                        data-bs-target="#detailModal-<?= (int) $a['id'] ?>"
+                        title="Ver detalle"><i class="bi bi-eye"></i></button>
+                <?php if ($a['status_slug'] === 'atendida'): ?>
+                  <a class="btn btn-outline-success"
+                     href="<?= url('api/cita-recibo.php?id=' . (int) $a['id']) ?>"
+                     target="_blank" rel="noopener"
+                     title="Ver / imprimir recibo"><i class="bi bi-receipt"></i></a>
+                  <button type="button"
+                          class="btn btn-outline-success bnc-send-receipt"
+                          data-id="<?= (int) $a['id'] ?>"
+                          data-already="<?= (int) ($a['receipt_sent'] ?? 0) ?>"
+                          title="<?= ((int) ($a['receipt_sent'] ?? 0) === 1) ? 'Reenviar recibo por correo' : 'Enviar recibo por correo' ?>">
+                    <i class="bi bi-envelope-paper<?= ((int) ($a['receipt_sent'] ?? 0) === 1) ? '-fill' : '' ?>"></i>
+                  </button>
                 <?php endif; ?>
-                <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#deleteModal-<?= (int) $a['id'] ?>"><i class="bi bi-trash3"></i></button>
+                <a class="btn btn-bnc-outline" href="<?= url('admin/cita-form.php?id=' . (int) $a['id']) ?>" title="Editar"><i class="bi bi-pencil"></i></a>
+                <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#deleteModal-<?= (int) $a['id'] ?>" title="Eliminar"><i class="bi bi-trash3"></i></button>
               </div>
             </td>
           </tr>
 
+          <?php $allowed = AppointmentService::allowedTransitions($a['status_slug']); ?>
           <div class="modal fade" id="detailModal-<?= (int) $a['id'] ?>" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
               <div class="modal-content" style="border-radius:16px">
@@ -230,45 +249,61 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
                   <h5 class="modal-title">Detalle de cita</h5>
                   <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" data-appt-id="<?= (int) $a['id'] ?>" data-status-slug="<?= e($a['status_slug']) ?>">
                   <div class="mb-2"><strong>Código:</strong> <code><?= e($a['code']) ?></code></div>
                   <div class="mb-2"><strong>Cliente:</strong> <?= e($a['client_name']) ?><br><small class="text-muted"><?= e($a['client_phone']) ?> <?= e($a['client_email']) ?></small></div>
                   <div class="mb-2"><strong>Servicio:</strong> <?= e($a['service_name']) ?></div>
                   <div class="mb-2"><strong>Sucursal:</strong> <?= e($a['branch_name']) ?></div>
                   <div class="mb-2"><strong>Profesional:</strong> <?= !empty($a['professional_name']) ? e($a['professional_name']) : '<span class="text-muted">Sin asignar</span>' ?></div>
                   <div class="mb-2"><strong>Fecha:</strong> <?= e(fmt_dt($a['start_at'])) ?></div>
-                  <div class="mb-2"><strong>Estado:</strong> <span class="bnc-status <?= e($a['status_slug']) ?>"><?= e($a['status_name']) ?></span></div>
+                  <div class="mb-2"><strong>Estado:</strong> <span class="bnc-status <?= e($a['status_slug']) ?>" data-status-pill><?= e($a['status_name']) ?></span></div>
+                  <?php if (!empty($a['receipt_folio'])): ?>
+                    <div class="mb-2"><strong>Folio recibo:</strong> <code><?= e($a['receipt_folio']) ?></code>
+                      <?php if ((int) ($a['receipt_sent'] ?? 0) === 1): ?>
+                        <span class="badge bg-success ms-1"><i class="bi bi-envelope-check"></i> Enviado</span>
+                      <?php endif; ?>
+                    </div>
+                  <?php endif; ?>
                   <?php if ($a['notes_admin']): ?><hr><strong>Nota interna:</strong><br><?= nl2br(e($a['notes_admin'])) ?><?php endif; ?>
                   <?php if ($a['cancel_reason']): ?><hr><strong>Motivo de cancelación:</strong><br><?= e($a['cancel_reason']) ?><?php endif; ?>
                 </div>
-                <div class="modal-footer">
-                  <a class="btn btn-bnc-primary" href="<?= url('admin/cita-form.php?id=' . (int) $a['id']) ?>">Editar</a>
+                <div class="modal-footer flex-column align-items-stretch gap-2">
+                  <div class="bnc-quick-actions d-flex flex-wrap gap-2 justify-content-end w-100">
+                    <?php if (in_array('confirmada', $allowed, true)): ?>
+                      <button type="button" class="btn btn-success btn-sm bnc-transition" data-id="<?= (int) $a['id'] ?>" data-to="confirmada" data-confirm="¿Confirmar la cita?">
+                        <i class="bi bi-check2-circle"></i> Confirmar
+                      </button>
+                    <?php endif; ?>
+                    <?php if (in_array('atendida', $allowed, true)): ?>
+                      <button type="button" class="btn btn-bnc-primary btn-sm bnc-transition" data-id="<?= (int) $a['id'] ?>" data-to="atendida" data-confirm="¿Marcar como atendida y generar recibo?" data-send-email="ask">
+                        <i class="bi bi-clipboard2-check"></i> Atender
+                      </button>
+                    <?php endif; ?>
+                    <?php if (in_array('no_asistio', $allowed, true)): ?>
+                      <button type="button" class="btn btn-warning btn-sm bnc-transition" data-id="<?= (int) $a['id'] ?>" data-to="no_asistio" data-confirm="¿Marcar como NO asistió? Se enviará un correo empático al cliente." data-send-email="auto">
+                        <i class="bi bi-person-x"></i> No asistió
+                      </button>
+                    <?php endif; ?>
+                    <?php if (in_array('cancelada', $allowed, true)): ?>
+                      <button type="button" class="btn btn-outline-danger btn-sm bnc-transition" data-id="<?= (int) $a['id'] ?>" data-to="cancelada" data-prompt-reason="1" data-send-email="auto">
+                        <i class="bi bi-calendar-x"></i> Cancelar
+                      </button>
+                    <?php endif; ?>
+                    <?php if ($a['status_slug'] === 'atendida'): ?>
+                      <a class="btn btn-success btn-sm" href="<?= url('api/cita-recibo.php?id=' . (int) $a['id']) ?>" target="_blank" rel="noopener">
+                        <i class="bi bi-receipt"></i> Ver recibo
+                      </a>
+                      <button type="button" class="btn btn-outline-success btn-sm bnc-send-receipt" data-id="<?= (int) $a['id'] ?>" data-already="<?= (int) ($a['receipt_sent'] ?? 0) ?>">
+                        <i class="bi bi-envelope-paper<?= ((int) ($a['receipt_sent'] ?? 0) === 1) ? '-fill' : '' ?>"></i>
+                        <?= ((int) ($a['receipt_sent'] ?? 0) === 1) ? 'Reenviar recibo' : 'Enviar recibo' ?>
+                      </button>
+                    <?php endif; ?>
+                  </div>
+                  <div class="d-flex justify-content-between w-100 pt-2">
+                    <a class="btn btn-light btn-sm" href="<?= url('admin/cita-form.php?id=' . (int) $a['id']) ?>"><i class="bi bi-pencil"></i> Editar</a>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="modal fade" id="cancelModal-<?= (int) $a['id'] ?>" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-              <div class="modal-content" style="border-radius:16px">
-                <form method="POST">
-                  <?= Csrf::input() ?>
-                  <input type="hidden" name="action" value="cancel">
-                  <input type="hidden" name="appointment_id" value="<?= (int) $a['id'] ?>">
-                  <div class="modal-header">
-                    <h5 class="modal-title">Cancelar cita</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                  </div>
-                  <div class="modal-body">
-                    <p>La cita se conservará para historial y estadísticas.</p>
-                    <label class="bnc-label">Motivo (opcional)</label>
-                    <textarea name="cancel_reason" class="form-control" rows="3" maxlength="255"></textarea>
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Mantener</button>
-                    <button type="submit" class="btn btn-danger">Cancelar cita</button>
-                  </div>
-                </form>
               </div>
             </div>
           </div>
@@ -300,5 +335,121 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
     </table>
   </div>
 </div>
+
+<script>
+(function () {
+  const csrfToken = <?= json_encode(Csrf::token()) ?>;
+  const csrfField = <?= json_encode(Csrf::FIELD) ?>;
+  const endpoints = {
+    transition: <?= json_encode(url('api/cita-estado.json.php')) ?>,
+    sendReceipt: <?= json_encode(url('api/cita-recibo-enviar.json.php')) ?>,
+  };
+
+  function toast(type, msg) {
+    const wrap = document.createElement('div');
+    wrap.className = 'position-fixed top-0 end-0 p-3';
+    wrap.style.zIndex = 1090;
+    wrap.innerHTML = `
+      <div class="toast align-items-center text-bg-${type} border-0 show" role="alert">
+        <div class="d-flex">
+          <div class="toast-body">${msg}</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      </div>`;
+    document.body.appendChild(wrap);
+    setTimeout(() => { wrap.remove(); }, 4500);
+  }
+
+  async function postJson(url, data) {
+    const fd = new FormData();
+    Object.entries(data).forEach(([k, v]) => { if (v !== null && v !== undefined) fd.append(k, v); });
+    fd.append(csrfField, csrfToken);
+    const r = await fetch(url, { method: 'POST', body: fd, credentials: 'same-origin' });
+    let json = null;
+    try { json = await r.json(); } catch (e) { json = { ok: false, error: 'Respuesta no válida.' }; }
+    return { http: r.status, body: json };
+  }
+
+  document.body.addEventListener('click', async function (ev) {
+    const btnT = ev.target.closest('.bnc-transition');
+    const btnR = ev.target.closest('.bnc-send-receipt');
+
+    if (btnT) {
+      ev.preventDefault();
+      if (btnT.dataset.busy === '1') return;
+      const to = btnT.dataset.to;
+      const id = btnT.dataset.id;
+      const promptReason = btnT.dataset.promptReason === '1';
+      const sendEmailMode = btnT.dataset.sendEmail || ''; // '', 'auto', 'ask'
+
+      let reason = null;
+      if (promptReason) {
+        reason = window.prompt('Motivo (opcional):', '');
+        if (reason === null) return; // canceló el prompt
+        reason = reason.trim();
+      }
+      if (btnT.dataset.confirm && !window.confirm(btnT.dataset.confirm)) return;
+
+      let sendEmail = '';
+      if (sendEmailMode === 'auto') sendEmail = '1';
+      if (sendEmailMode === 'ask') {
+        sendEmail = window.confirm('¿Enviar el recibo por correo al cliente ahora?') ? '1' : '';
+      }
+
+      btnT.dataset.busy = '1';
+      const orig = btnT.innerHTML;
+      btnT.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Procesando…';
+      btnT.disabled = true;
+      const { body } = await postJson(endpoints.transition, {
+        appointment_id: id, to, reason: reason || '', send_email: sendEmail || ''
+      });
+      btnT.disabled = false;
+      btnT.innerHTML = orig;
+      btnT.dataset.busy = '';
+
+      if (!body.ok) {
+        toast('danger', body.error || 'No fue posible cambiar el estado.');
+        return;
+      }
+      if (body.receipt_warning) toast('warning', 'Estado cambiado, pero el recibo no pudo enviarse: ' + body.receipt_warning);
+      else if (body.empathy_warning) toast('warning', 'Estado cambiado, pero el correo empático no pudo enviarse: ' + body.empathy_warning);
+      else if (body.receipt_sent) toast('success', '¡Atendida! Recibo enviado al cliente.');
+      else if (body.empathy_sent) toast('success', 'Estado actualizado y correo enviado al cliente.');
+      else toast('success', 'Estado actualizado a “' + (body.status?.name || to) + '”.');
+
+      // Refresca la vista para reflejar columnas y modales actualizados
+      setTimeout(() => location.reload(), 700);
+      return;
+    }
+
+    if (btnR) {
+      ev.preventDefault();
+      if (btnR.dataset.busy === '1') return;
+      const already = btnR.dataset.already === '1';
+      if (already && !window.confirm('Este recibo ya fue enviado antes. ¿Reenviar al cliente?')) return;
+      else if (!already && !window.confirm('Enviar recibo al correo del cliente?')) return;
+
+      btnR.dataset.busy = '1';
+      const orig = btnR.innerHTML;
+      btnR.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+      btnR.disabled = true;
+      const { body } = await postJson(endpoints.sendReceipt, {
+        appointment_id: btnR.dataset.id, force: already ? '1' : ''
+      });
+      btnR.disabled = false;
+      btnR.innerHTML = orig;
+      btnR.dataset.busy = '';
+
+      if (body.ok) {
+        toast('success', 'Recibo enviado correctamente.');
+        btnR.dataset.already = '1';
+      } else {
+        toast('danger', body.error || 'No fue posible enviar el recibo.');
+      }
+      return;
+    }
+  });
+})();
+</script>
 
 <?php require __DIR__ . '/../includes/layouts/footer.php'; ?>
