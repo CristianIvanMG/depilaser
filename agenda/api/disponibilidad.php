@@ -13,6 +13,7 @@
 require_once __DIR__ . '/../includes/bootstrap.php';
 
 header('Content-Type: application/json; charset=utf-8');
+AppointmentService::ensureMachinerySchema();
 
 // Solo usuarios autenticados
 if (!Auth::check()) {
@@ -33,6 +34,7 @@ $branchId  = (int) ($_GET['branch']  ?? 0);
 $serviceId = (int) ($_GET['service'] ?? 0);
 $dateRaw   = (string) ($_GET['date'] ?? '');
 $ignoreId  = Auth::isAdmin() ? (int) ($_GET['ignore'] ?? 0) : 0;
+$professionalId = Auth::isAdmin() ? (int) ($_GET['professional'] ?? 0) : 0;
 
 if (!$branchId || !$serviceId || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateRaw)) {
     http_response_code(400);
@@ -182,15 +184,20 @@ foreach ($windows as $w) {
         foreach ($busyRanges as [$bs, $be]) {
             if ($t < $be && $slotEnd > $bs) { $busyCount++; }
         }
-        $availableCabins = AppointmentService::branchCabinCapacity($branchId) - $busyCount;
-        if ($availableCabins <= 0) continue;
+        $slotStartSql = date('Y-m-d H:i:s', $t);
+        $slotEndSql = date('Y-m-d H:i:s', $slotEnd);
+        $availableCabins = AppointmentService::availableCabins($branchId, $slotStartSql, $slotEndSql, $ignoreId ?: null);
+        $availableMachines = AppointmentService::availableMachineUnits($branchId, $serviceId, $slotStartSql, $slotEndSql, $ignoreId ?: null);
+        if ($professionalId > 0 && AppointmentService::professionalHasConflict($professionalId, $slotStartSql, $slotEndSql, $ignoreId ?: null)) continue;
+        if ($availableCabins <= 0 || $availableMachines <= 0) continue;
 
         $slots[] = [
-            'start'      => date('Y-m-d H:i:s', $t),
-            'end'        => date('Y-m-d H:i:s', $slotEnd),
+            'start'      => $slotStartSql,
+            'end'        => $slotEndSql,
             'label'      => date('H:i', $t),
-            'label_long' => fmt_dt(date('Y-m-d H:i:s', $t)),
+            'label_long' => fmt_dt($slotStartSql),
             'available_cabins' => $availableCabins,
+            'available_machines' => $availableMachines === PHP_INT_MAX ? null : $availableMachines,
         ];
     }
 }
@@ -200,4 +207,7 @@ echo json_encode([
     'slots' => $slots,
     'count' => count($slots),
     'cabin_capacity' => AppointmentService::branchCabinCapacity($branchId),
+    'machine_capacity' => AppointmentService::serviceResourceKey($serviceId)
+        ? AppointmentService::resourceCapacity($branchId, AppointmentService::serviceResourceKey($serviceId))
+        : null,
 ]);

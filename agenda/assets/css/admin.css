@@ -322,6 +322,73 @@ body.bnc-admin {
 .bnc-status.waiting { background: #fff2cf; color: #856011; }
 .bnc-status.promoted { background: #e7f7ec; color: #2f7040; }
 .bnc-status.cancelled { background: #ffe9ec; color: #9c3e48; }
+.bnc-admin-form-section {
+  align-items: center;
+  background: #fff8fb;
+  border: 1px solid var(--bnc-line);
+  border-radius: 12px;
+  display: flex;
+  gap: 12px;
+  padding: 12px 14px;
+}
+.bnc-admin-form-section span {
+  align-items: center;
+  background: var(--bnc-pink);
+  border-radius: 50%;
+  color: #fff;
+  display: inline-flex;
+  flex: 0 0 30px;
+  font-size: 13px;
+  font-weight: 800;
+  height: 30px;
+  justify-content: center;
+  width: 30px;
+}
+.bnc-admin-form-section strong {
+  display: block;
+  font-size: 14px;
+}
+.bnc-admin-form-section small {
+  color: var(--bnc-grey);
+  display: block;
+  font-size: 12px;
+}
+.bnc-admin-availability {
+  align-items: end;
+  background: #fff;
+  border: 1px solid var(--bnc-line);
+  border-radius: 14px;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(190px, 240px) auto minmax(220px, 1fr);
+  padding: 16px;
+}
+.bnc-selected-slot {
+  background: var(--bnc-pink-bg);
+  border: 1px solid var(--bnc-line);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+.bnc-selected-slot small {
+  color: var(--bnc-grey);
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+}
+.bnc-selected-slot strong {
+  display: block;
+  font-size: 14px;
+}
+.slot-btn {
+  min-width: 74px;
+}
+
+@media (max-width: 767.98px) {
+  .bnc-admin-availability { grid-template-columns: 1fr; }
+  .bnc-admin-availability .btn { width: 100%; }
+}
 .bnc-progress-level {
   border-radius: 999px;
   display: inline-flex;

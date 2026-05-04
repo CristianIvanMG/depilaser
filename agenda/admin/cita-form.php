@@ -17,6 +17,7 @@ function admin_appointment_form_nonce(): string
 
 // Asegura schema de Profesionales (auto-migracion suave)
 AppointmentService::ensureProfessionalSchema();
+AppointmentService::ensureMachinerySchema();
 EmailNotificationService::ensureSchema();
 
 $statuses = Database::all('SELECT id, slug, name FROM appointment_statuses ORDER BY id');
@@ -228,7 +229,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $professionalId = (int) ($_POST['professional_id'] ?? 0);
         $statusSlug = '';
         foreach ($statuses as $st) { if ((int) $st['id'] === $statusId) { $statusSlug = $st['slug']; break; } }
-        $professionalRequired = in_array($statusSlug, ['confirmada','atendida'], true);
+        $professionalRequired = $statusSlug !== 'cancelada';
+        $statusChanged = !$isEdit || (int) ($appointment['status_id'] ?? 0) !== $statusId;
+        if ($isEdit && $statusChanged && $statusSlug) {
+            $allowedStatusSlugs = AppointmentService::allowedTransitions((string) $appointment['status_slug']);
+            if (!in_array($statusSlug, $allowedStatusSlugs, true)) {
+                $errors['status_id'] = 'Ese cambio de estado no es válido para la cita actual.';
+            }
+        }
+        if ($schedule['ok'] && $statusChanged) {
+            $timingError = AppointmentService::statusTimingError($statusSlug, $schedule['start_sql']);
+            if ($timingError) {
+                $errors['status_id'] = $timingError;
+            }
+        }
 
         if ($professionalId > 0 && $schedule['ok']) {
             $vp = AppointmentService::validateProfessionalAssignment(
@@ -242,7 +256,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $errors['professional_id'] = $vp['error'];
             }
         } elseif ($professionalRequired) {
-            $errors['professional_id'] = 'Asigna un profesional para confirmar la cita.';
+            $errors['professional_id'] = 'Asigna un profesional para esta cita.';
         }
 
         if (!$errors) {
@@ -251,6 +265,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 if (AppointmentService::hasConflict($branchId, $schedule['start_sql'], $schedule['end_sql'], $isEdit ? $appointmentId : null, true)) {
                     throw new RuntimeException('SLOT_TAKEN');
+                }
+                if (AppointmentService::hasMachineryConflict($branchId, $serviceId, $schedule['start_sql'], $schedule['end_sql'], $isEdit ? $appointmentId : null, true)) {
+                    throw new RuntimeException('MACHINE_TAKEN');
+                }
+                if ($professionalId > 0 && AppointmentService::professionalHasConflict($professionalId, $schedule['start_sql'], $schedule['end_sql'], $isEdit ? $appointmentId : null, true)) {
+                    throw new RuntimeException('PROFESSIONAL_TAKEN');
                 }
 
                 if ($clientMode === 'new') {
@@ -381,6 +401,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $pdo->rollBack();
                 if ($e->getMessage() === 'SLOT_TAKEN') {
                     $errors['start_at'] = 'Ese horario ya no tiene cabinas disponibles.';
+                } elseif ($e->getMessage() === 'MACHINE_TAKEN') {
+                    $errors['start_at'] = 'La maquinaria necesaria para ese servicio ya está ocupada en ese horario.';
+                } elseif ($e->getMessage() === 'PROFESSIONAL_TAKEN') {
+                    $errors['professional_id'] = 'El profesional ya tiene otra cita en ese horario.';
                 } elseif ($e->getMessage() === 'DUPLICATE_APPOINTMENT') {
                     $errors['_'] = 'Ya existe una cita igual para ese cliente, servicio y horario. Revisa el listado antes de crear otra.';
                 } else {
@@ -422,6 +446,12 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
       </div>
       <div class="bnc-card-body">
         <div class="row g-3">
+          <div class="col-12">
+            <div class="bnc-admin-form-section">
+              <span>1</span>
+              <div><strong>Datos básicos</strong><small>Selecciona quién se atiende, dónde y con qué profesional.</small></div>
+            </div>
+          </div>
           <div class="col-12">
             <label class="bnc-label d-block">Cliente</label>
             <?php if (!$isEdit): ?>
@@ -484,36 +514,12 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
             <?php if (isset($errors['service_id'])): ?><div class="invalid-feedback"><?= e($errors['service_id']) ?></div><?php endif; ?>
           </div>
 
-          <div class="col-md-4">
-            <label class="bnc-label">Fecha y hora</label>
-            <input type="datetime-local" name="start_at" id="startAtInput" value="<?= e($form['start_at']) ?>" <?= !$isEdit ? 'min="' . e(date('Y-m-d\TH:i')) . '"' : '' ?> class="form-control <?= isset($errors['start_at']) ? 'is-invalid' : '' ?>">
-            <?php if (isset($errors['start_at'])): ?><div class="invalid-feedback"><?= e($errors['start_at']) ?></div><?php endif; ?>
-          </div>
-
-          <div class="col-md-4">
-            <label class="bnc-label">Estado</label>
-            <select name="status_id" class="form-select <?= isset($errors['status_id']) ? 'is-invalid' : '' ?>">
-              <?php foreach ($statuses as $status): ?>
-                <option value="<?= (int) $status['id'] ?>" <?= (int) $form['status_id'] === (int) $status['id'] ? 'selected' : '' ?>><?= e($status['name']) ?></option>
-              <?php endforeach; ?>
-            </select>
-            <?php if (isset($errors['status_id'])): ?><div class="invalid-feedback"><?= e($errors['status_id']) ?></div><?php endif; ?>
-          </div>
-
-          <div class="col-md-4">
-            <label class="bnc-label">Canal de origen</label>
-            <select name="source" class="form-select <?= isset($errors['source']) ? 'is-invalid' : '' ?>">
-              <?php foreach ($sourceOptions as $value => $label): ?>
-                <option value="<?= e($value) ?>" <?= $form['source'] === $value ? 'selected' : '' ?>><?= e($label) ?></option>
-              <?php endforeach; ?>
-            </select>
-            <?php if (isset($errors['source'])): ?><div class="invalid-feedback"><?= e($errors['source']) ?></div><?php endif; ?>
-          </div>
+          <input type="hidden" name="start_at" id="startAtInput" value="<?= e($form['start_at']) ?>">
 
           <div class="col-12">
             <label class="bnc-label">
               Profesional asignado
-              <span class="text-muted small">(obligatorio para Confirmada / Atendida)</span>
+              <span class="text-muted small">(obligatorio)</span>
             </label>
             <select name="professional_id" id="professionalSelect" class="form-select <?= isset($errors['professional_id']) ? 'is-invalid' : '' ?>">
               <option value="">Sin asignar</option>
@@ -538,15 +544,60 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
           </div>
 
           <div class="col-12">
-            <div class="d-flex flex-wrap align-items-end gap-2 mb-2">
-              <div>
-                <label class="bnc-label" for="availabilityDateInput">Fecha para disponibilidad</label>
-                <input type="date" id="availabilityDateInput" class="form-control form-control-sm" min="<?= e(date('Y-m-d')) ?>" value="<?= e($form['start_at'] ? substr($form['start_at'], 0, 10) : date('Y-m-d')) ?>">
+            <div class="bnc-admin-form-section">
+              <span>2</span>
+              <div><strong>Fecha</strong><small>La fecha filtra la disponibilidad real de sucursal, servicio y maquinaria.</small></div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="bnc-admin-availability">
+              <div class="bnc-admin-date-box">
+                <label class="bnc-label" for="availabilityDateInput">Fecha de atención</label>
+                <input type="date" id="availabilityDateInput" class="form-control <?= isset($errors['start_at']) ? 'is-invalid' : '' ?>" <?= !$isEdit ? 'min="' . e(date('Y-m-d')) . '"' : '' ?> value="<?= e($form['start_at'] ? substr($form['start_at'], 0, 10) : date('Y-m-d')) ?>">
+                <?php if (isset($errors['start_at'])): ?><div class="invalid-feedback d-block"><?= e($errors['start_at']) ?></div><?php endif; ?>
               </div>
-              <button type="button" class="btn btn-sm btn-bnc-outline mb-1" id="loadSlotsBtn"><i class="bi bi-clock"></i> Ver horarios libres</button>
-              <span class="small text-muted mb-2">Selecciona un horario para llenar la fecha y hora de la cita.</span>
+              <button type="button" class="btn btn-bnc-outline" id="loadSlotsBtn"><i class="bi bi-clock"></i> Ver horarios libres</button>
+              <div class="bnc-selected-slot" id="selectedSlotSummary">
+                <small>Horario elegido</small>
+                <strong><?= $form['start_at'] ? e(fmt_dt(str_replace('T', ' ', $form['start_at']))) : 'Pendiente de seleccionar' ?></strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="bnc-admin-form-section">
+              <span>3</span>
+              <div><strong>Horarios disponibles</strong><small>Solo se muestran horarios que cumplen cabinas, profesional y maquinaria.</small></div>
             </div>
             <div id="slotsBox" class="mb-3"></div>
+          </div>
+
+          <div class="col-12">
+            <div class="bnc-admin-form-section">
+              <span>4</span>
+              <div><strong>Datos administrativos</strong><small>Estado, canal y notas internas para recepción.</small></div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="bnc-label">Estado</label>
+            <select name="status_id" class="form-select <?= isset($errors['status_id']) ? 'is-invalid' : '' ?>">
+              <?php foreach ($statuses as $status): ?>
+                <option value="<?= (int) $status['id'] ?>" data-slug="<?= e($status['slug']) ?>" <?= (int) $form['status_id'] === (int) $status['id'] ? 'selected' : '' ?>><?= e($status['name']) ?></option>
+              <?php endforeach; ?>
+            </select>
+            <?php if (isset($errors['status_id'])): ?><div class="invalid-feedback"><?= e($errors['status_id']) ?></div><?php endif; ?>
+          </div>
+
+          <div class="col-md-6">
+            <label class="bnc-label">Canal de origen</label>
+            <select name="source" class="form-select <?= isset($errors['source']) ? 'is-invalid' : '' ?>">
+              <?php foreach ($sourceOptions as $value => $label): ?>
+                <option value="<?= e($value) ?>" <?= $form['source'] === $value ? 'selected' : '' ?>><?= e($label) ?></option>
+              <?php endforeach; ?>
+            </select>
+            <?php if (isset($errors['source'])): ?><div class="invalid-feedback"><?= e($errors['source']) ?></div><?php endif; ?>
           </div>
 
           <div class="col-12">
@@ -670,12 +721,14 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
     const radios = document.querySelectorAll('input[name="client_mode"]');
     const branchSelect = document.querySelector('select[name="branch_id"]');
     const serviceSelect = document.querySelector('select[name="service_id"]');
+    const statusSelect = document.querySelector('select[name="status_id"]');
     const startInput = document.getElementById('startAtInput');
     const availabilityDateInput = document.getElementById('availabilityDateInput');
     const loadSlotsBtn = document.getElementById('loadSlotsBtn');
     const appointmentForm = document.getElementById('appointmentForm');
     const saveAppointmentBtn = document.getElementById('saveAppointmentBtn');
     const slotsBox = document.getElementById('slotsBox');
+    const selectedSlotSummary = document.getElementById('selectedSlotSummary');
     let slotRequest = null;
     let appointmentSubmitting = false;
 
@@ -718,6 +771,46 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
       slotsBox.innerHTML = message ? `<div class="text-muted small">${message}</div>` : '';
     }
 
+    function formatSelectedSlot(value) {
+      if (!value) return 'Pendiente de seleccionar';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return value.replace('T', ' ');
+      return new Intl.DateTimeFormat('es-MX', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        hour: 'numeric',
+        minute: '2-digit'
+      }).format(date);
+    }
+
+    function syncSelectedSlot() {
+      if (!selectedSlotSummary) return;
+      selectedSlotSummary.querySelector('strong').textContent = formatSelectedSlot(startInput.value);
+    }
+
+    function canCloseOutSelectedTime() {
+      if (!startInput.value) return false;
+      const start = new Date(startInput.value);
+      if (Number.isNaN(start.getTime())) return false;
+      const now = new Date();
+      return start.toDateString() === now.toDateString() && now >= start;
+    }
+
+    function syncStatusOptions() {
+      if (!statusSelect) return;
+      const canClose = canCloseOutSelectedTime();
+      Array.from(statusSelect.options).forEach(option => {
+        const slug = option.dataset.slug || '';
+        const blocked = ['atendida', 'no_asistio'].includes(slug) && !canClose && !option.selected;
+        option.disabled = blocked;
+      });
+      if (statusSelect.selectedOptions[0]?.disabled) {
+        const fallback = Array.from(statusSelect.options).find(option => option.dataset.slug === 'programada' && !option.disabled);
+        if (fallback) statusSelect.value = fallback.value;
+      }
+    }
+
     async function loadSlots() {
       const branchId = branchSelect.value;
       const serviceId = serviceSelect.value;
@@ -748,6 +841,7 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         url.searchParams.set('branch', branchId);
         url.searchParams.set('service', serviceId);
         url.searchParams.set('date', date);
+        if (professionalSelect?.value) url.searchParams.set('professional', professionalSelect.value);
         <?php if ($isEdit): ?>url.searchParams.set('ignore', '<?= (int) $appointmentId ?>');<?php endif; ?>
         const response = await fetch(url, {
           headers: { 'Accept': 'application/json' },
@@ -777,14 +871,16 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
           </div>
         `;
         slotsBox.querySelectorAll('.slot-btn').forEach(button => {
-          button.addEventListener('click', () => {
-            startInput.value = button.dataset.start;
-            availabilityDateInput.value = button.dataset.start.slice(0, 10);
-            startInput.classList.remove('is-invalid');
-            availabilityDateInput.classList.remove('is-invalid');
-            slotsBox.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('btn-bnc-primary', 'active'));
-            button.classList.add('btn-bnc-primary', 'active');
-          });
+            button.addEventListener('click', () => {
+              startInput.value = button.dataset.start;
+              availabilityDateInput.value = button.dataset.start.slice(0, 10);
+              startInput.classList.remove('is-invalid');
+              availabilityDateInput.classList.remove('is-invalid');
+              syncSelectedSlot();
+              syncStatusOptions();
+              slotsBox.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('btn-bnc-primary', 'active'));
+              button.classList.add('btn-bnc-primary', 'active');
+            });
         });
       } catch (err) {
         if (err.name !== 'AbortError') {
@@ -817,6 +913,12 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
     }
     if (branchSelect && professionalSelect) {
       branchSelect.addEventListener('change', syncProfessionals);
+      professionalSelect.addEventListener('change', () => {
+        startInput.value = '';
+        syncSelectedSlot();
+        syncStatusOptions();
+        if (branchSelect.value && serviceSelect.value && availabilityDateInput.value) loadSlots();
+      });
       syncProfessionals();
     }
 
@@ -824,6 +926,12 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
     appointmentForm.addEventListener('submit', function (event) {
       if (appointmentSubmitting) {
         event.preventDefault();
+        return;
+      }
+      if (!startInput.value) {
+        event.preventDefault();
+        renderSlotMessage('warning', 'Selecciona un horario disponible antes de guardar la cita.');
+        availabilityDateInput.classList.add('is-invalid');
         return;
       }
       if (!appointmentForm.checkValidity()) {
@@ -838,14 +946,27 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
     });
     loadSlotsBtn.addEventListener('click', loadSlots);
     [branchSelect, serviceSelect].forEach(field => {
-      field.addEventListener('change', () => resetSlots('La disponibilidad se actualizara al consultar de nuevo.'));
+      field.addEventListener('change', () => {
+        startInput.value = '';
+        syncSelectedSlot();
+        syncStatusOptions();
+        if (branchSelect.value && serviceSelect.value && availabilityDateInput.value) loadSlots();
+        else resetSlots('Selecciona sucursal, servicio y fecha para ver horarios.');
+      });
     });
-    startInput.addEventListener('change', () => {
-      if (startInput.value) availabilityDateInput.value = startInput.value.slice(0, 10);
-      resetSlots('La disponibilidad se actualizara al consultar de nuevo.');
+    availabilityDateInput.addEventListener('change', () => {
+      startInput.value = '';
+      syncSelectedSlot();
+      syncStatusOptions();
+      if (branchSelect.value && serviceSelect.value && availabilityDateInput.value) loadSlots();
+      else resetSlots('Selecciona sucursal, servicio y fecha para ver horarios.');
     });
-    availabilityDateInput.addEventListener('change', () => resetSlots('La disponibilidad se actualizara al consultar de nuevo.'));
     syncClientMode();
+    syncSelectedSlot();
+    syncStatusOptions();
+    if (branchSelect.value && serviceSelect.value && availabilityDateInput.value) {
+      loadSlots();
+    }
   })();
 </script>
 

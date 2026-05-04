@@ -11,6 +11,7 @@ final class AppointmentService
         string $startAt,
         ?int $ignoreAppointmentId = null
     ): array {
+        self::ensureMachinerySchema();
         $errors = [];
 
         if (!$branchId) {
@@ -70,6 +71,9 @@ final class AppointmentService
 
         if (self::hasConflict($branchId, $startSql, $endSql, $ignoreAppointmentId)) {
             return ['ok' => false, 'errors' => ['start_at' => 'Ese horario ya no tiene cabinas disponibles.']];
+        }
+        if (self::hasMachineryConflict($branchId, $serviceId, $startSql, $endSql, $ignoreAppointmentId)) {
+            return ['ok' => false, 'errors' => ['start_at' => 'La maquinaria necesaria para ese servicio ya está ocupada en ese horario.']];
         }
 
         return [
@@ -173,6 +177,127 @@ final class AppointmentService
             Database::exec('ALTER TABLE branches ADD COLUMN cabin_capacity TINYINT UNSIGNED NOT NULL DEFAULT 3 AFTER gmaps_url');
             Database::exec("UPDATE branches SET cabin_capacity = 2 WHERE LOWER(CONCAT(slug, ' ', name)) LIKE '%queretaro%' OR LOWER(CONCAT(slug, ' ', name)) LIKE '%querétaro%'");
         }
+    }
+
+    public static function ensureMachinerySchema(): void
+    {
+        if (!self::tableExists('branch_service_resources')) {
+            Database::exec(
+                "CREATE TABLE branch_service_resources (
+                    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+                    branch_id SMALLINT UNSIGNED NOT NULL,
+                    resource_key VARCHAR(80) NOT NULL,
+                    name VARCHAR(120) NOT NULL,
+                    capacity TINYINT UNSIGNED NOT NULL DEFAULT 1,
+                    active TINYINT(1) NOT NULL DEFAULT 1,
+                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME NULL ON UPDATE CURRENT_TIMESTAMP,
+                    PRIMARY KEY (id),
+                    UNIQUE KEY uq_branch_resource (branch_id, resource_key),
+                    INDEX idx_bsr_branch_active (branch_id, active),
+                    CONSTRAINT fk_bsr_branch FOREIGN KEY (branch_id) REFERENCES branches(id) ON DELETE CASCADE
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+            );
+        }
+
+        foreach (Database::all('SELECT id FROM branches WHERE active = 1') as $branch) {
+            Database::exec(
+                "INSERT IGNORE INTO branch_service_resources (branch_id, resource_key, name, capacity, active)
+                 VALUES (?, 'depilacion_laser', 'Máquina de depilación láser', 1, 1)",
+                [(int) $branch['id']]
+            );
+        }
+    }
+
+    public static function serviceResourceKey(int $serviceId): ?string
+    {
+        $service = Database::one('SELECT category, name FROM services WHERE id = ? LIMIT 1', [$serviceId]);
+        if (!$service) {
+            return null;
+        }
+        $raw = mb_strtolower(trim((string) ($service['category'] ?: $service['name'])));
+        $normalized = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $raw) ?: $raw;
+        if (str_contains($normalized, 'depil') || str_contains($normalized, 'laser')) {
+            return 'depilacion_laser';
+        }
+        return null;
+    }
+
+    public static function resourceCapacity(int $branchId, ?string $resourceKey): int
+    {
+        if (!$resourceKey) {
+            return PHP_INT_MAX;
+        }
+        self::ensureMachinerySchema();
+        $row = Database::one(
+            'SELECT capacity FROM branch_service_resources WHERE branch_id = ? AND resource_key = ? AND active = 1 LIMIT 1',
+            [$branchId, $resourceKey]
+        );
+        return max(0, (int) ($row['capacity'] ?? 0));
+    }
+
+    public static function availableMachineUnits(
+        int $branchId,
+        int $serviceId,
+        string $startSql,
+        string $endSql,
+        ?int $ignoreAppointmentId = null,
+        bool $forUpdate = false
+    ): int {
+        $resourceKey = self::serviceResourceKey($serviceId);
+        if (!$resourceKey) {
+            return PHP_INT_MAX;
+        }
+        $capacity = self::resourceCapacity($branchId, $resourceKey);
+        if ($capacity <= 0) {
+            return 0;
+        }
+
+        $params = [$branchId, $endSql, $startSql];
+        $ignoreSql = '';
+        if ($ignoreAppointmentId) {
+            $ignoreSql = ' AND a.id <> ?';
+            $params[] = $ignoreAppointmentId;
+        }
+        $paymentSql = '';
+        if (self::columnExists('appointments', 'payment_status')) {
+            $paymentSql = " AND (
+                 a.payment_required = 0
+                 OR a.payment_status = 'paid'
+                 OR (a.payment_status = 'pending' AND a.payment_expires_at > NOW())
+               )";
+        }
+        $selectSql = $forUpdate ? 'SELECT a.id' : 'SELECT COUNT(*) AS n';
+        $lockSql = $forUpdate ? ' FOR UPDATE' : '';
+        $sql = "{$selectSql}
+             FROM appointments a
+             JOIN appointment_statuses st ON st.id = a.status_id
+             JOIN services s ON s.id = a.service_id
+             WHERE a.branch_id = ?
+               AND st.slug IN ('programada','confirmada','atendida')
+               AND a.start_at < ? AND a.end_at > ?
+               AND (LOWER(s.category) LIKE '%depil%' OR LOWER(s.category) LIKE '%laser%' OR LOWER(s.name) LIKE '%depil%' OR LOWER(s.name) LIKE '%laser%')
+               {$paymentSql}
+               {$ignoreSql}
+             {$lockSql}";
+        if ($forUpdate) {
+            $rows = Database::all($sql, $params);
+            return max(0, $capacity - count($rows));
+        }
+        $row = Database::one($sql, $params);
+
+        return max(0, $capacity - (int) ($row['n'] ?? 0));
+    }
+
+    public static function hasMachineryConflict(
+        int $branchId,
+        int $serviceId,
+        string $startSql,
+        string $endSql,
+        ?int $ignoreAppointmentId = null,
+        bool $forUpdate = false
+    ): bool {
+        return self::availableMachineUnits($branchId, $serviceId, $startSql, $endSql, $ignoreAppointmentId, $forUpdate) <= 0;
     }
 
     /**
@@ -356,6 +481,29 @@ final class AppointmentService
         return $map[$fromSlug] ?? [];
     }
 
+    public static function statusTimingError(string $toSlug, string $appointmentStartAt): ?string
+    {
+        if (!in_array($toSlug, ['atendida', 'no_asistio'], true)) {
+            return null;
+        }
+        $startTs = strtotime($appointmentStartAt);
+        if (!$startTs) {
+            return 'La fecha de la cita no es válida para cambiar el estado.';
+        }
+        $now = time();
+        if (date('Y-m-d', $startTs) !== date('Y-m-d', $now)) {
+            return $toSlug === 'atendida'
+                ? 'Solo puedes marcar una cita como Atendida el mismo día de la cita, después de su horario.'
+                : 'Solo puedes marcar No asistió el mismo día de la cita, después de su horario.';
+        }
+        if ($now < $startTs) {
+            return $toSlug === 'atendida'
+                ? 'Aún no es momento de marcar esta cita como Atendida.'
+                : 'Aún no es momento de marcar esta cita como No asistió.';
+        }
+        return null;
+    }
+
     /**
      * Cambia el estado de una cita validando reglas clinicas. Devuelve
      * ['ok' => bool, 'error' => string?, 'appointment' => array?, 'receipt_folio' => string?].
@@ -383,6 +531,10 @@ final class AppointmentService
         $allowed = self::allowedTransitions($from);
         if (!in_array($toSlug, $allowed, true)) {
             return ['ok' => false, 'error' => 'Transición no válida desde "' . $from . '".'];
+        }
+        $timingError = self::statusTimingError($toSlug, (string) $appt['start_at']);
+        if ($timingError) {
+            return ['ok' => false, 'error' => $timingError];
         }
 
         $newStatus = Database::one('SELECT id FROM appointment_statuses WHERE slug = ? LIMIT 1', [$toSlug]);

@@ -89,6 +89,7 @@ $events = array_map(fn($r) => [
         'status_slug'  => $r['status_slug'],
         'status_color' => $r['color_hex'] ?: '#d63b93',
         'when'         => fmt_dt($r['start_at']),
+        'start_at'     => $r['start_at'],
         'start_time'   => date('H:i', strtotime($r['start_at'])),
         'end_time'     => date('H:i', strtotime($r['end_at'])),
         'notes_client' => $r['notes_client'],

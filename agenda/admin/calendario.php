@@ -234,9 +234,20 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
     };
     const RECIBO_URL = <?= json_encode(url('api/cita-recibo.php')) ?>;
 
+    function canCloseOutAppointment(a) {
+      const startRaw = a.start_at || '';
+      const start = startRaw ? new Date(startRaw.replace(' ', 'T')) : null;
+      if (!start || Number.isNaN(start.getTime())) return false;
+      const now = new Date();
+      return start.toDateString() === now.toDateString() && now >= start;
+    }
+
     function buildQuickActions(id, a) {
       const slug = a.status_slug || 'programada';
-      const list = ALLOWED[slug] || [];
+      let list = ALLOWED[slug] || [];
+      if (!canCloseOutAppointment(a)) {
+        list = list.filter(status => !['atendida', 'no_asistio'].includes(status));
+      }
       let html = '';
       if (list.includes('confirmada')) {
         html += `<button type="button" class="btn btn-success btn-sm bnc-transition" data-id="${id}" data-to="confirmada" data-confirm="¿Confirmar la cita?"><i class="bi bi-check2-circle"></i> Confirmar</button>`;
@@ -249,6 +260,9 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
       }
       if (list.includes('cancelada')) {
         html += `<button type="button" class="btn btn-outline-danger btn-sm bnc-transition" data-id="${id}" data-to="cancelada" data-prompt-reason="1" data-send-email="auto"><i class="bi bi-calendar-x"></i> Cancelar</button>`;
+      }
+      if (slug === 'confirmada' && !canCloseOutAppointment(a)) {
+        html += '<small class="text-muted me-auto">Atendida y No asistió se habilitan el día de la cita, después del horario programado.</small>';
       }
       if (slug === 'atendida') {
         html += `<a class="btn btn-success btn-sm" href="${RECIBO_URL}?id=${id}" target="_blank" rel="noopener"><i class="bi bi-receipt"></i> Ver recibo</a>`;
