@@ -322,6 +322,16 @@ body.bnc-admin {
 .bnc-status.waiting { background: #fff2cf; color: #856011; }
 .bnc-status.promoted { background: #e7f7ec; color: #2f7040; }
 .bnc-status.cancelled { background: #ffe9ec; color: #9c3e48; }
+.bnc-progress-level {
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 5px 10px;
+}
+.bnc-progress-level.low { background: #fff2cf; color: #856011; }
+.bnc-progress-level.medium { background: #eaf3ff; color: #24527f; }
+.bnc-progress-level.high { background: #e7f7ec; color: #2f7040; }
 
 @media (max-width: 767.98px) {
   #calendar { min-height: 560px; }

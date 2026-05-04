@@ -50,13 +50,16 @@ $adminHome = Auth::isAdmin() ? url('admin/') : url('admin/calendario.php');
       <a href="<?= url('admin/lista-espera.php') ?>" class="bnc-nav-item <?= is_active('lista-espera') ?>">
         <i class="bi bi-hourglass-split"></i><span>Lista de espera</span>
       </a>
-      <a href="<?= url('admin/usuarios.php') ?>" class="bnc-nav-item <?= is_active('usuarios') ?>">
+      <a href="<?= url('admin/progreso-tratamientos.php') ?>" class="bnc-nav-item <?= is_active('progreso-tratamientos') ?>">
+        <i class="bi bi-heart-pulse"></i><span>Seguimiento</span>
+      </a>
+      <div class="bnc-nav-section">CONFIGURACIÓN</div>
+       <a href="<?= url('admin/usuarios.php') ?>" class="bnc-nav-item <?= is_active('usuarios') ?>">
         <i class="bi bi-people"></i><span>Clientes</span>
       </a>
       <a href="<?= url('admin/profesionales.php') ?>" class="bnc-nav-item <?= is_active('profesionales') ?>">
         <i class="bi bi-person-badge"></i><span>Profesionales</span>
       </a>
-      <div class="bnc-nav-section">CONFIGURACIÓN</div>
       <a href="<?= url('admin/servicios.php') ?>" class="bnc-nav-item <?= is_active('servicios') ?>">
         <i class="bi bi-tag"></i><span>Servicios</span>
       </a>
