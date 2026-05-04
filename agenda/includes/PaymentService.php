@@ -87,35 +87,35 @@ final class PaymentService
             return ['ok' => false, 'error' => 'El tiempo para pagar esta cita expiró. Elige un nuevo horario.'];
         }
 
-        $existing = Database::one(
-            "SELECT checkout_url
-             FROM appointment_payments
-             WHERE appointment_id = ? AND status IN ('created','pending') AND checkout_url IS NOT NULL
-             ORDER BY id DESC LIMIT 1",
-            [$appointmentId]
-        );
-        if ($existing) {
-            return ['ok' => true, 'redirect_url' => (string) $existing['checkout_url']];
-        }
-
         $cfg = self::mercadoPagoConfig();
         if (!$cfg['access_token']) {
             return ['ok' => false, 'error' => 'Mercado Pago no está configurado.'];
         }
 
-        $externalRef = 'BNC-' . $appointmentId . '-' . bin2hex(random_bytes(5));
+        $externalRef = self::externalReference($appointmentId);
+        $payerEmail = filter_var((string) $d['client_email'], FILTER_VALIDATE_EMAIL)
+            ? (string) $d['client_email']
+            : 'pagos@bellanickclinic.com';
+        $itemTitle = trim('BellaNick - ' . (string) $d['service_name']);
+        if ($itemTitle === 'BellaNick -') {
+            $itemTitle = 'BellaNick - Cita';
+        }
+        $amount = round((float) $d['payment_amount_mxn'], 2);
+        if ($amount <= 0) {
+            return ['ok' => false, 'error' => 'El monto de pago no es válido.'];
+        }
         $payload = [
             'items' => [[
                 'id' => (string) $d['service_id'],
-                'title' => 'BellaNick - ' . (string) $d['service_name'],
+                'title' => $itemTitle,
                 'description' => 'Cita ' . (string) $d['code'],
                 'quantity' => 1,
                 'currency_id' => 'MXN',
-                'unit_price' => (float) $d['payment_amount_mxn'],
+                'unit_price' => $amount,
             ]],
             'payer' => [
                 'name' => (string) $d['client_name'],
-                'email' => (string) $d['client_email'],
+                'email' => $payerEmail,
             ],
             'external_reference' => $externalRef,
             'notification_url' => url('api/mercadopago-webhook.php'),
@@ -149,17 +149,10 @@ final class PaymentService
         }
 
         Database::exec(
-            "INSERT INTO appointment_payments
-                (appointment_id, provider, provider_preference_id, external_reference, status, amount_mxn, checkout_url, raw_payload)
-             VALUES (?, 'mercadopago', ?, ?, 'created', ?, ?, ?)",
-            [
-                $appointmentId,
-                (string) ($body['id'] ?? ''),
-                $externalRef,
-                (float) $d['payment_amount_mxn'],
-                $checkoutUrl,
-                json_encode($body, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-            ]
+            "UPDATE appointments
+             SET payment_due_at = NOW()
+             WHERE id = ? AND payment_status = 'pending'",
+            [$appointmentId]
         );
 
         return ['ok' => true, 'redirect_url' => $checkoutUrl];
@@ -198,17 +191,16 @@ final class PaymentService
             return ['ok' => false, 'error' => 'Pago sin referencia.'];
         }
 
-        $row = Database::one('SELECT * FROM appointment_payments WHERE external_reference = ? LIMIT 1', [$externalRef]);
-        if (!$row) {
+        $appointmentId = self::appointmentIdFromExternalReference($externalRef);
+        if ($appointmentId <= 0) {
             return ['ok' => false, 'error' => 'Referencia de pago no encontrada.'];
         }
-        $appointmentId = (int) $row['appointment_id'];
         $d = self::hydrateAppointment($appointmentId);
         if (!$d) {
             return ['ok' => false, 'error' => 'Cita no encontrada.'];
         }
         $paidAmount = (float) ($mpPayment['transaction_amount'] ?? 0);
-        $expected = (float) $row['amount_mxn'];
+        $expected = (float) $d['payment_amount_mxn'];
         if ($paidAmount + 0.009 < $expected) {
             return ['ok' => false, 'error' => 'Monto pagado menor al esperado.'];
         }
@@ -223,23 +215,7 @@ final class PaymentService
             default => 'pending',
         };
 
-        Database::exec(
-            "UPDATE appointment_payments
-             SET provider_payment_id = ?,
-                 status = ?,
-                 payment_method = ?,
-                 raw_payload = ?,
-                 paid_at = IF(? = 'approved', NOW(), paid_at)
-             WHERE id = ?",
-            [
-                $providerPaymentId,
-                $normalized,
-                (string) ($mpPayment['payment_method_id'] ?? $mpPayment['payment_type_id'] ?? ''),
-                json_encode($mpPayment, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-                $normalized,
-                (int) $row['id'],
-            ]
-        );
+        self::recordProviderPayment($appointmentId, $externalRef, $providerPaymentId, $normalized, $mpPayment);
 
         if ($normalized === 'approved') {
             self::markAppointmentPaid($appointmentId);
@@ -334,6 +310,57 @@ final class PaymentService
                  cancel_reason = COALESCE(cancel_reason, ?)
              WHERE id = ? AND payment_required = 1 AND payment_status <> 'paid'",
             [(int) $status['id'], $paymentStatus, $reason, $appointmentId]
+        );
+    }
+
+    private static function externalReference(int $appointmentId): string
+    {
+        return 'BNC-APPT-' . $appointmentId;
+    }
+
+    private static function appointmentIdFromExternalReference(string $reference): int
+    {
+        if (preg_match('/^BNC-APPT-(\d+)$/', $reference, $m)) {
+            return (int) $m[1];
+        }
+        if (preg_match('/^BNC-(\d+)-/', $reference, $m)) {
+            return (int) $m[1];
+        }
+        return 0;
+    }
+
+    private static function recordProviderPayment(
+        int $appointmentId,
+        string $externalRef,
+        string $providerPaymentId,
+        string $status,
+        array $payload
+    ): void {
+        Database::exec(
+            "INSERT INTO appointment_payments
+                (appointment_id, provider, provider_payment_id, provider_preference_id, external_reference, status,
+                 payment_method, amount_mxn, checkout_url, raw_payload, paid_at)
+             VALUES (?, 'mercadopago', ?, ?, ?, ?, ?, ?, NULL, ?, IF(? = 'approved', NOW(), NULL))
+             ON DUPLICATE KEY UPDATE
+                appointment_id = VALUES(appointment_id),
+                provider_payment_id = VALUES(provider_payment_id),
+                provider_preference_id = VALUES(provider_preference_id),
+                status = VALUES(status),
+                payment_method = VALUES(payment_method),
+                amount_mxn = VALUES(amount_mxn),
+                raw_payload = VALUES(raw_payload),
+                paid_at = IF(VALUES(status) = 'approved', COALESCE(paid_at, NOW()), paid_at)",
+            [
+                $appointmentId,
+                $providerPaymentId,
+                (string) ($payload['preference_id'] ?? ''),
+                $externalRef,
+                $status,
+                (string) ($payload['payment_method_id'] ?? $payload['payment_type_id'] ?? ''),
+                (float) ($payload['transaction_amount'] ?? 0),
+                json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                $status,
+            ]
         );
     }
 
