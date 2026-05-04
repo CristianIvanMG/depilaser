@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../includes/bootstrap.php';
 Auth::requireSuperAdmin();
+AppointmentService::ensureMachinerySchema();
 
 $errors = [];
 $editingId = 0;
@@ -26,6 +27,7 @@ function branch_validate(array $d, int $ignoreId = 0): array
         'email' => strtolower(trim($d['email'] ?? '')),
         'gmaps_url' => trim($d['gmaps_url'] ?? ''),
         'cabin_capacity' => max(1, min(10, (int) ($d['cabin_capacity'] ?? 3))),
+        'laser_machine_capacity' => max(0, min(10, (int) ($d['laser_machine_capacity'] ?? 1))),
         'display_order' => (int) ($d['display_order'] ?? 0),
         'active' => isset($d['active']) ? 1 : 0,
     ];
@@ -39,6 +41,10 @@ function branch_validate(array $d, int $ignoreId = 0): array
     if ($branch['phone'] && strlen($branch['phone']) < 10) $errors['phone'] = 'El teléfono debe tener al menos 10 dígitos.';
     if ($branch['email'] && !filter_var($branch['email'], FILTER_VALIDATE_EMAIL)) $errors['email'] = 'Correo inválido.';
 
+    if ($branch['laser_machine_capacity'] > $branch['cabin_capacity']) {
+        $errors['laser_machine_capacity'] = 'Las máquinas no pueden superar el número de cabinas.';
+    }
+
     $params = [$branch['slug']];
     $ignoreSql = '';
     if ($ignoreId) {
@@ -50,6 +56,16 @@ function branch_validate(array $d, int $ignoreId = 0): array
     }
 
     return ['ok' => !$errors, 'errors' => $errors, 'branch' => $branch];
+}
+
+function branch_save_laser_capacity(int $branchId, int $capacity): void
+{
+    Database::exec(
+        "INSERT INTO branch_service_resources (branch_id, resource_key, name, capacity, active)
+         VALUES (?, 'depilacion_laser', 'Máquina de depilación láser', ?, 1)
+         ON DUPLICATE KEY UPDATE capacity = VALUES(capacity), active = 1, updated_at = NOW()",
+        [$branchId, $capacity]
+    );
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -67,6 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'UPDATE branches SET slug=?, name=?, address=?, city=?, state=?, phone=?, whatsapp=?, email=?, gmaps_url=?, cabin_capacity=?, active=?, display_order=? WHERE id=?',
                     [$b['slug'], $b['name'], $b['address'], $b['city'], $b['state'], $b['phone'] ?: null, $b['whatsapp'] ?: null, $b['email'] ?: null, $b['gmaps_url'] ?: null, $b['cabin_capacity'], $b['active'], $b['display_order'], $branchId]
                 );
+                branch_save_laser_capacity($branchId, $b['laser_machine_capacity']);
                 Auth::audit('branch_update', 'branch', $branchId);
                 flash('success', 'Sucursal actualizada correctamente.');
             } else {
@@ -76,6 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     [$b['slug'], $b['name'], $b['address'], $b['city'], $b['state'], $b['phone'] ?: null, $b['whatsapp'] ?: null, $b['email'] ?: null, $b['gmaps_url'] ?: null, $b['cabin_capacity'], $b['active'], $b['display_order']]
                 );
                 $branchId = Database::lastId();
+                branch_save_laser_capacity($branchId, $b['laser_machine_capacity']);
                 Auth::audit('branch_create', 'branch', $branchId);
                 flash('success', 'Sucursal creada correctamente.');
             }
@@ -88,9 +106,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $branches = Database::all(
     "SELECT b.id, b.slug, b.name, b.address, b.city, b.state, b.phone, b.whatsapp,
             b.email, b.gmaps_url, b.cabin_capacity, b.active, b.display_order,
+            COALESCE(laser.capacity, 1) AS laser_machine_capacity,
             b.created_at, b.updated_at,
             COALESCE(ac.appointment_count, 0) AS appointment_count
      FROM branches b
+     LEFT JOIN branch_service_resources laser
+        ON laser.branch_id = b.id
+       AND laser.resource_key = 'depilacion_laser'
+       AND laser.active = 1
      LEFT JOIN (
         SELECT branch_id, COUNT(*) AS appointment_count
         FROM appointments
@@ -119,7 +142,10 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
           <tr>
             <td><strong><?= e($branch['name']) ?></strong><br><small class="text-muted"><?= e($branch['slug']) ?></small></td>
             <td><?= e($branch['address']) ?><br><small class="text-muted"><?= e($branch['city']) ?>, <?= e($branch['state']) ?></small></td>
-            <td><span class="badge bg-primary"><?= (int) $branch['cabin_capacity'] ?> cabina(s)</span></td>
+            <td>
+              <span class="badge bg-primary"><?= (int) $branch['cabin_capacity'] ?> cabina(s)</span><br>
+              <span class="badge bg-info text-dark mt-1"><?= (int) $branch['laser_machine_capacity'] ?> máquina(s) láser</span>
+            </td>
             <td><?= e($branch['phone']) ?><br><small class="text-muted"><?= e($branch['email']) ?></small></td>
             <td><?= $branch['active'] ? '<span class="badge bg-success">Activa</span>' : '<span class="badge bg-secondary">Inactiva</span>' ?></td>
             <td class="text-end"><button class="btn btn-sm btn-bnc-outline" data-bs-toggle="modal" data-bs-target="#branchEditModal-<?= (int) $branch['id'] ?>"><i class="bi bi-pencil"></i> Editar</button></td>
@@ -131,7 +157,7 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
 </div>
 
 <?php
-$emptyBranch = ['id'=>0,'name'=>'','slug'=>'','address'=>'','city'=>'','state'=>'','phone'=>'','whatsapp'=>'','email'=>'','gmaps_url'=>'','cabin_capacity'=>3,'display_order'=>0,'active'=>1];
+$emptyBranch = ['id'=>0,'name'=>'','slug'=>'','address'=>'','city'=>'','state'=>'','phone'=>'','whatsapp'=>'','email'=>'','gmaps_url'=>'','cabin_capacity'=>3,'laser_machine_capacity'=>1,'display_order'=>0,'active'=>1];
 $modalBranches = array_merge([$emptyBranch], $branches);
 foreach ($modalBranches as $branch):
   $isCreate = (int) $branch['id'] === 0;
@@ -169,6 +195,12 @@ foreach ($modalBranches as $branch):
               <div class="col-md-4"><label class="bnc-label">Ciudad</label><input name="city" class="form-control" value="<?= e($isErrored ? ($_POST['city'] ?? '') : $branch['city']) ?>"></div>
               <div class="col-md-4"><label class="bnc-label">Estado</label><input name="state" class="form-control" value="<?= e($isErrored ? ($_POST['state'] ?? '') : $branch['state']) ?>"></div>
               <div class="col-md-4"><label class="bnc-label">Cabinas</label><input type="number" min="1" max="10" name="cabin_capacity" class="form-control" value="<?= e($isErrored ? ($_POST['cabin_capacity'] ?? 3) : $branch['cabin_capacity']) ?>"></div>
+              <div class="col-md-4">
+                <label class="bnc-label">Máquinas láser</label>
+                <input type="number" min="0" max="10" name="laser_machine_capacity" class="form-control <?= isset($errors['laser_machine_capacity']) && $isErrored ? 'is-invalid' : '' ?>" value="<?= e($isErrored ? ($_POST['laser_machine_capacity'] ?? 1) : ($branch['laser_machine_capacity'] ?? 1)) ?>">
+                <?php if (isset($errors['laser_machine_capacity']) && $isErrored): ?><div class="invalid-feedback"><?= e($errors['laser_machine_capacity']) ?></div><?php endif; ?>
+                <div class="form-text">Controla cuántas citas de depilación láser pueden ocurrir al mismo tiempo en esta sucursal.</div>
+              </div>
               <div class="col-md-4"><label class="bnc-label">Teléfono</label><input name="phone" class="form-control" value="<?= e($isErrored ? ($_POST['phone'] ?? '') : $branch['phone']) ?>"></div>
               <div class="col-md-4"><label class="bnc-label">WhatsApp</label><input name="whatsapp" class="form-control" value="<?= e($isErrored ? ($_POST['whatsapp'] ?? '') : $branch['whatsapp']) ?>"></div>
               <div class="col-md-4"><label class="bnc-label">Correo</label><input type="email" name="email" class="form-control" value="<?= e($isErrored ? ($_POST['email'] ?? '') : $branch['email']) ?>"></div>
