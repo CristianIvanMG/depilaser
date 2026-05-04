@@ -96,12 +96,21 @@ final class AppointmentService
             $params[] = $ignoreAppointmentId;
         }
 
+        $paymentSql = '';
+        if (self::columnExists('appointments', 'payment_status')) {
+            $paymentSql = " AND (
+                 payment_required = 0
+                 OR payment_status = 'paid'
+                 OR (payment_status = 'pending' AND payment_expires_at > NOW())
+               )";
+        }
         $lockSql = $forUpdate ? ' FOR UPDATE' : '';
         $rows = Database::all(
             "SELECT id FROM appointments
              WHERE branch_id = ?
                AND status_id IN (SELECT id FROM appointment_statuses WHERE slug IN ('programada','confirmada','atendida'))
                AND start_at < ? AND end_at > ?
+               {$paymentSql}
                {$ignoreSql}
              {$lockSql}",
             $params
@@ -123,6 +132,15 @@ final class AppointmentService
             $params[] = $ignoreAppointmentId;
         }
 
+        $paymentSql = '';
+        if (self::columnExists('appointments', 'payment_status')) {
+            $paymentSql = " AND (
+                 a.payment_required = 0
+                 OR a.payment_status = 'paid'
+                 OR (a.payment_status = 'pending' AND a.payment_expires_at > NOW())
+               )";
+        }
+
         $row = Database::one(
             "SELECT COUNT(*) AS n
              FROM appointments a
@@ -130,6 +148,7 @@ final class AppointmentService
              WHERE a.branch_id = ?
                AND st.slug IN ('programada','confirmada','atendida')
                AND a.start_at < ? AND a.end_at > ?
+               {$paymentSql}
                {$ignoreSql}",
             $params
         );

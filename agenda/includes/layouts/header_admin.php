@@ -63,6 +63,9 @@ $adminHome = Auth::isAdmin() ? url('admin/') : url('admin/calendario.php');
       <a href="<?= url('admin/servicios.php') ?>" class="bnc-nav-item <?= is_active('servicios') ?>">
         <i class="bi bi-tag"></i><span>Servicios</span>
       </a>
+      <a href="<?= url('admin/pagos-servicios.php') ?>" class="bnc-nav-item <?= is_active('pagos-servicios') ?>">
+        <i class="bi bi-credit-card"></i><span>Pagos</span>
+      </a>
       <a href="<?= url('admin/horarios.php') ?>" class="bnc-nav-item <?= is_active('horarios') ?>">
         <i class="bi bi-clock-history"></i><span>Horarios</span>
       </a>

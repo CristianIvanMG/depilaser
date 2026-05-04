@@ -6,6 +6,8 @@ $user = Auth::user();
 
 global $CONFIG;
 $cfg = $CONFIG['business'];
+PaymentService::ensureSchema();
+PaymentService::expirePendingPayments();
 
 // ── Validaciones de límites ──
 $activos = (int) (Database::one(
@@ -33,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $errors = Validator::appointmentCreate($_POST);
     if (!$errors) {
         // Verificar service y branch existen
-        $svc = Database::one('SELECT id, duration_min, name FROM services WHERE id = ? AND active = 1', [$serviceId]);
+        $svc = Database::one('SELECT id, duration_min, name, price_mxn, payment_required, payment_mode, deposit_amount_mxn FROM services WHERE id = ? AND active = 1', [$serviceId]);
         $br  = Database::one('SELECT id FROM branches WHERE id = ? AND active = 1', [$branchId]);
         if (!$svc || !$br) {
             $errors['_'] = 'Servicio o sucursal inválido.';
@@ -65,16 +67,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Estado inicial: programada
                     $statusId = (int) Database::one("SELECT id FROM appointment_statuses WHERE slug = 'programada'")['id'];
                     $code = generate_appointment_code();
+                    $payment = PaymentService::servicePaymentConfig($svc);
+                    $paymentExpiresAt = date('Y-m-d H:i:s', time() + 20 * 60);
 
                     Database::exec(
-                        'INSERT INTO appointments (code, user_id, branch_id, service_id, status_id, start_at, end_at, notes_client, source, created_by_user_id)
-                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, "web", ?)',
-                        [$code, $user['id'], $branchId, $serviceId, $statusId, $startSql, $endSql, $notes ?: null, $user['id']]
+                        'INSERT INTO appointments
+                           (code, user_id, branch_id, service_id, status_id, start_at, end_at, notes_client, source, created_by_user_id,
+                            payment_required, payment_status, payment_amount_mxn, payment_due_at, payment_expires_at)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, "web", ?, ?, ?, ?, NOW(), ?)',
+                        [
+                            $code,
+                            $user['id'],
+                            $branchId,
+                            $serviceId,
+                            $statusId,
+                            $startSql,
+                            $endSql,
+                            $notes ?: null,
+                            $user['id'],
+                            $payment['required'] ? 1 : 0,
+                            $payment['required'] ? 'pending' : 'not_required',
+                            $payment['amount'],
+                            $payment['required'] ? $paymentExpiresAt : null,
+                        ]
                     );
                     $apptId = Database::lastId();
                     $pdo->commit();
 
                     Auth::audit('appointment_create', 'appointment', $apptId, ['code' => $code]);
+
+                    if ($payment['required']) {
+                        $checkout = PaymentService::createMercadoPagoCheckout($apptId);
+                        if ($checkout['ok'] && !empty($checkout['redirect_url'])) {
+                            redirect($checkout['redirect_url']);
+                        }
+                        flash('warning', $checkout['error'] ?? 'No fue posible iniciar el pago. Tu horario se liberará si no completas el anticipo.');
+                        redirect('pago-cita.php?appointment_id=' . $apptId);
+                    }
 
                     flash('success', "¡Cita confirmada! Tu código es <strong>{$code}</strong>");
                     redirect('mis-citas.php');
@@ -102,7 +131,7 @@ $selectedDate    = $_GET['date'] ?? $_POST['date'] ?? '';
 $services = [];
 if ($selectedBranch) {
     $services = Database::all(
-        'SELECT s.id, s.slug, s.name, s.description, s.duration_min, s.price_mxn
+        'SELECT s.id, s.slug, s.name, s.description, s.duration_min, s.price_mxn, s.payment_required, s.payment_mode, s.deposit_amount_mxn
          FROM services s
          JOIN service_branches sb ON sb.service_id = s.id
          WHERE sb.branch_id = ? AND s.active = 1
@@ -184,8 +213,9 @@ require __DIR__ . '/includes/layouts/header_client.php';
   <?php else: ?>
     <!-- ════════ PASO 3: FECHA + HORA ════════ -->
     <?php
-      $svc = Database::one('SELECT name, duration_min, price_mxn FROM services WHERE id = ?', [$selectedService]);
+      $svc = Database::one('SELECT name, duration_min, price_mxn, payment_required, payment_mode, deposit_amount_mxn FROM services WHERE id = ?', [$selectedService]);
       $br  = Database::one('SELECT name, address FROM branches WHERE id = ?', [$selectedBranch]);
+      $paymentCfg = PaymentService::servicePaymentConfig($svc ?: []);
       $minDate = date('Y-m-d', time() + $cfg['booking_min_hours'] * 3600);
       $maxDate = date('Y-m-d', time() + $cfg['booking_max_days'] * 86400);
     ?>
@@ -216,7 +246,10 @@ require __DIR__ . '/includes/layouts/header_client.php';
                 <label class="bnc-label" for="notes">¿Algo que debamos saber? (opcional)</label>
                 <textarea class="form-control" name="notes" id="notes" rows="2" maxlength="500" placeholder="Ej. Es mi primera vez, me interesan paquetes..."></textarea>
               </div>
-              <button type="submit" class="btn btn-bnc-primary w-100 py-2">Confirmar cita <i class="bi bi-check2-circle ms-1"></i></button>
+              <button type="submit" class="btn btn-bnc-primary w-100 py-2">
+                <?= $paymentCfg['required'] ? 'Continuar a pago seguro' : 'Confirmar cita' ?>
+                <i class="bi <?= $paymentCfg['required'] ? 'bi-lock' : 'bi-check2-circle' ?> ms-1"></i>
+              </button>
             </form>
           </div>
         </div>
@@ -243,6 +276,15 @@ require __DIR__ . '/includes/layouts/header_client.php';
               <strong id="summaryWhen" class="text-muted">Selecciona un horario</strong>
             </div>
             <hr>
+            <?php if ($paymentCfg['required']): ?>
+              <div class="bnc-payment-summary mb-3">
+                <div>
+                  <small><?= e($paymentCfg['label']) ?> requerido</small>
+                  <strong><?= fmt_price((float) $paymentCfg['amount']) ?></strong>
+                </div>
+                <i class="bi bi-shield-check"></i>
+              </div>
+            <?php endif; ?>
             <div class="d-flex justify-content-between align-items-center">
               <span class="text-muted">Total</span>
               <strong style="color:var(--bnc-pink); font-size:20px"><?= fmt_price((float) $svc['price_mxn']) ?></strong>

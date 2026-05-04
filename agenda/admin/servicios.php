@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../includes/bootstrap.php';
 Auth::requireAdmin();
+PaymentService::ensureSchema();
 
 $errors = [];
 $editingId = 0;
@@ -23,6 +24,9 @@ function service_validate(array $d, int $ignoreId = 0): array
         'description' => trim($d['description'] ?? ''),
         'duration_min' => (int) ($d['duration_min'] ?? 30),
         'price_mxn' => (float) ($d['price_mxn'] ?? 0),
+        'payment_required' => isset($d['payment_required']) ? 1 : 0,
+        'payment_mode' => in_array(($d['payment_mode'] ?? 'none'), ['none','deposit','full'], true) ? $d['payment_mode'] : 'none',
+        'deposit_amount_mxn' => (float) ($d['deposit_amount_mxn'] ?? 0),
         'display_order' => (int) ($d['display_order'] ?? 0),
         'active' => isset($d['active']) ? 1 : 0,
         'branches' => array_map('intval', $d['branches'] ?? []),
@@ -32,6 +36,14 @@ function service_validate(array $d, int $ignoreId = 0): array
     if (mb_strlen($service['name']) < 3) $errors['name'] = 'Ingresa el nombre del servicio.';
     if ($service['duration_min'] < 5 || $service['duration_min'] > 240) $errors['duration_min'] = 'La duración debe estar entre 5 y 240 minutos.';
     if ($service['price_mxn'] < 0) $errors['price_mxn'] = 'El precio no puede ser negativo.';
+    if (!$service['payment_required']) {
+        $service['payment_mode'] = 'none';
+        $service['deposit_amount_mxn'] = null;
+    } elseif ($service['payment_mode'] === 'none') {
+        $errors['payment_mode'] = 'Selecciona si se cobra anticipo o pago total.';
+    } elseif ($service['payment_mode'] === 'deposit' && ($service['deposit_amount_mxn'] <= 0 || $service['deposit_amount_mxn'] > $service['price_mxn'])) {
+        $errors['deposit_amount_mxn'] = 'El anticipo debe ser mayor a cero y no superar el precio.';
+    }
     if (!$service['branches']) $errors['branches'] = 'Selecciona al menos una sucursal.';
 
     $params = [$service['slug']];
@@ -71,16 +83,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$errors) {
                 if ($serviceId) {
                     Database::exec(
-                        'UPDATE services SET slug=?, name=?, category=?, description=?, duration_min=?, price_mxn=?, active=?, display_order=? WHERE id=?',
-                        [$s['slug'], $s['name'], $s['category'], $s['description'] ?: null, $s['duration_min'], $s['price_mxn'], $s['active'], $s['display_order'], $serviceId]
+                        'UPDATE services SET slug=?, name=?, category=?, description=?, duration_min=?, price_mxn=?, payment_required=?, payment_mode=?, deposit_amount_mxn=?, active=?, display_order=? WHERE id=?',
+                        [$s['slug'], $s['name'], $s['category'], $s['description'] ?: null, $s['duration_min'], $s['price_mxn'], $s['payment_required'], $s['payment_mode'], $s['deposit_amount_mxn'], $s['active'], $s['display_order'], $serviceId]
                     );
                     Database::exec('DELETE FROM service_branches WHERE service_id=?', [$serviceId]);
                     Auth::audit('service_update', 'service', $serviceId);
                     flash('success', 'Servicio actualizado correctamente.');
                 } else {
                     Database::exec(
-                        'INSERT INTO services (slug, name, category, description, duration_min, price_mxn, active, display_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-                        [$s['slug'], $s['name'], $s['category'], $s['description'] ?: null, $s['duration_min'], $s['price_mxn'], $s['active'], $s['display_order']]
+                        'INSERT INTO services (slug, name, category, description, duration_min, price_mxn, payment_required, payment_mode, deposit_amount_mxn, active, display_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                        [$s['slug'], $s['name'], $s['category'], $s['description'] ?: null, $s['duration_min'], $s['price_mxn'], $s['payment_required'], $s['payment_mode'], $s['deposit_amount_mxn'], $s['active'], $s['display_order']]
                     );
                     $serviceId = Database::lastId();
                     Auth::audit('service_create', 'service', $serviceId);

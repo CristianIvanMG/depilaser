@@ -376,6 +376,38 @@ body.bnc-client {
   padding: 18px 20px;
 }
 .bnc-review-invite p { color: var(--bnc-grey); }
+.bnc-payment-summary,
+.bnc-payment-state {
+  align-items: center;
+  background: var(--bnc-pink-bg);
+  border: 1px solid var(--bnc-line);
+  border-radius: 14px;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 14px;
+}
+.bnc-payment-summary small,
+.bnc-payment-state span {
+  color: var(--bnc-grey);
+  display: block;
+  font-size: 12px;
+}
+.bnc-payment-summary strong {
+  color: var(--bnc-pink-deep);
+  display: block;
+  font-size: 20px;
+}
+.bnc-payment-summary i,
+.bnc-payment-state i {
+  color: var(--bnc-pink);
+  font-size: 28px;
+}
+.bnc-payment-state.paid {
+  background: #e7f7ec;
+  border-color: #b7e2c2;
+}
+.bnc-payment-state.paid i { color: #2f7040; }
 
 @media (max-width: 767.98px) {
   .bnc-profile-hero,

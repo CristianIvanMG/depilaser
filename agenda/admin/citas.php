@@ -261,6 +261,14 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
                   <div class="mb-2"><strong>Profesional:</strong> <?= !empty($a['professional_name']) ? e($a['professional_name']) : '<span class="text-muted">Sin asignar</span>' ?></div>
                   <div class="mb-2"><strong>Fecha:</strong> <?= e(fmt_dt($a['start_at'])) ?></div>
                   <div class="mb-2"><strong>Estado:</strong> <span class="bnc-status <?= e($a['status_slug']) ?>" data-status-pill><?= e($a['status_name']) ?></span></div>
+                  <?php if (!empty($a['payment_required'])): ?>
+                    <?php $paymentRow = PaymentService::paymentForAppointment((int) $a['id']); ?>
+                    <div class="mb-2"><strong>Pago:</strong>
+                      <span class="badge <?= ($a['payment_status'] ?? '') === 'paid' ? 'bg-success' : 'bg-warning text-dark' ?>"><?= e(PaymentService::paymentLabel($a['payment_status'] ?? null)) ?></span>
+                      <span class="ms-1"><?= fmt_price((float) $a['payment_amount_mxn']) ?></span>
+                      <?php if ($paymentRow && !empty($paymentRow['provider_payment_id'])): ?><br><small class="text-muted">Ref. <?= e($paymentRow['provider_payment_id']) ?> · <?= e($paymentRow['payment_method'] ?? 'Mercado Pago') ?></small><?php endif; ?>
+                    </div>
+                  <?php endif; ?>
                   <?php if (!empty($a['receipt_folio'])): ?>
                     <div class="mb-2"><strong>Folio recibo:</strong> <code><?= e($a['receipt_folio']) ?></code>
                       <?php if ((int) ($a['receipt_sent'] ?? 0) === 1): ?>

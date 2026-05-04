@@ -174,7 +174,10 @@ final class WaitlistService
                 return ['ok' => false, 'skipped' => true, 'reason' => 'No hay clientes elegibles en lista de espera.'];
             }
 
-            $statusId = (int) (Database::one("SELECT id FROM appointment_statuses WHERE slug = 'programada' LIMIT 1")['id'] ?? 0);
+            $servicePayment = Database::one('SELECT price_mxn, payment_required, payment_mode, deposit_amount_mxn FROM services WHERE id = ? LIMIT 1', [(int) $cancelled['service_id']]);
+            $payment = PaymentService::servicePaymentConfig($servicePayment ?: []);
+            $statusSlug = $payment['required'] ? 'programada' : 'confirmada';
+            $statusId = (int) (Database::one("SELECT id FROM appointment_statuses WHERE slug = ? LIMIT 1", [$statusSlug])['id'] ?? 0);
             if (!$statusId) {
                 throw new RuntimeException('WAITLIST_STATUS_MISSING');
             }
@@ -187,8 +190,9 @@ final class WaitlistService
             $code = generate_appointment_code();
             Database::exec(
                 "INSERT INTO appointments
-                    (code, user_id, professional_id, branch_id, service_id, status_id, start_at, end_at, source, notes_admin, created_by_user_id)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'web', ?, NULL)",
+                    (code, user_id, professional_id, branch_id, service_id, status_id, start_at, end_at, source, notes_admin, created_by_user_id,
+                     payment_required, payment_status, payment_amount_mxn, payment_due_at, payment_expires_at)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'web', ?, NULL, ?, ?, ?, NOW(), ?)",
                 [
                     $code,
                     (int) $entry['user_id'],
@@ -199,6 +203,10 @@ final class WaitlistService
                     $startSql,
                     $endSql,
                     'Promoción automática desde lista de espera. Entrada #' . (int) $entry['id'],
+                    $payment['required'] ? 1 : 0,
+                    $payment['required'] ? 'pending' : 'not_required',
+                    $payment['amount'],
+                    $payment['required'] ? date('Y-m-d H:i:s', time() + 20 * 60) : null,
                 ]
             );
             $newAppointmentId = Database::lastId();
@@ -220,7 +228,10 @@ final class WaitlistService
                 'cancelled_appointment_id' => $cancelledAppointmentId,
             ]);
 
-            $mail = EmailNotificationService::sendForAppointment($newAppointmentId, 'appointment_created');
+            if ($payment['required']) {
+                PaymentService::createMercadoPagoCheckout($newAppointmentId);
+            }
+            $mail = EmailNotificationService::sendForAppointment($newAppointmentId, $payment['required'] ? 'appointment_created' : 'appointment_confirmed');
             if (!empty($mail['sent'])) {
                 Database::exec('UPDATE waitlist_entries SET notified_at = NOW() WHERE id = ?', [(int) $entry['id']]);
             }

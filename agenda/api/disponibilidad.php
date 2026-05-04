@@ -139,10 +139,20 @@ if ($exc) {
 }
 
 // 3) Citas existentes que ocupan slots
+$paymentSql = '';
+if (Database::one("SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'appointments' AND COLUMN_NAME = 'payment_status' LIMIT 1")) {
+    $paymentSql = " AND (
+        payment_required = 0
+        OR payment_status = 'paid'
+        OR (payment_status = 'pending' AND payment_expires_at > NOW())
+    )";
+}
+
 $busySql = "SELECT start_at, end_at FROM appointments
             WHERE branch_id = ?
               AND DATE(start_at) = ?
-              AND status_id IN (SELECT id FROM appointment_statuses WHERE slug NOT IN ('cancelada','no_asistio'))";
+              AND status_id IN (SELECT id FROM appointment_statuses WHERE slug NOT IN ('cancelada','no_asistio'))
+              {$paymentSql}";
 $busyArgs = [$branchId, $dateRaw];
 if ($ignoreId > 0) {
     $busySql .= ' AND id <> ?';

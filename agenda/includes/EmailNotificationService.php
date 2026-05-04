@@ -189,6 +189,7 @@ final class EmailNotificationService
         $row = Database::one(
             "SELECT a.id, a.code, a.start_at, a.end_at, a.cancel_reason,
                     a.email_reminder_sent, a.email_reminder_sent_at,
+                    a.payment_required, a.payment_status, a.payment_amount_mxn,
                     u.name AS client_name, u.email AS client_email, u.email_verified, u.active AS client_active,
                     s.name AS service_name, s.duration_min,
                     b.name AS branch_name, b.address AS branch_address, b.city AS branch_city,
@@ -408,6 +409,12 @@ final class EmailNotificationService
         if ($maps !== '' && !in_array($type, ['appointment_cancelled', 'appointment_no_show'], true)) {
             $html .= '<p style="margin:18px 0 0"><a href="' . $H($maps) . '" style="color:#a4276c;font-weight:700;text-decoration:none">Ver sucursal en Google Maps</a></p>';
         }
+        if (!empty($d['payment_required']) && ($d['payment_status'] ?? '') === 'pending') {
+            $html .= '<div style="background:#fff8fb;border:1px solid #f1d8e7;border-radius:12px;padding:14px;margin:18px 0 0">';
+            $html .= '<div style="font-weight:800;color:#a4276c">Pago anticipado pendiente</div>';
+            $html .= '<div style="font-size:13px;color:#6b4860">Para confirmar tu cita, completa tu pago seguro en Mercado Pago.</div>';
+            $html .= '</div>';
+        }
         if ($cta) {
             $html .= '<div style="text-align:center;margin:26px 0 6px"><a href="' . $H($cta['url']) . '" style="display:inline-block;background:#d63b93;color:#fff;padding:12px 24px;border-radius:999px;text-decoration:none;font-weight:800">' . $H($cta['label']) . '</a></div>';
         }
@@ -455,6 +462,9 @@ final class EmailNotificationService
 
     private static function cta(array $d, string $type): ?array
     {
+        if (!empty($d['payment_required']) && ($d['payment_status'] ?? '') === 'pending') {
+            return ['label' => 'Pagar mi cita', 'url' => url('pago-cita.php?appointment_id=' . (int) $d['id'])];
+        }
         if (in_array($type, ['appointment_cancelled', 'appointment_no_show'], true)) {
             return ['label' => 'Reagendar cita', 'url' => url('agendar.php')];
         }
