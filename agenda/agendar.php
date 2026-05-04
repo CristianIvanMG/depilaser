@@ -262,7 +262,7 @@ require __DIR__ . '/includes/layouts/header_client.php';
       </div>
 
       <div class="col-lg-5">
-        <div class="bnc-card sticky-top" style="top: 90px;">
+        <div class="bnc-card bnc-booking-summary">
           <div class="bnc-card-header">
             <h2 class="h6 fw-bold mb-0">Resumen de tu cita</h2>
           </div>
