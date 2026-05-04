@@ -314,6 +314,11 @@ final class PaymentService
         };
     }
 
+    public static function mercadoPagoConfigured(): bool
+    {
+        return self::mercadoPagoConfig()['access_token'] !== '';
+    }
+
     private static function cancelUnpaidAppointment(int $appointmentId, string $reason, string $paymentStatus = 'failed'): void
     {
         $status = Database::one("SELECT id FROM appointment_statuses WHERE slug = 'cancelada' LIMIT 1");
@@ -350,10 +355,41 @@ final class PaymentService
     {
         global $CONFIG;
         $cfg = $CONFIG['payments']['mercadopago'] ?? [];
+        $secretCfg = self::secretsPaymentConfig();
+        $cfg = array_replace($cfg, $secretCfg);
         $token = (string) ($cfg['access_token'] ?? getenv('MP_ACCESS_TOKEN') ?: '');
         $secret = (string) ($cfg['webhook_secret'] ?? getenv('MP_WEBHOOK_SECRET') ?: '');
         $sandbox = (bool) ($cfg['sandbox'] ?? getenv('MP_SANDBOX') ?: false);
         return ['access_token' => $token, 'webhook_secret' => $secret, 'sandbox' => $sandbox];
+    }
+
+    private static function secretsPaymentConfig(): array
+    {
+        $paths = [
+            // Produccion recomendada: fuera de public_html.
+            AGENDA_ROOT . '/../../../../secrets.php',
+            AGENDA_ROOT . '/../../../secrets.php',
+            AGENDA_ROOT . '/../../secrets.php',
+            // Fallbacks compatibles con la estructura actual.
+            AGENDA_ROOT . '/../config/secrets.php',
+            AGENDA_ROOT . '/config/secrets.php',
+        ];
+        foreach ($paths as $path) {
+            if (!is_file($path)) {
+                continue;
+            }
+            $secrets = require $path;
+            if (!is_array($secrets)) {
+                continue;
+            }
+            if (isset($secrets['payments']['mercadopago']) && is_array($secrets['payments']['mercadopago'])) {
+                return $secrets['payments']['mercadopago'];
+            }
+            if (isset($secrets['mercadopago']) && is_array($secrets['mercadopago'])) {
+                return $secrets['mercadopago'];
+            }
+        }
+        return [];
     }
 
     private static function mpRequest(string $method, string $path, ?array $payload = null): array

@@ -40,11 +40,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'pay')
     if ($checkout['ok'] && !empty($checkout['redirect_url'])) {
         redirect($checkout['redirect_url']);
     }
-    flash('danger', $checkout['error'] ?? 'No fue posible abrir el pago.');
+    flash('warning', 'No pudimos abrir Mercado Pago en este momento. Tu cita sigue pendiente mientras el horario esté reservado.');
     redirect('pago-cita.php?appointment_id=' . $appointmentId);
 }
 
 $payment = PaymentService::paymentForAppointment($appointmentId);
+$paymentStatus = (string) ($appointment['payment_status'] ?? 'not_required');
+$mercadoPagoReady = PaymentService::mercadoPagoConfigured();
+$isReleased = in_array($paymentStatus, ['failed', 'expired', 'cancelled'], true) || $appointment['status_slug'] === 'cancelada';
+$statusCopy = match ($paymentStatus) {
+    'paid' => [
+        'icon' => 'bi-check-circle',
+        'title' => 'Pago recibido',
+        'body' => 'Tu cita quedó confirmada. Te esperamos en BellaNick.',
+    ],
+    'expired' => [
+        'icon' => 'bi-clock-history',
+        'title' => 'Tiempo de pago agotado',
+        'body' => 'La reserva temporal terminó porque el pago no se completó dentro del tiempo disponible.',
+    ],
+    'failed' => [
+        'icon' => 'bi-exclamation-circle',
+        'title' => 'Pago no completado',
+        'body' => 'Mercado Pago no confirmó el cobro. Para proteger la agenda, la reserva temporal se canceló.',
+    ],
+    'cancelled' => [
+        'icon' => 'bi-x-circle',
+        'title' => 'Pago cancelado',
+        'body' => 'La reserva fue cancelada y el horario volvió a quedar disponible.',
+    ],
+    'pending' => $mercadoPagoReady
+        ? [
+            'icon' => 'bi-shield-lock',
+            'title' => 'Pago pendiente',
+            'body' => 'Completa el pago en Mercado Pago para confirmar tu cita. No guardamos datos de tarjeta.',
+        ]
+        : [
+            'icon' => 'bi-exclamation-circle',
+            'title' => 'Pago en línea no disponible',
+            'body' => 'Tu cita requiere pago anticipado, pero la pasarela de Mercado Pago todavía no está activa.',
+        ],
+    default => [
+        'icon' => 'bi-info-circle',
+        'title' => 'Pago no requerido',
+        'body' => 'Esta cita no requiere pago anticipado.',
+    ],
+};
+
 $pageTitle = 'Pago de cita';
 require __DIR__ . '/includes/layouts/header_client.php';
 ?>
@@ -57,11 +99,11 @@ require __DIR__ . '/includes/layouts/header_client.php';
           <h1 class="h5 fw-bold mb-0">Pago seguro de tu cita</h1>
         </div>
         <div class="bnc-card-body">
-          <div class="bnc-payment-state mb-4 <?= e($appointment['payment_status']) ?>">
-            <i class="bi <?= $appointment['payment_status'] === 'paid' ? 'bi-check-circle' : 'bi-shield-lock' ?>"></i>
+          <div class="bnc-payment-state mb-4 <?= e($paymentStatus) ?>">
+            <i class="bi <?= e($statusCopy['icon']) ?>"></i>
             <div>
-              <strong><?= e(PaymentService::paymentLabel($appointment['payment_status'])) ?></strong>
-              <span><?= $appointment['payment_status'] === 'paid' ? 'Tu cita quedó confirmada.' : 'El pago se procesa en Mercado Pago. No guardamos datos de tarjeta.' ?></span>
+              <strong><?= e($statusCopy['title']) ?></strong>
+              <span><?= e($statusCopy['body']) ?></span>
             </div>
           </div>
 
@@ -70,19 +112,28 @@ require __DIR__ . '/includes/layouts/header_client.php';
           <div class="mb-3"><small class="text-muted text-uppercase">Fecha y hora</small><br><strong><?= e(fmt_dt($appointment['start_at'])) ?></strong></div>
           <div class="mb-4"><small class="text-muted text-uppercase">Monto a pagar</small><br><strong class="h4" style="color:var(--bnc-pink)"><?= fmt_price((float) $appointment['payment_amount_mxn']) ?></strong></div>
 
-          <?php if ($appointment['payment_status'] === 'paid'): ?>
+          <?php if ($paymentStatus === 'paid'): ?>
             <a href="<?= url('mis-citas.php') ?>" class="btn btn-bnc-primary w-100">Ver mis citas</a>
-          <?php elseif (in_array($appointment['payment_status'], ['failed','expired','cancelled'], true) || $appointment['status_slug'] === 'cancelada'): ?>
-            <div class="alert alert-warning">Este horario ya fue liberado. Puedes elegir una nueva fecha para agendar.</div>
-            <a href="<?= url('agendar.php') ?>" class="btn btn-bnc-primary w-100">Elegir nuevo horario</a>
+          <?php elseif ($isReleased): ?>
+            <div class="alert alert-warning">
+              Esta cita ya no está reservada. Si todavía quieres ese servicio, elige un nuevo horario disponible y una forma de pago válida.
+            </div>
+            <a href="<?= url('agendar.php') ?>" class="btn btn-bnc-primary w-100">Elegir horario y forma de pago</a>
           <?php else: ?>
-            <form method="POST">
-              <?= Csrf::input() ?>
-              <input type="hidden" name="action" value="pay">
-              <button class="btn btn-bnc-primary w-100 py-2" type="submit">
-                <i class="bi bi-lock"></i> Pagar con Mercado Pago
-              </button>
-            </form>
+            <?php if ($mercadoPagoReady): ?>
+              <form method="POST">
+                <?= Csrf::input() ?>
+                <input type="hidden" name="action" value="pay">
+                <button class="btn btn-bnc-primary w-100 py-2" type="submit">
+                  <i class="bi bi-lock"></i> Pagar con Mercado Pago
+                </button>
+              </form>
+            <?php else: ?>
+              <div class="alert alert-warning">
+                Por ahora no podemos procesar el pago en línea. Para continuar, elige un nuevo horario cuando esté habilitada una forma de pago o contacta a la clínica.
+              </div>
+              <a href="<?= url('agendar.php') ?>" class="btn btn-bnc-primary w-100">Elegir horario y forma de pago</a>
+            <?php endif; ?>
             <?php if (!empty($appointment['payment_expires_at'])): ?>
               <p class="small text-muted text-center mt-3 mb-0">Tu horario se conserva hasta <?= e(date('H:i', strtotime($appointment['payment_expires_at']))) ?>.</p>
             <?php endif; ?>
