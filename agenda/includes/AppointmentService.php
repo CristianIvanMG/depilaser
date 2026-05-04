@@ -338,6 +338,15 @@ final class AppointmentService
                    ADD INDEX idx_appt_prof_start (professional_id, start_at),
                    ADD CONSTRAINT fk_appt_prof FOREIGN KEY (professional_id) REFERENCES users(id) ON DELETE SET NULL'
             );
+        } else {
+            $idx = Database::one(
+                "SELECT 1 FROM INFORMATION_SCHEMA.STATISTICS
+                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'appointments'
+                   AND INDEX_NAME = 'idx_appt_prof_start' LIMIT 1"
+            );
+            if (!$idx) {
+                try { Database::exec('ALTER TABLE appointments ADD INDEX idx_appt_prof_start (professional_id, start_at)'); } catch (\Throwable $e) { /* noop */ }
+            }
         }
     }
 
@@ -361,6 +370,14 @@ final class AppointmentService
             $ignoreSql = ' AND id <> ?';
             $params[] = $ignoreAppointmentId;
         }
+        $paymentSql = '';
+        if (self::columnExists('appointments', 'payment_status')) {
+            $paymentSql = " AND (
+                 payment_required = 0
+                 OR payment_status = 'paid'
+                 OR (payment_status = 'pending' AND payment_expires_at > NOW())
+               )";
+        }
         $lockSql = $forUpdate ? ' FOR UPDATE' : '';
 
         $row = Database::one(
@@ -368,6 +385,7 @@ final class AppointmentService
              WHERE professional_id = ?
                AND status_id IN (SELECT id FROM appointment_statuses WHERE slug IN ('programada','confirmada','atendida'))
                AND start_at < ? AND end_at > ?
+               {$paymentSql}
                {$ignoreSql}
              LIMIT 1{$lockSql}",
             $params
@@ -421,7 +439,7 @@ final class AppointmentService
         }
 
         if (self::professionalHasConflict($professionalId, $startSql, $endSql, $ignoreAppointmentId)) {
-            return ['ok' => false, 'error' => 'El profesional ya tiene otra cita en ese horario.'];
+            return ['ok' => false, 'error' => 'Este profesional ya tiene una cita en ese horario, por favor selecciona otro horario o profesional.'];
         }
 
         return ['ok' => true, 'professional' => $prof];

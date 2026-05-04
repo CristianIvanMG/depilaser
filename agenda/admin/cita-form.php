@@ -404,7 +404,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } elseif ($e->getMessage() === 'MACHINE_TAKEN') {
                     $errors['start_at'] = 'La maquinaria necesaria para ese servicio ya está ocupada en ese horario.';
                 } elseif ($e->getMessage() === 'PROFESSIONAL_TAKEN') {
-                    $errors['professional_id'] = 'El profesional ya tiene otra cita en ese horario.';
+                    $errors['professional_id'] = 'Este profesional ya tiene una cita en ese horario, por favor selecciona otro horario o profesional.';
                 } elseif ($e->getMessage() === 'DUPLICATE_APPOINTMENT') {
                     $errors['_'] = 'Ya existe una cita igual para ese cliente, servicio y horario. Revisa el listado antes de crear otra.';
                 } else {
@@ -731,6 +731,7 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
     const selectedSlotSummary = document.getElementById('selectedSlotSummary');
     let slotRequest = null;
     let appointmentSubmitting = false;
+    let selectedBusyProfessionals = [];
 
     function syncClientMode() {
       const mode = document.querySelector('input[name="client_mode"]:checked')?.value || 'existing';
@@ -787,6 +788,10 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
     function syncSelectedSlot() {
       if (!selectedSlotSummary) return;
       selectedSlotSummary.querySelector('strong').textContent = formatSelectedSlot(startInput.value);
+    }
+
+    function busyProfessionalSet() {
+      return new Set((selectedBusyProfessionals || []).map(String));
     }
 
     function canCloseOutSelectedTime() {
@@ -866,18 +871,21 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
               const value = slot.start.replace(' ', 'T').slice(0, 16);
               const active = value === currentValue ? ' btn-bnc-primary active' : '';
               const cabins = slot.available_cabins ? ` · ${slot.available_cabins} cabina(s)` : '';
-              return `<button type="button" class="btn btn-bnc-outline btn-sm slot-btn${active}" data-start="${escapeHtml(value)}" title="${escapeHtml((slot.label_long || slot.label) + cabins)}">${escapeHtml(slot.label)}${escapeHtml(cabins)}</button>`;
+              const busyPros = Array.isArray(slot.busy_professional_ids) ? slot.busy_professional_ids.join(',') : '';
+              return `<button type="button" class="btn btn-bnc-outline btn-sm slot-btn${active}" data-start="${escapeHtml(value)}" data-busy-pros="${escapeHtml(busyPros)}" title="${escapeHtml((slot.label_long || slot.label) + cabins)}">${escapeHtml(slot.label)}${escapeHtml(cabins)}</button>`;
             }).join('')}
           </div>
         `;
         slotsBox.querySelectorAll('.slot-btn').forEach(button => {
             button.addEventListener('click', () => {
               startInput.value = button.dataset.start;
+              selectedBusyProfessionals = (button.dataset.busyPros || '').split(',').filter(Boolean);
               availabilityDateInput.value = button.dataset.start.slice(0, 10);
               startInput.classList.remove('is-invalid');
               availabilityDateInput.classList.remove('is-invalid');
               syncSelectedSlot();
               syncStatusOptions();
+              syncProfessionals();
               slotsBox.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('btn-bnc-primary', 'active'));
               button.classList.add('btn-bnc-primary', 'active');
             });
@@ -899,15 +907,17 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
       const branchId = String(branchSelect.value || '');
       const current  = professionalSelect.value;
       let firstVisible = null;
+      const busyIds = busyProfessionalSet();
       Array.from(professionalSelect.options).forEach(opt => {
-        if (!opt.value) { opt.hidden = false; return; }
+        if (!opt.value) { opt.hidden = false; opt.disabled = false; return; }
         const list = (opt.dataset.branches || '').split(',').filter(Boolean);
-        const visible = !branchId || list.includes(branchId);
+        const availableAtSlot = !startInput.value || !busyIds.has(String(opt.value));
+        const visible = (!branchId || list.includes(branchId)) && availableAtSlot;
         opt.hidden = !visible;
         opt.disabled = !visible;
         if (visible && firstVisible === null) firstVisible = opt.value;
       });
-      // Si el profesional actual ya no es valido para esa sucursal, lo limpia
+      // Si el profesional actual ya no es valido para esa sucursal u horario, lo limpia
       const curOpt = professionalSelect.querySelector(`option[value="${current}"]`);
       if (current && curOpt && curOpt.hidden) professionalSelect.value = '';
     }
@@ -915,8 +925,10 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
       branchSelect.addEventListener('change', syncProfessionals);
       professionalSelect.addEventListener('change', () => {
         startInput.value = '';
+        selectedBusyProfessionals = [];
         syncSelectedSlot();
         syncStatusOptions();
+        professionalSelect.classList.remove('is-invalid');
         if (branchSelect.value && serviceSelect.value && availabilityDateInput.value) loadSlots();
       });
       syncProfessionals();
@@ -934,6 +946,12 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         availabilityDateInput.classList.add('is-invalid');
         return;
       }
+      if (professionalSelect?.value && busyProfessionalSet().has(String(professionalSelect.value))) {
+        event.preventDefault();
+        renderSlotMessage('warning', 'Este profesional ya tiene una cita en ese horario, por favor selecciona otro horario o profesional.');
+        professionalSelect.classList.add('is-invalid');
+        return;
+      }
       if (!appointmentForm.checkValidity()) {
         return;
       }
@@ -948,16 +966,20 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
     [branchSelect, serviceSelect].forEach(field => {
       field.addEventListener('change', () => {
         startInput.value = '';
+        selectedBusyProfessionals = [];
         syncSelectedSlot();
         syncStatusOptions();
+        syncProfessionals();
         if (branchSelect.value && serviceSelect.value && availabilityDateInput.value) loadSlots();
         else resetSlots('Selecciona sucursal, servicio y fecha para ver horarios.');
       });
     });
     availabilityDateInput.addEventListener('change', () => {
       startInput.value = '';
+      selectedBusyProfessionals = [];
       syncSelectedSlot();
       syncStatusOptions();
+      syncProfessionals();
       if (branchSelect.value && serviceSelect.value && availabilityDateInput.value) loadSlots();
       else resetSlots('Selecciona sucursal, servicio y fecha para ver horarios.');
     });

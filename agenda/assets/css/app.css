@@ -427,6 +427,32 @@ body.bnc-client {
   border-color: #b7e2c2;
 }
 .bnc-payment-state.paid i { color: #2f7040; }
+.bnc-payment-policy {
+  align-items: flex-start;
+  background: #fff8fb;
+  border: 1px solid var(--bnc-line);
+  border-left: 4px solid var(--bnc-pink);
+  border-radius: 14px;
+  color: var(--bnc-ink);
+  display: flex;
+  gap: 12px;
+  padding: 14px;
+}
+.bnc-payment-policy i {
+  color: var(--bnc-pink);
+  font-size: 22px;
+  margin-top: 2px;
+}
+.bnc-payment-policy strong,
+.bnc-payment-policy span {
+  display: block;
+}
+.bnc-payment-policy span {
+  color: var(--bnc-grey);
+  font-size: 13px;
+  line-height: 1.45;
+  margin-top: 2px;
+}
 .bnc-booking-summary {
   z-index: 1;
 }

@@ -42,6 +42,16 @@ final class PaymentService
                 CONSTRAINT fk_payment_appointment FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
         );
+        self::ensurePaymentColumn('provider_payment_id', 'VARCHAR(120) NULL');
+        self::ensurePaymentColumn('provider_preference_id', 'VARCHAR(120) NULL');
+        self::ensurePaymentColumn('external_reference', 'VARCHAR(80) NULL');
+        self::ensurePaymentColumn("status", "ENUM('created','pending','approved','rejected','cancelled','refunded','expired') NOT NULL DEFAULT 'created'");
+        self::ensurePaymentColumn('payment_method', 'VARCHAR(80) NULL');
+        self::ensurePaymentColumn('amount_mxn', 'DECIMAL(10,2) NOT NULL DEFAULT 0.00');
+        self::ensurePaymentColumn("currency", "CHAR(3) NOT NULL DEFAULT 'MXN'");
+        self::ensurePaymentColumn('checkout_url', 'TEXT NULL');
+        self::ensurePaymentColumn('raw_payload', 'JSON NULL');
+        self::ensurePaymentColumn('paid_at', 'DATETIME NULL');
     }
 
     public static function servicePaymentConfig(array $service): array
@@ -227,6 +237,91 @@ final class PaymentService
         return ['ok' => true, 'status' => $normalized, 'appointment_id' => $appointmentId];
     }
 
+    public static function syncMercadoPagoReturn(int $appointmentId, array $query): array
+    {
+        self::ensureSchema();
+        $cfg = self::mercadoPagoConfig();
+        if (!$cfg['access_token']) {
+            return ['ok' => false, 'error' => 'Mercado Pago no configurado.'];
+        }
+
+        $paymentId = (string) (
+            $query['payment_id']
+            ?? $query['collection_id']
+            ?? $query['data.id']
+            ?? $query['id']
+            ?? ''
+        );
+
+        if ($paymentId !== '' && $paymentId !== 'null') {
+            $payment = self::mpRequest('GET', '/v1/payments/' . rawurlencode($paymentId));
+            if ($payment['ok']) {
+                return self::applyMercadoPagoPayment($payment['body']);
+            }
+
+            if (($query['status'] ?? '') === 'approved' || ($query['collection_status'] ?? '') === 'approved') {
+                return self::applyMercadoPagoReturnPayload($appointmentId, $query, $paymentId);
+            }
+
+            return ['ok' => false, 'error' => $payment['error'] ?? 'No fue posible consultar el pago.'];
+        }
+
+        $externalRef = self::externalReference($appointmentId);
+        $search = self::mpRequest(
+            'GET',
+            '/v1/payments/search?external_reference=' . rawurlencode($externalRef) . '&sort=date_created&criteria=desc'
+        );
+        if (!$search['ok']) {
+            return ['ok' => false, 'error' => $search['error'] ?? 'No fue posible consultar el pago.'];
+        }
+
+        $results = $search['body']['results'] ?? [];
+        if (!is_array($results) || !$results) {
+            return ['ok' => false, 'pending' => true, 'error' => 'Mercado Pago todavía no devuelve un pago para esta cita.'];
+        }
+
+        $selected = null;
+        foreach ($results as $candidate) {
+            if (($candidate['status'] ?? '') === 'approved') {
+                $selected = $candidate;
+                break;
+            }
+        }
+        $selected ??= $results[0];
+
+        return self::applyMercadoPagoPayment($selected);
+    }
+
+    private static function applyMercadoPagoReturnPayload(int $appointmentId, array $query, string $paymentId): array
+    {
+        $d = self::hydrateAppointment($appointmentId);
+        if (!$d) {
+            return ['ok' => false, 'error' => 'Cita no encontrada.'];
+        }
+        $externalRef = (string) ($query['external_reference'] ?? '');
+        if ($externalRef !== self::externalReference($appointmentId)) {
+            return ['ok' => false, 'error' => 'La referencia del pago no corresponde a esta cita.'];
+        }
+        if (($d['status_slug'] ?? '') === 'cancelada') {
+            return ['ok' => false, 'error' => 'La cita ya está cancelada.'];
+        }
+
+        $payload = [
+            'id' => $paymentId,
+            'status' => 'approved',
+            'external_reference' => $externalRef,
+            'preference_id' => (string) ($query['preference_id'] ?? ''),
+            'payment_method_id' => (string) ($query['payment_type'] ?? ''),
+            'transaction_amount' => (float) $d['payment_amount_mxn'],
+            'return_payload' => $query,
+        ];
+
+        self::recordProviderPayment($appointmentId, $externalRef, $paymentId, 'approved', $payload);
+        self::markAppointmentPaid($appointmentId);
+
+        return ['ok' => true, 'paid' => true, 'appointment_id' => $appointmentId, 'from_return' => true];
+    }
+
     public static function markAppointmentPaid(int $appointmentId): void
     {
         $status = Database::one("SELECT id FROM appointment_statuses WHERE slug = 'confirmada' LIMIT 1");
@@ -336,29 +431,70 @@ final class PaymentService
         string $status,
         array $payload
     ): void {
+        self::ensureSchema();
+        $preferenceId = (string) ($payload['preference_id'] ?? '');
+        $paymentMethod = (string) ($payload['payment_method_id'] ?? $payload['payment_type_id'] ?? '');
+        $amount = (float) ($payload['transaction_amount'] ?? 0);
+        $rawPayload = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+        $existing = $providerPaymentId !== ''
+            ? Database::one(
+                "SELECT id FROM appointment_payments
+                 WHERE provider = 'mercadopago' AND provider_payment_id = ?
+                 LIMIT 1",
+                [$providerPaymentId]
+            )
+            : null;
+        if (!$existing) {
+            $existing = Database::one(
+                "SELECT id FROM appointment_payments
+                 WHERE appointment_id = ? AND external_reference = ?
+                 ORDER BY id DESC LIMIT 1",
+                [$appointmentId, $externalRef]
+            );
+        }
+
+        if ($existing) {
+            Database::exec(
+                "UPDATE appointment_payments
+                 SET provider_payment_id = ?,
+                     provider_preference_id = ?,
+                     external_reference = ?,
+                     status = ?,
+                     payment_method = ?,
+                     amount_mxn = ?,
+                     raw_payload = ?,
+                     paid_at = IF(? = 'approved', COALESCE(paid_at, NOW()), paid_at)
+                 WHERE id = ?",
+                [
+                    $providerPaymentId ?: null,
+                    $preferenceId ?: null,
+                    $externalRef,
+                    $status,
+                    $paymentMethod ?: null,
+                    $amount,
+                    $rawPayload,
+                    $status,
+                    (int) $existing['id'],
+                ]
+            );
+            return;
+        }
+
         Database::exec(
             "INSERT INTO appointment_payments
                 (appointment_id, provider, provider_payment_id, provider_preference_id, external_reference, status,
                  payment_method, amount_mxn, checkout_url, raw_payload, paid_at)
-             VALUES (?, 'mercadopago', ?, ?, ?, ?, ?, ?, NULL, ?, IF(? = 'approved', NOW(), NULL))
-             ON DUPLICATE KEY UPDATE
-                appointment_id = VALUES(appointment_id),
-                provider_payment_id = VALUES(provider_payment_id),
-                provider_preference_id = VALUES(provider_preference_id),
-                status = VALUES(status),
-                payment_method = VALUES(payment_method),
-                amount_mxn = VALUES(amount_mxn),
-                raw_payload = VALUES(raw_payload),
-                paid_at = IF(VALUES(status) = 'approved', COALESCE(paid_at, NOW()), paid_at)",
+             VALUES (?, 'mercadopago', ?, ?, ?, ?, ?, ?, NULL, ?, IF(? = 'approved', NOW(), NULL))",
             [
                 $appointmentId,
-                $providerPaymentId,
-                (string) ($payload['preference_id'] ?? ''),
+                $providerPaymentId ?: null,
+                $preferenceId ?: null,
                 $externalRef,
                 $status,
-                (string) ($payload['payment_method_id'] ?? $payload['payment_type_id'] ?? ''),
-                (float) ($payload['transaction_amount'] ?? 0),
-                json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                $paymentMethod ?: null,
+                $amount,
+                $rawPayload,
                 $status,
             ]
         );
@@ -488,6 +624,13 @@ final class PaymentService
     {
         if (!self::columnExists('appointments', $name)) {
             Database::exec("ALTER TABLE appointments ADD COLUMN {$name} {$definition}");
+        }
+    }
+
+    private static function ensurePaymentColumn(string $name, string $definition): void
+    {
+        if (!self::columnExists('appointment_payments', $name)) {
+            Database::exec("ALTER TABLE appointment_payments ADD COLUMN {$name} {$definition}");
         }
     }
 

@@ -164,6 +164,23 @@ $busy = Database::all($busySql, $busyArgs);
 
 $busyRanges = array_map(fn($b) => [strtotime($b['start_at']), strtotime($b['end_at'])], $busy);
 
+$busyProsSql = "SELECT professional_id, start_at, end_at
+                FROM appointments
+                WHERE professional_id IS NOT NULL
+                  AND DATE(start_at) = ?
+                  AND status_id IN (SELECT id FROM appointment_statuses WHERE slug IN ('programada','confirmada','atendida'))
+                  {$paymentSql}";
+$busyProsArgs = [$dateRaw];
+if ($ignoreId > 0) {
+    $busyProsSql .= ' AND id <> ?';
+    $busyProsArgs[] = $ignoreId;
+}
+$busyPros = Auth::isAdmin() ? Database::all($busyProsSql, $busyProsArgs) : [];
+$busyProRanges = array_map(
+    fn($b) => [(int) $b['professional_id'], strtotime($b['start_at']), strtotime($b['end_at'])],
+    $busyPros
+);
+
 // 4) Generar slots
 $slots = [];
 $now = time();
@@ -188,7 +205,14 @@ foreach ($windows as $w) {
         $slotEndSql = date('Y-m-d H:i:s', $slotEnd);
         $availableCabins = AppointmentService::availableCabins($branchId, $slotStartSql, $slotEndSql, $ignoreId ?: null);
         $availableMachines = AppointmentService::availableMachineUnits($branchId, $serviceId, $slotStartSql, $slotEndSql, $ignoreId ?: null);
-        if ($professionalId > 0 && AppointmentService::professionalHasConflict($professionalId, $slotStartSql, $slotEndSql, $ignoreId ?: null)) continue;
+        $busyProfessionalIds = [];
+        foreach ($busyProRanges as [$busyProfessionalId, $busyStart, $busyEnd]) {
+            if ($t < $busyEnd && $slotEnd > $busyStart) {
+                $busyProfessionalIds[] = $busyProfessionalId;
+            }
+        }
+        $busyProfessionalIds = array_values(array_unique($busyProfessionalIds));
+        if ($professionalId > 0 && in_array($professionalId, $busyProfessionalIds, true)) continue;
         if ($availableCabins <= 0 || $availableMachines <= 0) continue;
 
         $slots[] = [
@@ -198,6 +222,7 @@ foreach ($windows as $w) {
             'label_long' => fmt_dt($slotStartSql),
             'available_cabins' => $availableCabins,
             'available_machines' => $availableMachines === PHP_INT_MAX ? null : $availableMachines,
+            'busy_professional_ids' => $busyProfessionalIds,
         ];
     }
 }

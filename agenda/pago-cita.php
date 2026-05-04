@@ -27,8 +27,31 @@ if (!$appointment) {
 }
 
 $returnWarning = '';
+$returnSync = null;
+if ($appointment['payment_status'] !== 'paid' && in_array($result, ['success', 'pending'], true)) {
+    $returnSync = PaymentService::syncMercadoPagoReturn($appointmentId, $_GET);
+    if (!empty($returnSync['paid'])) {
+        $appointment = Database::one(
+            "SELECT a.*, st.slug AS status_slug, st.name AS status_name,
+                    s.name AS service_name, s.price_mxn,
+                    b.name AS branch_name
+             FROM appointments a
+             JOIN appointment_statuses st ON st.id = a.status_id
+             JOIN services s ON s.id = a.service_id
+             JOIN branches b ON b.id = a.branch_id
+             WHERE a.id = ? AND a.user_id = ? LIMIT 1",
+            [$appointmentId, $user['id']]
+        );
+    } elseif (empty($returnSync['pending'])) {
+        error_log('[pago-cita return sync] ' . ($returnSync['error'] ?? 'No fue posible sincronizar Mercado Pago.'));
+    }
+}
 if ($result === 'failure' && $appointment['payment_status'] !== 'paid') {
     $returnWarning = 'Mercado Pago no pudo completar el intento de pago. Tu cita sigue pendiente mientras el horario esté reservado.';
+}
+
+if ($result === 'success' && $appointment['payment_status'] !== 'paid' && $returnWarning === '') {
+    $returnWarning = 'Mercado Pago recibio el pago, pero la confirmacion final todavia no llega. Estamos validandolo; si ya fue aprobado, tu cita se actualizara en unos momentos.';
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'pay') {
@@ -105,6 +128,16 @@ require __DIR__ . '/includes/layouts/header_client.php';
           </div>
           <?php if ($returnWarning): ?>
             <div class="alert alert-warning"><?= e($returnWarning) ?></div>
+          <?php endif; ?>
+
+          <?php if ($paymentStatus === 'paid'): ?>
+            <div class="bnc-payment-policy mb-4">
+              <i class="bi bi-heart"></i>
+              <div>
+                <strong>Tu horario ya esta apartado para ti</strong>
+                <span>Si necesitas cambiar o cancelar, avisanos con anticipacion para poder liberar el espacio a otra clienta. Si no asistes o cancelas fuera de tiempo, el anticipo puede aplicarse como cargo por reserva.</span>
+              </div>
+            </div>
           <?php endif; ?>
 
           <div class="mb-3"><small class="text-muted text-uppercase">Servicio</small><br><strong><?= e($appointment['service_name']) ?></strong></div>
