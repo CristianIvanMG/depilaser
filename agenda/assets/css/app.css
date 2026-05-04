@@ -387,6 +387,25 @@ body.bnc-client {
   justify-content: space-between;
   padding: 14px;
 }
+.bnc-payment-note {
+  align-items: flex-start;
+  background: #fff8fb;
+  border: 1px solid var(--bnc-line);
+  border-radius: 12px;
+  color: var(--bnc-grey);
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+}
+.bnc-payment-note i {
+  color: var(--bnc-pink);
+  font-size: 18px;
+  margin-top: 1px;
+}
+.bnc-payment-note span {
+  font-size: 13px;
+  line-height: 1.45;
+}
 .bnc-payment-summary small,
 .bnc-payment-state span {
   color: var(--bnc-grey);

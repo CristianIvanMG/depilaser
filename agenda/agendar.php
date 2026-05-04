@@ -246,8 +246,14 @@ require __DIR__ . '/includes/layouts/header_client.php';
                 <label class="bnc-label" for="notes">¿Algo que debamos saber? (opcional)</label>
                 <textarea class="form-control" name="notes" id="notes" rows="2" maxlength="500" placeholder="Ej. Es mi primera vez, me interesan paquetes..."></textarea>
               </div>
+              <?php if ($paymentCfg['required']): ?>
+                <div class="bnc-payment-note mb-3">
+                  <i class="bi bi-lock"></i>
+                  <span>Al confirmar, apartamos tu horario por 20 minutos y te llevamos a Mercado Pago para completar el <?= mb_strtolower($paymentCfg['label']) ?>.</span>
+                </div>
+              <?php endif; ?>
               <button type="submit" class="btn btn-bnc-primary w-100 py-2">
-                <?= $paymentCfg['required'] ? 'Continuar a pago seguro' : 'Confirmar cita' ?>
+                <?= $paymentCfg['required'] ? 'Confirmar y pagar' : 'Confirmar cita' ?>
                 <i class="bi <?= $paymentCfg['required'] ? 'bi-lock' : 'bi-check2-circle' ?> ms-1"></i>
               </button>
             </form>
@@ -277,6 +283,11 @@ require __DIR__ . '/includes/layouts/header_client.php';
             </div>
             <hr>
             <?php if ($paymentCfg['required']): ?>
+              <div class="mb-3">
+                <small class="text-muted text-uppercase d-block mb-1" style="font-size:11px; letter-spacing:.5px">Método de pago</small>
+                <strong><i class="bi bi-credit-card"></i> Mercado Pago</strong>
+                <div class="small text-muted">Pago seguro con tarjeta, transferencia o medios disponibles.</div>
+              </div>
               <div class="bnc-payment-summary mb-3">
                 <div>
                   <small><?= e($paymentCfg['label']) ?> requerido</small>
