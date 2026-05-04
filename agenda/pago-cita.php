@@ -4,7 +4,6 @@ Auth::requireLogin();
 Auth::requireVerifiedEmail();
 
 PaymentService::ensureSchema();
-PaymentService::expirePendingPayments();
 
 $user = Auth::user();
 $appointmentId = (int) ($_GET['appointment_id'] ?? 0);
@@ -27,11 +26,9 @@ if (!$appointment) {
     redirect('mis-citas.php');
 }
 
+$returnWarning = '';
 if ($result === 'failure' && $appointment['payment_status'] !== 'paid') {
-    PaymentService::markReturnFailure($appointmentId);
-    $appointment['payment_status'] = 'failed';
-    $appointment['status_slug'] = 'cancelada';
-    $appointment['status_name'] = 'Cancelada';
+    $returnWarning = 'Mercado Pago no pudo completar el intento de pago. Tu cita sigue pendiente mientras el horario esté reservado.';
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'pay') {
@@ -106,6 +103,9 @@ require __DIR__ . '/includes/layouts/header_client.php';
               <span><?= e($statusCopy['body']) ?></span>
             </div>
           </div>
+          <?php if ($returnWarning): ?>
+            <div class="alert alert-warning"><?= e($returnWarning) ?></div>
+          <?php endif; ?>
 
           <div class="mb-3"><small class="text-muted text-uppercase">Servicio</small><br><strong><?= e($appointment['service_name']) ?></strong></div>
           <div class="mb-3"><small class="text-muted text-uppercase">Sucursal</small><br><strong><?= e($appointment['branch_name']) ?></strong></div>

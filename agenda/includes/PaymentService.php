@@ -212,6 +212,9 @@ final class PaymentService
         if ($paidAmount + 0.009 < $expected) {
             return ['ok' => false, 'error' => 'Monto pagado menor al esperado.'];
         }
+        if (($d['status_slug'] ?? '') === 'cancelada') {
+            return ['ok' => false, 'error' => 'La cita ya está cancelada.'];
+        }
 
         $normalized = match ($status) {
             'approved' => 'approved',

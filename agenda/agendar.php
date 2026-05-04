@@ -101,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         if ($checkout['ok'] && !empty($checkout['redirect_url'])) {
                             redirect($checkout['redirect_url']);
                         }
-                        flash('warning', $checkout['error'] ?? 'No fue posible iniciar el pago. Tu horario se liberará si no completas el anticipo.');
+                        flash('warning', 'No pudimos abrir Mercado Pago en este momento. Tu cita quedó pendiente mientras se habilita el pago.');
                         redirect('pago-cita.php?appointment_id=' . $apptId);
                     }
 
