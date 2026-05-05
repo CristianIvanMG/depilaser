@@ -11,8 +11,15 @@ final class Validator
     {
         $e = [];
 
-        if (empty($d['name']) || mb_strlen(trim($d['name'])) < 2) {
-            $e['name'] = 'Tu nombre debe tener al menos 2 caracteres.';
+        $identity = class_exists('ClientProfile')
+            ? ClientProfile::normalizeName($d)
+            : ['first_name' => trim((string) ($d['first_name'] ?? '')), 'last_name' => trim((string) ($d['last_name'] ?? ''))];
+
+        if (mb_strlen($identity['first_name']) < 2) {
+            $e['first_name'] = 'Tu nombre debe tener al menos 2 caracteres.';
+        }
+        if (mb_strlen($identity['last_name']) < 2) {
+            $e['last_name'] = 'Ingresa tus apellidos.';
         }
         if (empty($d['email']) || !filter_var($d['email'], FILTER_VALIDATE_EMAIL)) {
             $e['email'] = 'Correo electrónico inválido.';

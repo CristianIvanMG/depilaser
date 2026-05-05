@@ -166,6 +166,7 @@ final class Auth
 
         // Auto-migración fase 5 + validación de campos opcionales
         ClientProfile::ensureSchema();
+        $identity = ClientProfile::normalizeName($data);
         $extra = ClientProfile::normalize($data);
         $extraErrors = ClientProfile::validate($extra);
         if ($extraErrors) {
@@ -185,22 +186,26 @@ final class Auth
 
         // INSERT dinámico — solo agrega columnas opcionales que ya existan en la tabla
         $frag = ClientProfile::sqlFragment($extra);
+        $nameFrag = ClientProfile::nameSqlFragment($identity);
+        $nameCols = $nameFrag['cols'] ? ', ' . implode(', ', $nameFrag['cols']) : '';
+        $namePh   = $nameFrag['cols'] ? ', ' . implode(', ', array_fill(0, count($nameFrag['cols']), '?')) : '';
         $extraCols = $frag['cols'] ? ', ' . implode(', ', $frag['cols']) : '';
         $extraPh   = $frag['cols'] ? ', ' . $frag['placeholders'] : '';
 
         $params = [
             $roleId,
-            trim($data['name']),
+            $identity['name'],
             strtolower(trim($data['email'])),
             preg_replace('/\D+/', '', $data['phone'] ?? ''),
             password_hash($data['password'], PASSWORD_DEFAULT),
         ];
+        $params = array_merge($params, $nameFrag['values']);
         $params = array_merge($params, $frag['values']);
 
         Database::exec(
             'INSERT INTO users (role_id, name, email, phone, password_hash, email_verified, active'
-                . $extraCols .
-            ') VALUES (?, ?, ?, ?, ?, 0, 1' . $extraPh . ')',
+                . $nameCols . $extraCols .
+            ') VALUES (?, ?, ?, ?, ?, 0, 1' . $namePh . $extraPh . ')',
             $params
         );
         $uid = Database::lastId();

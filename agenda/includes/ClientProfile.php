@@ -71,6 +71,109 @@ final class ClientProfile
     }
 
     /**
+     * Detecta las columnas de nombre y apellidos disponibles en users.
+     * Mantiene compatibilidad con distintas migraciones posibles.
+     *
+     * @return array{first: ?string, last: ?string}
+     */
+    public static function nameColumns(): array
+    {
+        static $cols = null;
+        if ($cols !== null) return $cols;
+
+        $firstCandidates = ['first_name', 'nombres', 'nombre', 'given_name'];
+        $lastCandidates  = ['last_name', 'apellidos', 'apellido', 'family_name'];
+
+        $first = null;
+        foreach ($firstCandidates as $candidate) {
+            if (self::hasColumn($candidate)) {
+                $first = $candidate;
+                break;
+            }
+        }
+
+        $last = null;
+        foreach ($lastCandidates as $candidate) {
+            if (self::hasColumn($candidate)) {
+                $last = $candidate;
+                break;
+            }
+        }
+
+        return $cols = ['first' => $first, 'last' => $last];
+    }
+
+    /**
+     * Normaliza nombres y apellidos, conservando users.name como nombre completo
+     * para no romper calendarios, correos, pagos ni reportes existentes.
+     */
+    public static function normalizeName(array $input): array
+    {
+        $first = trim((string) ($input['first_name'] ?? $input['client_first_name'] ?? ''));
+        $last  = trim((string) ($input['last_name'] ?? $input['client_last_name'] ?? ''));
+        $full  = trim((string) ($input['name'] ?? $input['client_name'] ?? ''));
+
+        if ($first === '' && $last === '' && $full !== '') {
+            $parts = preg_split('/\s+/', $full) ?: [];
+            if (count($parts) > 1) {
+                $first = array_shift($parts);
+                $last = implode(' ', $parts);
+            } else {
+                $first = $full;
+            }
+        }
+
+        $first = preg_replace('/\s+/', ' ', $first) ?? $first;
+        $last = preg_replace('/\s+/', ' ', $last) ?? $last;
+        $fullName = trim($first . ' ' . $last);
+
+        return [
+            'first_name' => $first,
+            'last_name' => $last,
+            'name' => $fullName !== '' ? $fullName : $full,
+        ];
+    }
+
+    /**
+     * Fragmentos SQL para guardar nombre/apellidos solo si existen las columnas.
+     *
+     * @return array{set: string, cols: string[], values: list<mixed>}
+     */
+    public static function nameSqlFragment(array $clean): array
+    {
+        $nameCols = self::nameColumns();
+        $cols = [];
+        $vals = [];
+
+        if ($nameCols['first']) {
+            $cols[] = $nameCols['first'];
+            $vals[] = $clean['first_name'] ?? '';
+        }
+        if ($nameCols['last']) {
+            $cols[] = $nameCols['last'];
+            $vals[] = $clean['last_name'] ?? '';
+        }
+
+        return [
+            'cols' => $cols,
+            'set' => $cols ? implode(' = ?, ', $cols) . ' = ?' : '',
+            'values' => $vals,
+        ];
+    }
+
+    /** SELECT compatible para traer nombres/apellidos como aliases estables. */
+    public static function selectNamePartsExpr(string $alias = ''): string
+    {
+        $a = $alias ? rtrim($alias, '.') . '.' : '';
+        $nameCols = self::nameColumns();
+
+        $first = $nameCols['first'] ? ($a . $nameCols['first'] . ' AS first_name') : 'NULL AS first_name';
+        $last = $nameCols['last'] ? ($a . $nameCols['last'] . ' AS last_name') : 'NULL AS last_name';
+
+        return $first . ', ' . $last;
+    }
+
+    /**
      * Normaliza los 3 campos opcionales desde $_POST (o array similar).
      * Devuelve ['birth_date' => string|null, 'gender' => string|null, 'address' => string|null].
      */

@@ -11,8 +11,11 @@ $genderOptions = ClientProfile::genderOptions();
 
 function admin_client_payload(array $data): array
 {
+    $identity = ClientProfile::normalizeName($data);
     $base = [
-        'name' => trim($data['name'] ?? ''),
+        'first_name' => $identity['first_name'],
+        'last_name' => $identity['last_name'],
+        'name' => $identity['name'],
         'email' => strtolower(trim($data['email'] ?? '')),
         'phone' => preg_replace('/\D+/', '', $data['phone'] ?? ''),
     ];
@@ -24,8 +27,11 @@ function admin_validate_client(array $data, int $ignoreId = 0): array
     $client = admin_client_payload($data);
     $errors = [];
 
-    if (mb_strlen($client['name']) < 2) {
-        $errors['name'] = 'Ingresa el nombre completo.';
+    if (mb_strlen($client['first_name']) < 2) {
+        $errors['first_name'] = 'Ingresa el nombre del cliente.';
+    }
+    if (mb_strlen($client['last_name']) < 2) {
+        $errors['last_name'] = 'Ingresa los apellidos del cliente.';
     }
     if (!$client['email'] || !filter_var($client['email'], FILTER_VALIDATE_EMAIL)) {
         $errors['email'] = 'Ingresa un correo válido.';
@@ -71,9 +77,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($validated['ok']) {
             $client = $validated['client'];
             $extra = ClientProfile::sqlFragment($client);  // cols, set, placeholders, values
+            $nameExtra = ClientProfile::nameSqlFragment($client);
             if ($clientId) {
                 $sql = 'UPDATE users SET name = ?, email = ?, phone = ?';
                 $params = [$client['name'], $client['email'], $client['phone']];
+                if ($nameExtra['set']) {
+                    $sql .= ', ' . $nameExtra['set'];
+                    $params = array_merge($params, $nameExtra['values']);
+                }
                 if ($extra['set']) {
                     $sql .= ', ' . $extra['set'];
                     $params = array_merge($params, $extra['values']);
@@ -87,6 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $roleId = (int) Database::one("SELECT id FROM roles WHERE slug = 'cliente' LIMIT 1")['id'];
                 $cols = ['role_id', 'name', 'email', 'phone'];
                 $vals = [$roleId, $client['name'], $client['email'], $client['phone']];
+                foreach ($nameExtra['cols'] as $i => $c) { $cols[] = $c; $vals[] = $nameExtra['values'][$i]; }
                 foreach ($extra['cols'] as $i => $c) { $cols[] = $c; $vals[] = $extra['values'][$i]; }
                 $cols[] = 'password_hash'; $vals[] = password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT);
                 $cols[] = 'email_verified'; $vals[] = 1;
@@ -131,14 +143,52 @@ $q = trim($_GET['q'] ?? '');
 $where = ["r.slug = 'cliente'"];
 $params = [];
 if ($q !== '') {
-    $where[] = '(u.name LIKE ? OR u.email LIKE ? OR u.phone LIKE ?)';
+    $nameCols = ClientProfile::nameColumns();
+    $searchParts = ['u.name LIKE ?', 'u.email LIKE ?', 'u.phone LIKE ?'];
     $like = '%' . $q . '%';
     array_push($params, $like, $like, $like);
+    if ($nameCols['first']) {
+        $searchParts[] = 'u.' . $nameCols['first'] . ' LIKE ?';
+        $params[] = $like;
+    }
+    if ($nameCols['last']) {
+        $searchParts[] = 'u.' . $nameCols['last'] . ' LIKE ?';
+        $params[] = $like;
+    }
+    $where[] = '(' . implode(' OR ', $searchParts) . ')';
+}
+
+$perPageOptions = [25, 50, 100];
+$perPage = (int) ($_GET['per_page'] ?? 50);
+if (!in_array($perPage, $perPageOptions, true)) {
+    $perPage = 50;
+}
+
+$totalClients = (int) (Database::one(
+    "SELECT COUNT(DISTINCT u.id) AS n
+     FROM users u
+     JOIN roles r ON r.id = u.role_id
+     WHERE " . implode(' AND ', $where),
+    $params
+)['n'] ?? 0);
+
+$totalPages = max(1, (int) ceil($totalClients / $perPage));
+$page = max(1, min((int) ($_GET['page'] ?? 1), $totalPages));
+$offset = ($page - 1) * $perPage;
+
+function admin_clients_url(int $page, string $q, int $perPage): string
+{
+    $query = ['page' => $page, 'per_page' => $perPage];
+    if ($q !== '') {
+        $query['q'] = $q;
+    }
+    return url('admin/usuarios.php?' . http_build_query($query));
 }
 
 $profileCols = ClientProfile::selectExpr('u');
+$namePartCols = ClientProfile::selectNamePartsExpr('u');
 $clients = Database::all(
-    "SELECT u.id, u.name, u.email, u.phone, u.active, u.created_at, {$profileCols},
+    "SELECT u.id, u.name, {$namePartCols}, u.email, u.phone, u.active, u.created_at, {$profileCols},
             COUNT(a.id) AS appointment_count,
             SUM(CASE WHEN a.start_at >= NOW() AND st.slug IN ('programada','confirmada') THEN 1 ELSE 0 END) AS active_appointments
      FROM users u
@@ -148,9 +198,21 @@ $clients = Database::all(
      WHERE " . implode(' AND ', $where) . "
      GROUP BY u.id
      ORDER BY u.active DESC, u.name
-     LIMIT 300",
+     LIMIT {$perPage} OFFSET {$offset}",
     $params
 );
+
+foreach ($clients as &$client) {
+    $identity = ClientProfile::normalizeName([
+        'first_name' => $client['first_name'] ?? '',
+        'last_name' => $client['last_name'] ?? '',
+        'name' => $client['name'] ?? '',
+    ]);
+    $client['first_name'] = $identity['first_name'];
+    $client['last_name'] = $identity['last_name'];
+    $client['name'] = $identity['name'];
+}
+unset($client);
 
 $clientIds = array_column($clients, 'id');
 $histories = [];
@@ -189,10 +251,18 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
   <div class="bnc-card-body">
     <form method="GET" class="row g-3 align-items-end">
       <div class="col-md-8">
-        <label class="bnc-label">Nombre, correo o teléfono</label>
+        <label class="bnc-label">Nombre, apellidos, correo o teléfono</label>
         <input name="q" class="form-control" value="<?= e($q) ?>" placeholder="Buscar cliente">
       </div>
-      <div class="col-md-4 d-flex gap-2">
+      <div class="col-md-2">
+        <label class="bnc-label">Por página</label>
+        <select name="per_page" class="form-select">
+          <?php foreach ($perPageOptions as $option): ?>
+            <option value="<?= $option ?>" <?= $perPage === $option ? 'selected' : '' ?>><?= $option ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="col-md-2 d-flex gap-2">
         <button class="btn btn-bnc-primary" type="submit"><i class="bi bi-search"></i> Buscar</button>
         <a class="btn btn-bnc-outline" href="<?= url('admin/usuarios.php') ?>">Limpiar</a>
       </div>
@@ -203,13 +273,14 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
 <div class="bnc-card">
   <div class="bnc-card-header d-flex align-items-center">
     <h2 class="h6 fw-bold mb-0 me-auto">Listado de clientes</h2>
-    <span class="badge bg-secondary"><?= count($clients) ?> resultado(s)</span>
+    <span class="badge bg-secondary"><?= number_format($totalClients) ?> resultado(s)</span>
   </div>
   <div class="table-responsive">
     <table class="bnc-table mb-0">
       <thead>
         <tr>
-          <th>Cliente</th>
+          <th>Nombres</th>
+          <th>Apellidos</th>
           <th>Contacto</th>
           <th>Citas</th>
           <th>Estado</th>
@@ -219,10 +290,11 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
       </thead>
       <tbody>
         <?php if (!$clients): ?>
-          <tr><td colspan="6" class="text-center text-muted py-4">No hay clientes con esa búsqueda.</td></tr>
+          <tr><td colspan="7" class="text-center text-muted py-4">No hay clientes con esa búsqueda.</td></tr>
         <?php else: foreach ($clients as $client): ?>
           <tr>
-            <td class="fw-bold"><?= e($client['name']) ?></td>
+            <td class="fw-bold"><?= e($client['first_name']) ?></td>
+            <td><?= e($client['last_name']) ?></td>
             <td><?= e($client['phone']) ?><br><small class="text-muted"><?= e($client['email']) ?></small></td>
             <td>
               <?= (int) $client['appointment_count'] ?> total<br>
@@ -244,6 +316,44 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
       </tbody>
     </table>
   </div>
+  <?php if ($totalClients > 0): ?>
+    <?php
+      $from = $offset + 1;
+      $to = min($offset + count($clients), $totalClients);
+      $startPage = max(1, $page - 2);
+      $endPage = min($totalPages, $page + 2);
+    ?>
+    <div class="bnc-card-body border-top d-flex flex-wrap align-items-center gap-3">
+      <div class="text-muted small me-auto">
+        Mostrando <?= number_format($from) ?>-<?= number_format($to) ?> de <?= number_format($totalClients) ?> clientes
+      </div>
+      <?php if ($totalPages > 1): ?>
+        <nav aria-label="Paginación de clientes">
+          <ul class="pagination pagination-sm mb-0">
+            <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
+              <a class="page-link" href="<?= $page > 1 ? e(admin_clients_url($page - 1, $q, $perPage)) : '#' ?>">Anterior</a>
+            </li>
+            <?php if ($startPage > 1): ?>
+              <li class="page-item"><a class="page-link" href="<?= e(admin_clients_url(1, $q, $perPage)) ?>">1</a></li>
+              <?php if ($startPage > 2): ?><li class="page-item disabled"><span class="page-link">...</span></li><?php endif; ?>
+            <?php endif; ?>
+            <?php for ($p = $startPage; $p <= $endPage; $p++): ?>
+              <li class="page-item <?= $p === $page ? 'active' : '' ?>">
+                <a class="page-link" href="<?= e(admin_clients_url($p, $q, $perPage)) ?>"><?= $p ?></a>
+              </li>
+            <?php endfor; ?>
+            <?php if ($endPage < $totalPages): ?>
+              <?php if ($endPage < $totalPages - 1): ?><li class="page-item disabled"><span class="page-link">...</span></li><?php endif; ?>
+              <li class="page-item"><a class="page-link" href="<?= e(admin_clients_url($totalPages, $q, $perPage)) ?>"><?= $totalPages ?></a></li>
+            <?php endif; ?>
+            <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
+              <a class="page-link" href="<?= $page < $totalPages ? e(admin_clients_url($page + 1, $q, $perPage)) : '#' ?>">Siguiente</a>
+            </li>
+          </ul>
+        </nav>
+      <?php endif; ?>
+    </div>
+  <?php endif; ?>
 </div>
 
 <div class="modal fade" id="clientCreateModal" tabindex="-1">
@@ -257,10 +367,17 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          <div class="mb-3">
-            <label class="bnc-label">Nombre completo</label>
-            <input name="name" class="form-control <?= isset($errors['name']) && !$editingId ? 'is-invalid' : '' ?>" value="<?= !$editingId ? e($_POST['name'] ?? '') : '' ?>">
-            <?php if (isset($errors['name']) && !$editingId): ?><div class="invalid-feedback"><?= e($errors['name']) ?></div><?php endif; ?>
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="bnc-label">Nombres</label>
+              <input name="first_name" class="form-control <?= isset($errors['first_name']) && !$editingId ? 'is-invalid' : '' ?>" value="<?= !$editingId ? e($_POST['first_name'] ?? '') : '' ?>" autocomplete="given-name">
+              <?php if (isset($errors['first_name']) && !$editingId): ?><div class="invalid-feedback"><?= e($errors['first_name']) ?></div><?php endif; ?>
+            </div>
+            <div class="col-md-6">
+              <label class="bnc-label">Apellidos</label>
+              <input name="last_name" class="form-control <?= isset($errors['last_name']) && !$editingId ? 'is-invalid' : '' ?>" value="<?= !$editingId ? e($_POST['last_name'] ?? '') : '' ?>" autocomplete="family-name">
+              <?php if (isset($errors['last_name']) && !$editingId): ?><div class="invalid-feedback"><?= e($errors['last_name']) ?></div><?php endif; ?>
+            </div>
           </div>
           <div class="mb-3">
             <label class="bnc-label">Correo</label>
@@ -321,10 +438,17 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
-            <div class="mb-3">
-              <label class="bnc-label">Nombre completo</label>
-              <input name="name" class="form-control <?= isset($errors['name']) && $editingId === (int) $client['id'] ? 'is-invalid' : '' ?>" value="<?= e($editingId === (int) $client['id'] ? ($_POST['name'] ?? $client['name']) : $client['name']) ?>">
-              <?php if (isset($errors['name']) && $editingId === (int) $client['id']): ?><div class="invalid-feedback"><?= e($errors['name']) ?></div><?php endif; ?>
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="bnc-label">Nombres</label>
+                <input name="first_name" class="form-control <?= isset($errors['first_name']) && $editingId === (int) $client['id'] ? 'is-invalid' : '' ?>" value="<?= e($editingId === (int) $client['id'] ? ($_POST['first_name'] ?? $client['first_name']) : $client['first_name']) ?>" autocomplete="given-name">
+                <?php if (isset($errors['first_name']) && $editingId === (int) $client['id']): ?><div class="invalid-feedback"><?= e($errors['first_name']) ?></div><?php endif; ?>
+              </div>
+              <div class="col-md-6">
+                <label class="bnc-label">Apellidos</label>
+                <input name="last_name" class="form-control <?= isset($errors['last_name']) && $editingId === (int) $client['id'] ? 'is-invalid' : '' ?>" value="<?= e($editingId === (int) $client['id'] ? ($_POST['last_name'] ?? $client['last_name']) : $client['last_name']) ?>" autocomplete="family-name">
+                <?php if (isset($errors['last_name']) && $editingId === (int) $client['id']): ?><div class="invalid-feedback"><?= e($errors['last_name']) ?></div><?php endif; ?>
+              </div>
             </div>
             <div class="mb-3">
               <label class="bnc-label">Correo</label>
@@ -383,6 +507,14 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         </div>
         <div class="modal-body">
           <div class="row g-3 mb-4">
+            <div class="col-md-4">
+              <div class="bnc-label text-uppercase small text-muted">Nombres</div>
+              <div><?= e($client['first_name']) ?></div>
+            </div>
+            <div class="col-md-4">
+              <div class="bnc-label text-uppercase small text-muted">Apellidos</div>
+              <div><?= e($client['last_name']) ?></div>
+            </div>
             <div class="col-md-4">
               <div class="bnc-label text-uppercase small text-muted">Correo</div>
               <div><?= e($client['email']) ?></div>

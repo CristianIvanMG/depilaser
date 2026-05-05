@@ -86,6 +86,8 @@ if ($isEdit) {
 $form = [
     'client_mode' => $_POST['client_mode'] ?? 'existing',
     'user_id' => $_POST['user_id'] ?? ($appointment['user_id'] ?? ''),
+    'client_first_name' => $_POST['client_first_name'] ?? '',
+    'client_last_name' => $_POST['client_last_name'] ?? '',
     'client_name' => $_POST['client_name'] ?? '',
     'client_email' => $_POST['client_email'] ?? '',
     'client_phone' => $_POST['client_phone'] ?? '',
@@ -101,13 +103,19 @@ $form = [
 
 function admin_validate_client_input(array $data): array
 {
-    $name = trim($data['client_name'] ?? '');
+    $identity = ClientProfile::normalizeName($data);
+    $firstName = $identity['first_name'];
+    $lastName = $identity['last_name'];
+    $name = $identity['name'];
     $email = strtolower(trim($data['client_email'] ?? ''));
     $phone = preg_replace('/\D+/', '', $data['client_phone'] ?? '');
     $errors = [];
 
-    if (mb_strlen($name) < 2) {
-        $errors['client_name'] = 'Ingresa el nombre del cliente.';
+    if (mb_strlen($firstName) < 2) {
+        $errors['client_first_name'] = 'Ingresa el nombre del cliente.';
+    }
+    if (mb_strlen($lastName) < 2) {
+        $errors['client_last_name'] = 'Ingresa los apellidos del cliente.';
     }
     if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errors['client_email'] = 'Ingresa un correo valido.';
@@ -118,7 +126,13 @@ function admin_validate_client_input(array $data): array
         $errors['client_phone'] = 'Ingresa un telefono de al menos 10 digitos.';
     }
 
-    return ['ok' => !$errors, 'errors' => $errors, 'data' => compact('name', 'email', 'phone')];
+    return ['ok' => !$errors, 'errors' => $errors, 'data' => [
+        'first_name' => $firstName,
+        'last_name' => $lastName,
+        'name' => $name,
+        'email' => $email,
+        'phone' => $phone,
+    ]];
 }
 
 function admin_create_client(array $data): int
@@ -130,10 +144,20 @@ function admin_create_client(array $data): int
     $client = $validated['data'];
 
     $roleId = (int) Database::one("SELECT id FROM roles WHERE slug = 'cliente' LIMIT 1")['id'];
+    $cols = ['role_id', 'name', 'email', 'phone'];
+    $vals = [$roleId, $client['name'], $client['email'], $client['phone']];
+    $nameExtra = ClientProfile::nameSqlFragment($client);
+    foreach ($nameExtra['cols'] as $i => $col) {
+        $cols[] = $col;
+        $vals[] = $nameExtra['values'][$i];
+    }
+    $cols[] = 'password_hash'; $vals[] = password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT);
+    $cols[] = 'email_verified'; $vals[] = 1;
+    $cols[] = 'active'; $vals[] = 1;
+    $placeholders = implode(', ', array_fill(0, count($cols), '?'));
     Database::exec(
-        'INSERT INTO users (role_id, name, email, phone, password_hash, email_verified, active)
-         VALUES (?, ?, ?, ?, ?, 1, 1)',
-        [$roleId, $client['name'], $client['email'], $client['phone'], password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT)]
+        'INSERT INTO users (' . implode(', ', $cols) . ') VALUES (' . $placeholders . ')',
+        $vals
     );
     $userId = Database::lastId();
     Auth::audit('admin_client_create', 'user', $userId);
@@ -476,15 +500,19 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
             </div>
 
             <div id="newClientBox" class="row g-3 d-none">
-              <div class="col-md-4">
-                <input class="form-control <?= isset($errors['client_name']) ? 'is-invalid' : '' ?>" name="client_name" value="<?= e($form['client_name']) ?>" placeholder="Nombre completo">
-                <?php if (isset($errors['client_name'])): ?><div class="invalid-feedback"><?= e($errors['client_name']) ?></div><?php endif; ?>
+              <div class="col-md-3">
+                <input class="form-control <?= isset($errors['client_first_name']) ? 'is-invalid' : '' ?>" name="client_first_name" value="<?= e($form['client_first_name']) ?>" placeholder="Nombres" autocomplete="given-name">
+                <?php if (isset($errors['client_first_name'])): ?><div class="invalid-feedback"><?= e($errors['client_first_name']) ?></div><?php endif; ?>
               </div>
-              <div class="col-md-4">
+              <div class="col-md-3">
+                <input class="form-control <?= isset($errors['client_last_name']) ? 'is-invalid' : '' ?>" name="client_last_name" value="<?= e($form['client_last_name']) ?>" placeholder="Apellidos" autocomplete="family-name">
+                <?php if (isset($errors['client_last_name'])): ?><div class="invalid-feedback"><?= e($errors['client_last_name']) ?></div><?php endif; ?>
+              </div>
+              <div class="col-md-3">
                 <input type="email" class="form-control <?= isset($errors['client_email']) ? 'is-invalid' : '' ?>" name="client_email" value="<?= e($form['client_email']) ?>" placeholder="correo@cliente.com">
                 <?php if (isset($errors['client_email'])): ?><div class="invalid-feedback"><?= e($errors['client_email']) ?></div><?php endif; ?>
               </div>
-              <div class="col-md-4">
+              <div class="col-md-3">
                 <input class="form-control <?= isset($errors['client_phone']) ? 'is-invalid' : '' ?>" name="client_phone" value="<?= e($form['client_phone']) ?>" placeholder="Telefono">
                 <?php if (isset($errors['client_phone'])): ?><div class="invalid-feedback"><?= e($errors['client_phone']) ?></div><?php endif; ?>
               </div>

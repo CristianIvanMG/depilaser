@@ -21,7 +21,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $errors = $result['errors'];
     set_old([
-        'name'       => $_POST['name']       ?? '',
+        'first_name' => $_POST['first_name'] ?? '',
+        'last_name'  => $_POST['last_name']  ?? '',
         'email'      => $_POST['email']      ?? '',
         'phone'      => $_POST['phone']      ?? '',
         'birth_date' => $_POST['birth_date'] ?? '',
@@ -56,11 +57,19 @@ require __DIR__ . '/includes/layouts/header_client.php';
         <form method="POST" novalidate>
           <?= Csrf::input() ?>
 
-          <div class="mb-3">
-            <label class="bnc-label" for="name">Nombre completo</label>
-            <input type="text" class="form-control <?= isset($errors['name']) ? 'is-invalid' : '' ?>"
-                   id="name" name="name" value="<?= old('name') ?>" required autocomplete="name" minlength="2">
-            <?php if (isset($errors['name'])): ?><div class="invalid-feedback"><?= e($errors['name']) ?></div><?php endif; ?>
+          <div class="row g-3">
+            <div class="col-12 col-md-6 mb-3">
+              <label class="bnc-label" for="first_name">Nombres</label>
+              <input type="text" class="form-control <?= isset($errors['first_name']) ? 'is-invalid' : '' ?>"
+                     id="first_name" name="first_name" value="<?= old('first_name') ?>" required autocomplete="given-name" minlength="2">
+              <?php if (isset($errors['first_name'])): ?><div class="invalid-feedback"><?= e($errors['first_name']) ?></div><?php endif; ?>
+            </div>
+            <div class="col-12 col-md-6 mb-3">
+              <label class="bnc-label" for="last_name">Apellidos</label>
+              <input type="text" class="form-control <?= isset($errors['last_name']) ? 'is-invalid' : '' ?>"
+                     id="last_name" name="last_name" value="<?= old('last_name') ?>" required autocomplete="family-name" minlength="2">
+              <?php if (isset($errors['last_name'])): ?><div class="invalid-feedback"><?= e($errors['last_name']) ?></div><?php endif; ?>
+            </div>
           </div>
 
           <div class="row g-3">
