@@ -234,7 +234,7 @@ final class Auth
         return match ($roleSlug) {
             self::ROLE_SUPERADMIN, self::ROLE_ADMIN => url('admin/'),
             self::ROLE_PROFESSIONAL                 => url('admin/calendario.php'),
-            self::ROLE_CLIENT                       => url('mis-citas.php'),
+            self::ROLE_CLIENT                       => url('index.php'),
             default                                 => url(''),
         };
     }

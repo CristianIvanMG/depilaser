@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'pay')
 
 $payment = PaymentService::paymentForAppointment($appointmentId);
 $paymentStatus = (string) ($appointment['payment_status'] ?? 'not_required');
-$mercadoPagoReady = PaymentService::mercadoPagoConfigured();
+$mercadoPagoReady = PaymentService::mercadoPagoConfigured($appointmentId);
 $isReleased = in_array($paymentStatus, ['failed', 'expired', 'cancelled'], true) || $appointment['status_slug'] === 'cancelada';
 $statusCopy = match ($paymentStatus) {
     'paid' => [

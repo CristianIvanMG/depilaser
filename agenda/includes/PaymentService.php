@@ -106,7 +106,7 @@ final class PaymentService
             return ['ok' => false, 'error' => 'El tiempo para pagar esta cita expiró. Elige un nuevo horario.'];
         }
 
-        $cfg = self::mercadoPagoConfig();
+        $cfg = self::mercadoPagoConfig($d);
         if (!$cfg['access_token']) {
             return ['ok' => false, 'error' => 'Mercado Pago no está configurado.'];
         }
@@ -153,7 +153,7 @@ final class PaymentService
             ],
         ];
 
-        $response = self::mpRequest('POST', '/checkout/preferences', $payload);
+        $response = self::mpRequest('POST', '/checkout/preferences', $payload, $cfg);
         if (!$response['ok']) {
             return ['ok' => false, 'error' => $response['error'] ?? 'No fue posible iniciar el pago.'];
         }
@@ -180,11 +180,10 @@ final class PaymentService
     public static function handleMercadoPagoWebhook(array $payload, array $query, array $headers): array
     {
         self::ensureSchema();
-        $cfg = self::mercadoPagoConfig();
-        if (!$cfg['access_token']) {
+        if (!self::mercadoPagoAnyConfigured()) {
             return ['ok' => false, 'error' => 'Mercado Pago no configurado.'];
         }
-        if ($cfg['webhook_secret'] && !self::validMercadoPagoSignature($query, $headers, $cfg['webhook_secret'])) {
+        if (!self::validMercadoPagoWebhookSignature($query, $headers)) {
             return ['ok' => false, 'error' => 'Firma inválida.'];
         }
 
@@ -194,7 +193,11 @@ final class PaymentService
             return ['ok' => true, 'ignored' => true];
         }
 
-        $payment = self::mpRequest('GET', '/v1/payments/' . rawurlencode($paymentId));
+        $externalRef = (string) ($payload['external_reference'] ?? $query['external_reference'] ?? '');
+        $cfg = $externalRef !== '' ? self::mercadoPagoConfigForExternalReference($externalRef) : null;
+        $payment = ($cfg && !empty($cfg['access_token']))
+            ? self::mpRequest('GET', '/v1/payments/' . rawurlencode($paymentId), null, $cfg)
+            : self::mpRequestAcrossAccounts('GET', '/v1/payments/' . rawurlencode($paymentId));
         if (!$payment['ok']) {
             return ['ok' => false, 'error' => $payment['error'] ?? 'No fue posible consultar el pago.'];
         }
@@ -249,7 +252,11 @@ final class PaymentService
     public static function syncMercadoPagoReturn(int $appointmentId, array $query): array
     {
         self::ensureSchema();
-        $cfg = self::mercadoPagoConfig();
+        $d = self::hydrateAppointment($appointmentId);
+        if (!$d) {
+            return ['ok' => false, 'error' => 'Cita no encontrada.'];
+        }
+        $cfg = self::mercadoPagoConfig($d);
         if (!$cfg['access_token']) {
             return ['ok' => false, 'error' => 'Mercado Pago no configurado.'];
         }
@@ -263,7 +270,7 @@ final class PaymentService
         );
 
         if ($paymentId !== '' && $paymentId !== 'null') {
-            $payment = self::mpRequest('GET', '/v1/payments/' . rawurlencode($paymentId));
+            $payment = self::mpRequest('GET', '/v1/payments/' . rawurlencode($paymentId), null, $cfg);
             if ($payment['ok']) {
                 return self::applyMercadoPagoPayment($payment['body']);
             }
@@ -278,7 +285,9 @@ final class PaymentService
         $externalRef = self::externalReference($appointmentId);
         $search = self::mpRequest(
             'GET',
-            '/v1/payments/search?external_reference=' . rawurlencode($externalRef) . '&sort=date_created&criteria=desc'
+            '/v1/payments/search?external_reference=' . rawurlencode($externalRef) . '&sort=date_created&criteria=desc',
+            null,
+            $cfg
         );
         if (!$search['ok']) {
             return ['ok' => false, 'error' => $search['error'] ?? 'No fue posible consultar el pago.'];
@@ -507,9 +516,13 @@ final class PaymentService
         };
     }
 
-    public static function mercadoPagoConfigured(): bool
+    public static function mercadoPagoConfigured(?int $appointmentId = null): bool
     {
-        return self::mercadoPagoConfig()['access_token'] !== '';
+        if ($appointmentId) {
+            $d = self::hydrateAppointment($appointmentId);
+            return $d ? self::mercadoPagoConfig($d)['access_token'] !== '' : false;
+        }
+        return self::mercadoPagoAnyConfigured();
     }
 
     private static function cancelUnpaidAppointment(int $appointmentId, string $reason, string $paymentStatus = 'failed'): void
@@ -625,7 +638,7 @@ final class PaymentService
             "SELECT a.*, st.slug AS status_slug,
                     u.name AS client_name, u.email AS client_email,
                     s.name AS service_name, s.price_mxn,
-                    b.name AS branch_name
+                    b.id AS branch_id, b.slug AS branch_slug, b.name AS branch_name
              FROM appointments a
              JOIN appointment_statuses st ON st.id = a.status_id
              JOIN users u ON u.id = a.user_id
@@ -636,16 +649,108 @@ final class PaymentService
         );
     }
 
-    private static function mercadoPagoConfig(): array
+    private static function mercadoPagoConfig(?array $appointmentOrBranch = null): array
+    {
+        $cfg = self::baseMercadoPagoConfig();
+        $branchCfg = self::mercadoPagoBranchConfig($appointmentOrBranch, $cfg);
+        if ($branchCfg) {
+            $cfg = array_replace($cfg, $branchCfg);
+        }
+
+        $token = (string) ($cfg['access_token'] ?? getenv('MP_ACCESS_TOKEN') ?: '');
+        $secret = (string) ($cfg['webhook_secret'] ?? getenv('MP_WEBHOOK_SECRET') ?: '');
+        $sandbox = (bool) ($cfg['sandbox'] ?? getenv('MP_SANDBOX') ?: false);
+
+        return [
+            'access_token' => $token,
+            'webhook_secret' => $secret,
+            'sandbox' => $sandbox,
+            'branch_id' => isset($appointmentOrBranch['branch_id']) ? (int) $appointmentOrBranch['branch_id'] : null,
+            'branch_slug' => $appointmentOrBranch['branch_slug'] ?? null,
+        ];
+    }
+
+    private static function baseMercadoPagoConfig(): array
     {
         global $CONFIG;
         $cfg = $CONFIG['payments']['mercadopago'] ?? [];
         $secretCfg = self::secretsPaymentConfig();
-        $cfg = array_replace($cfg, $secretCfg);
-        $token = (string) ($cfg['access_token'] ?? getenv('MP_ACCESS_TOKEN') ?: '');
-        $secret = (string) ($cfg['webhook_secret'] ?? getenv('MP_WEBHOOK_SECRET') ?: '');
-        $sandbox = (bool) ($cfg['sandbox'] ?? getenv('MP_SANDBOX') ?: false);
-        return ['access_token' => $token, 'webhook_secret' => $secret, 'sandbox' => $sandbox];
+        return array_replace($cfg, $secretCfg);
+    }
+
+    private static function mercadoPagoBranchConfig(?array $appointmentOrBranch, array $cfg): array
+    {
+        if (!$appointmentOrBranch) {
+            return [];
+        }
+        $branches = $cfg['branches'] ?? $cfg['branch_tokens'] ?? [];
+        if (!is_array($branches) || !$branches) {
+            return [];
+        }
+
+        $branchId = isset($appointmentOrBranch['branch_id']) ? (string) (int) $appointmentOrBranch['branch_id'] : '';
+        $branchSlug = (string) ($appointmentOrBranch['branch_slug'] ?? '');
+        $candidates = array_values(array_filter([$branchId, $branchSlug]));
+
+        foreach ($candidates as $key) {
+            if (!array_key_exists($key, $branches)) {
+                continue;
+            }
+            $branchCfg = $branches[$key];
+            if (is_string($branchCfg)) {
+                return ['access_token' => $branchCfg];
+            }
+            if (is_array($branchCfg)) {
+                return $branchCfg;
+            }
+        }
+
+        return [];
+    }
+
+    private static function mercadoPagoConfigForExternalReference(string $externalRef): ?array
+    {
+        $appointmentId = self::appointmentIdFromExternalReference($externalRef);
+        if ($appointmentId <= 0) {
+            return null;
+        }
+        $d = self::hydrateAppointment($appointmentId);
+        return $d ? self::mercadoPagoConfig($d) : null;
+    }
+
+    private static function mercadoPagoConfiguredAccounts(): array
+    {
+        $base = self::baseMercadoPagoConfig();
+        $accounts = [];
+        $global = self::mercadoPagoConfig(null);
+        if ($global['access_token'] !== '') {
+            $accounts['global'] = $global;
+        }
+
+        $branches = $base['branches'] ?? $base['branch_tokens'] ?? [];
+        if (is_array($branches)) {
+            foreach ($branches as $key => $branchCfg) {
+                $cfg = is_string($branchCfg) ? ['access_token' => $branchCfg] : (is_array($branchCfg) ? $branchCfg : []);
+                $cfg = array_replace($base, $cfg);
+                unset($cfg['branches'], $cfg['branch_tokens']);
+                $token = (string) ($cfg['access_token'] ?? '');
+                if ($token === '') {
+                    continue;
+                }
+                $accounts['branch:' . (string) $key] = [
+                    'access_token' => $token,
+                    'webhook_secret' => (string) ($cfg['webhook_secret'] ?? ''),
+                    'sandbox' => (bool) ($cfg['sandbox'] ?? false),
+                ];
+            }
+        }
+
+        return $accounts;
+    }
+
+    private static function mercadoPagoAnyConfigured(): bool
+    {
+        return (bool) self::mercadoPagoConfiguredAccounts();
     }
 
     private static function secretsPaymentConfig(): array
@@ -677,9 +782,12 @@ final class PaymentService
         return [];
     }
 
-    private static function mpRequest(string $method, string $path, ?array $payload = null): array
+    private static function mpRequest(string $method, string $path, ?array $payload = null, ?array $cfg = null): array
     {
-        $cfg = self::mercadoPagoConfig();
+        $cfg ??= self::mercadoPagoConfig(null);
+        if (empty($cfg['access_token'])) {
+            return ['ok' => false, 'error' => 'Mercado Pago no configurado.'];
+        }
         $ch = curl_init('https://api.mercadopago.com' . $path);
         $headers = [
             'Authorization: Bearer ' . $cfg['access_token'],
@@ -709,6 +817,39 @@ final class PaymentService
             return ['ok' => false, 'error' => $body['message'] ?? 'Mercado Pago rechazó la solicitud.', 'body' => $body, 'http' => $http];
         }
         return ['ok' => true, 'body' => $body, 'http' => $http];
+    }
+
+    private static function mpRequestAcrossAccounts(string $method, string $path, ?array $payload = null): array
+    {
+        $last = ['ok' => false, 'error' => 'Mercado Pago no configurado.'];
+        foreach (self::mercadoPagoConfiguredAccounts() as $cfg) {
+            $result = self::mpRequest($method, $path, $payload, $cfg);
+            if (!empty($result['ok'])) {
+                return $result;
+            }
+            $last = $result;
+        }
+        return $last;
+    }
+
+    private static function validMercadoPagoWebhookSignature(array $query, array $headers): bool
+    {
+        $secrets = [];
+        foreach (self::mercadoPagoConfiguredAccounts() as $cfg) {
+            $secret = (string) ($cfg['webhook_secret'] ?? '');
+            if ($secret !== '') {
+                $secrets[$secret] = true;
+            }
+        }
+        if (!$secrets) {
+            return true;
+        }
+        foreach (array_keys($secrets) as $secret) {
+            if (self::validMercadoPagoSignature($query, $headers, $secret)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static function validMercadoPagoSignature(array $query, array $headers, string $secret): bool
