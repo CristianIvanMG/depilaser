@@ -128,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $services = Database::all(
     "SELECT s.*,
-            GROUP_CONCAT(b.name ORDER BY b.display_order SEPARATOR ', ') AS branch_names,
+            GROUP_CONCAT(DISTINCT b.name ORDER BY b.display_order SEPARATOR ', ') AS branch_names,
             COUNT(DISTINCT a.id) AS appointment_count
      FROM services s
      LEFT JOIN service_branches sb ON sb.service_id=s.id
@@ -137,7 +137,7 @@ $services = Database::all(
      GROUP BY s.id
      ORDER BY s.active DESC, s.display_order, s.name"
 );
-$serviceBranchRows = Database::all('SELECT service_id, branch_id FROM service_branches');
+$serviceBranchRows = Database::all('SELECT DISTINCT service_id, branch_id FROM service_branches');
 $serviceBranches = [];
 foreach ($serviceBranchRows as $row) {
     $serviceBranches[(int) $row['service_id']][] = (int) $row['branch_id'];
