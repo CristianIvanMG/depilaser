@@ -21,12 +21,14 @@ final class PaymentService
             "CREATE TABLE IF NOT EXISTS appointment_payments (
                 id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
                 appointment_id INT UNSIGNED NOT NULL,
-                provider ENUM('mercadopago','stripe') NOT NULL DEFAULT 'mercadopago',
+                provider ENUM('mercadopago','stripe','manual') NOT NULL DEFAULT 'mercadopago',
                 provider_payment_id VARCHAR(120) NULL,
                 provider_preference_id VARCHAR(120) NULL,
                 external_reference VARCHAR(80) NOT NULL,
                 status ENUM('created','pending','approved','rejected','cancelled','refunded','expired') NOT NULL DEFAULT 'created',
                 payment_method VARCHAR(80) NULL,
+                payment_reference VARCHAR(190) NULL,
+                registered_by_user_id INT UNSIGNED NULL,
                 amount_mxn DECIMAL(10,2) NOT NULL,
                 currency CHAR(3) NOT NULL DEFAULT 'MXN',
                 checkout_url TEXT NULL,
@@ -39,19 +41,26 @@ final class PaymentService
                 INDEX idx_payment_appointment (appointment_id),
                 INDEX idx_payment_preference (provider_preference_id),
                 INDEX idx_payment_status (status),
-                CONSTRAINT fk_payment_appointment FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE CASCADE
+                INDEX idx_payment_registered_by (registered_by_user_id),
+                CONSTRAINT fk_payment_appointment FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE CASCADE,
+                CONSTRAINT fk_payment_registered_by FOREIGN KEY (registered_by_user_id) REFERENCES users(id) ON DELETE SET NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
         );
+        self::ensureProviderAllowsManual();
         self::ensurePaymentColumn('provider_payment_id', 'VARCHAR(120) NULL');
         self::ensurePaymentColumn('provider_preference_id', 'VARCHAR(120) NULL');
         self::ensurePaymentColumn('external_reference', 'VARCHAR(80) NULL');
         self::ensurePaymentColumn("status", "ENUM('created','pending','approved','rejected','cancelled','refunded','expired') NOT NULL DEFAULT 'created'");
         self::ensurePaymentColumn('payment_method', 'VARCHAR(80) NULL');
+        self::ensurePaymentColumn('payment_reference', 'VARCHAR(190) NULL');
+        self::ensurePaymentColumn('registered_by_user_id', 'INT UNSIGNED NULL');
         self::ensurePaymentColumn('amount_mxn', 'DECIMAL(10,2) NOT NULL DEFAULT 0.00');
         self::ensurePaymentColumn("currency", "CHAR(3) NOT NULL DEFAULT 'MXN'");
         self::ensurePaymentColumn('checkout_url', 'TEXT NULL');
         self::ensurePaymentColumn('raw_payload', 'JSON NULL');
         self::ensurePaymentColumn('paid_at', 'DATETIME NULL');
+        self::ensurePaymentIndex('idx_payment_registered_by', 'registered_by_user_id');
+        self::ensurePaymentRegisteredByConstraint();
     }
 
     public static function servicePaymentConfig(array $service): array
@@ -371,9 +380,119 @@ final class PaymentService
     {
         self::ensureSchema();
         return Database::one(
-            'SELECT * FROM appointment_payments WHERE appointment_id = ? ORDER BY id DESC LIMIT 1',
+            "SELECT * FROM appointment_payments
+             WHERE appointment_id = ?
+             ORDER BY (status = 'approved') DESC, paid_at DESC, id DESC
+             LIMIT 1",
             [$appointmentId]
         );
+    }
+
+    public static function paidSummaryForAppointment(int $appointmentId): array
+    {
+        $payment = self::paymentForAppointment($appointmentId);
+        return [
+            'is_paid' => $payment && ($payment['status'] ?? '') === 'approved',
+            'payment' => $payment,
+        ];
+    }
+
+    public static function registerManualPayment(
+        int $appointmentId,
+        int $actorUserId,
+        string $method = 'manual',
+        ?string $reference = null,
+        ?float $amount = null,
+        bool $sendReceipt = true
+    ): array {
+        self::ensureSchema();
+        AppointmentService::ensureReceiptSchema();
+
+        $d = self::hydrateAppointment($appointmentId);
+        if (!$d) {
+            return ['ok' => false, 'error' => 'Cita no encontrada.'];
+        }
+        if (($d['status_slug'] ?? '') !== 'atendida') {
+            return ['ok' => false, 'error' => 'El pago solo puede registrarse cuando la cita está Atendida.'];
+        }
+
+        $existing = self::paymentForAppointment($appointmentId);
+        if ($existing && ($existing['status'] ?? '') === 'approved') {
+            return ['ok' => true, 'already_paid' => true, 'payment' => $existing];
+        }
+
+        $amount = $amount ?? (float) ($d['payment_amount_mxn'] ?? 0);
+        if ($amount <= 0) {
+            $amount = (float) ($d['price_mxn'] ?? 0);
+        }
+        if ($amount < 0) {
+            return ['ok' => false, 'error' => 'El monto de pago no es válido.'];
+        }
+
+        $method = trim($method) ?: 'manual';
+        $reference = trim((string) $reference) ?: null;
+        $externalRef = 'BNC-MANUAL-' . $appointmentId;
+        $raw = json_encode([
+            'source' => 'admin',
+            'registered_by_user_id' => $actorUserId,
+            'method' => $method,
+            'reference' => $reference,
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+        if ($existing) {
+            Database::exec(
+                "UPDATE appointment_payments
+                 SET provider = 'manual',
+                     provider_payment_id = NULL,
+                     provider_preference_id = NULL,
+                     external_reference = ?,
+                     status = 'approved',
+                     payment_method = ?,
+                     payment_reference = ?,
+                     registered_by_user_id = ?,
+                     amount_mxn = ?,
+                     raw_payload = ?,
+                     paid_at = COALESCE(paid_at, NOW())
+                 WHERE id = ?",
+                [$externalRef, $method, $reference, $actorUserId, $amount, $raw, (int) $existing['id']]
+            );
+        } else {
+            Database::exec(
+                "INSERT INTO appointment_payments
+                    (appointment_id, provider, external_reference, status, payment_method, payment_reference,
+                     registered_by_user_id, amount_mxn, raw_payload, paid_at)
+                 VALUES (?, 'manual', ?, 'approved', ?, ?, ?, ?, ?, NOW())",
+                [$appointmentId, $externalRef, $method, $reference, $actorUserId, $amount, $raw]
+            );
+        }
+
+        Database::exec(
+            "UPDATE appointments
+             SET payment_status = 'paid',
+                 payment_amount_mxn = CASE WHEN payment_amount_mxn <= 0 THEN ? ELSE payment_amount_mxn END
+             WHERE id = ?",
+            [$amount, $appointmentId]
+        );
+
+        $payment = self::paymentForAppointment($appointmentId);
+        Auth::audit('appointment_manual_payment_registered', 'appointment', $appointmentId, [
+            'method' => $method,
+            'reference' => $reference,
+            'amount_mxn' => $amount,
+        ]);
+
+        $receipt = null;
+        if ($sendReceipt) {
+            $receipt = ReceiptService::emailReceipt($appointmentId, false);
+        }
+
+        return [
+            'ok' => true,
+            'paid' => true,
+            'payment' => $payment,
+            'receipt_sent' => (bool) ($receipt['ok'] ?? false),
+            'receipt_warning' => $receipt && empty($receipt['ok']) ? ($receipt['error'] ?? 'No fue posible enviar el recibo.') : null,
+        ];
     }
 
     public static function paymentLabel(?string $status): string
@@ -631,6 +750,59 @@ final class PaymentService
     {
         if (!self::columnExists('appointment_payments', $name)) {
             Database::exec("ALTER TABLE appointment_payments ADD COLUMN {$name} {$definition}");
+        }
+    }
+
+    private static function ensureProviderAllowsManual(): void
+    {
+        try {
+            $row = Database::one("SHOW COLUMNS FROM appointment_payments LIKE 'provider'");
+            if ($row && isset($row['Type']) && !str_contains((string) $row['Type'], "'manual'")) {
+                Database::exec("ALTER TABLE appointment_payments MODIFY provider ENUM('mercadopago','stripe','manual') NOT NULL DEFAULT 'mercadopago'");
+            }
+        } catch (Throwable $e) {
+            error_log('[payment-schema] provider manual: ' . $e->getMessage());
+        }
+    }
+
+    private static function ensurePaymentIndex(string $name, string $column): void
+    {
+        try {
+            $idx = Database::one(
+                "SELECT 1 FROM INFORMATION_SCHEMA.STATISTICS
+                 WHERE TABLE_SCHEMA = DATABASE()
+                   AND TABLE_NAME = 'appointment_payments'
+                   AND INDEX_NAME = ?
+                 LIMIT 1",
+                [$name]
+            );
+            if (!$idx) {
+                Database::exec("ALTER TABLE appointment_payments ADD INDEX {$name} ({$column})");
+            }
+        } catch (Throwable $e) {
+            error_log('[payment-schema] index ' . $name . ': ' . $e->getMessage());
+        }
+    }
+
+    private static function ensurePaymentRegisteredByConstraint(): void
+    {
+        try {
+            $fk = Database::one(
+                "SELECT 1 FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+                 WHERE TABLE_SCHEMA = DATABASE()
+                   AND TABLE_NAME = 'appointment_payments'
+                   AND CONSTRAINT_NAME = 'fk_payment_registered_by'
+                 LIMIT 1"
+            );
+            if (!$fk) {
+                Database::exec(
+                    'ALTER TABLE appointment_payments
+                     ADD CONSTRAINT fk_payment_registered_by
+                     FOREIGN KEY (registered_by_user_id) REFERENCES users(id) ON DELETE SET NULL'
+                );
+            }
+        } catch (Throwable $e) {
+            error_log('[payment-schema] fk registered_by: ' . $e->getMessage());
         }
     }
 

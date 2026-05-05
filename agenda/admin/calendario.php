@@ -164,6 +164,11 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         const a = info.event.extendedProps;
         const id = info.event.id;
         const statusClass = 'bnc-status-' + String(a.status_slug || 'programada').replace(/_/g, '-');
+        const isPaid = !!a.is_paid || a.payment_status === 'paid';
+        const canMarkPaid = canManageCalendar && a.status_slug === 'atendida' && !isPaid;
+        const paymentMeta = isPaid
+          ? [a.paid_method || a.paid_provider || 'manual', a.paid_reference ? 'Ref. ' + a.paid_reference : '', a.paid_at || ''].filter(Boolean).join(' · ')
+          : (a.status_slug === 'atendida' ? 'Puedes registrar el pago cuando se confirme en recepcion.' : 'Se habilita cuando la cita esta Atendida.');
         document.getElementById('apptModalBody').innerHTML = `
           <div class="bnc-appt-detail" data-appt-id="${id}" data-status-slug="${escapeHtml(a.status_slug || '')}">
             <div>
@@ -190,6 +195,14 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
             <div>
               <span class="bnc-detail-label">Estado</span>
               <span class="bnc-status-pill ${statusClass}" data-status-pill>${escapeHtml(a.status)}</span>
+            </div>
+            <div>
+              <span class="bnc-detail-label">Pago</span>
+              <div class="form-check form-check-inline m-0">
+                <input class="form-check-input bnc-payment-toggle" type="radio" name="paid-calendar-${id}" value="1" data-id="${id}" data-paid="${isPaid ? '1' : '0'}" ${isPaid ? 'checked' : ''} ${canMarkPaid ? '' : 'disabled'}>
+                <label class="form-check-label ${isPaid ? 'text-success fw-semibold' : 'text-muted'}">${isPaid ? 'Pagada' : 'No pagada'}</label>
+              </div>
+              <small class="text-muted d-block">${escapeHtml(paymentMeta)}</small>
             </div>
             <div>
               <span class="bnc-detail-label">Código</span>
@@ -278,7 +291,8 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
     const csrfField = <?= json_encode(Csrf::FIELD) ?>;
     const ENDPOINTS = {
       transition:  <?= json_encode(url('api/cita-estado.json.php')) ?>,
-      sendReceipt: <?= json_encode(url('api/cita-recibo-enviar.json.php')) ?>
+      sendReceipt: <?= json_encode(url('api/cita-recibo-enviar.json.php')) ?>,
+      payment: <?= json_encode(url('api/cita-pago.json.php')) ?>
     };
 
     function toast(type, msg) {
@@ -302,8 +316,39 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
     }
 
     document.body.addEventListener('click', async function (ev) {
+      const p = ev.target.closest('.bnc-payment-toggle');
       const t = ev.target.closest('.bnc-transition');
       const r = ev.target.closest('.bnc-send-receipt');
+      if (p) {
+        if (p.disabled || p.dataset.paid === '1') return;
+        ev.preventDefault();
+        if (p.dataset.busy === '1') return;
+        if (!window.confirm('Confirmar que esta cita ya fue pagada? Se enviara el recibo al cliente.')) {
+          p.checked = false;
+          return;
+        }
+        p.dataset.busy = '1';
+        p.disabled = true;
+        const body = await postJson(ENDPOINTS.payment, {
+          appointment_id: p.dataset.id,
+          paid: '1',
+          method: 'manual',
+          send_receipt: '1'
+        });
+        p.dataset.busy = '';
+        if (!body.ok) {
+          p.checked = false;
+          p.disabled = false;
+          toast('danger', body.error || 'No fue posible registrar el pago.');
+          return;
+        }
+        if (body.receipt_warning) toast('warning', 'Pago registrado, pero el recibo no pudo enviarse: ' + body.receipt_warning);
+        else if (body.receipt_sent) toast('success', 'Pago registrado y recibo enviado al cliente.');
+        else toast('success', 'Pago registrado correctamente.');
+        bootstrap.Modal.getInstance(document.getElementById('apptModal'))?.hide();
+        cal.refetchEvents();
+        return;
+      }
       if (t) {
         ev.preventDefault();
         if (t.dataset.busy === '1') return;

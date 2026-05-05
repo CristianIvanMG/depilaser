@@ -19,6 +19,7 @@ function admin_appointment_form_nonce(): string
 AppointmentService::ensureProfessionalSchema();
 AppointmentService::ensureMachinerySchema();
 EmailNotificationService::ensureSchema();
+PaymentService::ensureSchema();
 
 $statuses = Database::all('SELECT id, slug, name FROM appointment_statuses ORDER BY id');
 $statusBySlug = [];
@@ -360,20 +361,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             'end_at' => $schedule['end_sql'],
                         ],
                     ]);
+                    $postSaveWarning = null;
                     if ($previousStatusId !== $statusId) {
                         $emailType = match ($statusSlug) {
                             'confirmada' => 'appointment_confirmed',
                             'cancelada' => 'appointment_cancelled',
                             'no_asistio' => 'appointment_no_show',
-                            'atendida' => 'appointment_attended',
+                            'atendida' => null,
                             default => 'appointment_status_changed',
                         };
-                        EmailNotificationService::sendForAppointment($appointmentId, $emailType);
+                        if ($emailType) {
+                            EmailNotificationService::sendForAppointment($appointmentId, $emailType);
+                        }
+                        if ($statusSlug === 'atendida') {
+                            $paymentResult = PaymentService::registerManualPayment(
+                                $appointmentId,
+                                (int) $admin['id'],
+                                'manual',
+                                null,
+                                null,
+                                true
+                            );
+                            if (empty($paymentResult['ok'])) {
+                                $postSaveWarning = $paymentResult['error'] ?? 'La cita se marco como Atendida, pero el pago no pudo registrarse.';
+                            } elseif (!empty($paymentResult['receipt_warning'])) {
+                                $postSaveWarning = 'La cita se marco como Atendida y pagada, pero el recibo no pudo enviarse: ' . $paymentResult['receipt_warning'];
+                            }
+                        }
                         if ($statusSlug === 'cancelada') {
                             WaitlistService::promoteForCancelledAppointment($appointmentId);
                         }
                     }
-                    flash('success', 'Cita actualizada correctamente.');
+                    if ($postSaveWarning) {
+                        flash('warning', $postSaveWarning);
+                    } else {
+                        flash('success', 'Cita actualizada correctamente.');
+                    }
                     redirect('admin/cita-form.php?id=' . $appointmentId);
                 }
 

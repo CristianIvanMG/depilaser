@@ -82,20 +82,32 @@ $emailType = match ($to) {
     'confirmada' => 'appointment_confirmed',
     'cancelada' => 'appointment_cancelled',
     'no_asistio' => 'appointment_no_show',
-    'atendida' => 'appointment_attended',
+    'atendida' => null,
     default => 'appointment_status_changed',
 };
-$statusMail = EmailNotificationService::sendForAppointment($appointmentId, $emailType);
-$response['status_email_sent'] = !empty($statusMail['sent']);
-if (!$response['status_email_sent'] && empty($statusMail['duplicate']) && empty($statusMail['skipped'])) {
-    $response['status_email_warning'] = $statusMail['error'] ?? 'No fue posible enviar la notificacion.';
+if ($emailType) {
+    $statusMail = EmailNotificationService::sendForAppointment($appointmentId, $emailType);
+    $response['status_email_sent'] = !empty($statusMail['sent']);
+    if (!$response['status_email_sent'] && empty($statusMail['duplicate']) && empty($statusMail['skipped'])) {
+        $response['status_email_warning'] = $statusMail['error'] ?? 'No fue posible enviar la notificacion.';
+    }
 }
 
 if ($sendEmail && $to === 'atendida') {
-    $sent = ReceiptService::emailReceipt($appointmentId, false);
-    $response['receipt_sent'] = $sent['ok'];
-    if (!$sent['ok']) {
-        $response['receipt_warning'] = $sent['error'] ?? null;
+    $payment = PaymentService::registerManualPayment(
+        $appointmentId,
+        (int) ($user['id'] ?? 0),
+        'manual',
+        null,
+        null,
+        true
+    );
+    $response['payment_registered'] = !empty($payment['paid']) || !empty($payment['already_paid']);
+    $response['receipt_sent'] = !empty($payment['receipt_sent']);
+    if (!empty($payment['receipt_warning'])) {
+        $response['receipt_warning'] = $payment['receipt_warning'];
+    } elseif (empty($payment['ok'])) {
+        $response['receipt_warning'] = $payment['error'] ?? null;
     }
 }
 

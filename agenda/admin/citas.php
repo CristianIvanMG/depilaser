@@ -7,6 +7,7 @@ $admin = Auth::user();
 // Asegura columnas profesionales y de recibo (idempotente)
 AppointmentService::ensureProfessionalSchema();
 AppointmentService::ensureReceiptSchema();
+PaymentService::ensureSchema();
 
 $branches = Database::all('SELECT id, name FROM branches WHERE active = 1 ORDER BY display_order, name');
 $statuses = Database::all('SELECT id, slug, name FROM appointment_statuses ORDER BY id');
@@ -100,13 +101,24 @@ $appointments = Database::all(
     "SELECT a.*, u.name AS client_name, u.email AS client_email, u.phone AS client_phone,
             s.name AS service_name, s.duration_min, b.name AS branch_name,
             st.slug AS status_slug, st.name AS status_name,
-            pr.name AS professional_name
+            pr.name AS professional_name,
+            pay.id AS paid_payment_id, pay.paid_at AS paid_at, pay.payment_method AS paid_method,
+            pay.payment_reference AS paid_reference, pay.provider AS paid_provider,
+            pay.amount_mxn AS paid_amount_mxn, pay_user.name AS paid_registered_by
      FROM appointments a
      JOIN users u ON u.id = a.user_id
      LEFT JOIN users pr ON pr.id = a.professional_id
      JOIN services s ON s.id = a.service_id
      JOIN branches b ON b.id = a.branch_id
      JOIN appointment_statuses st ON st.id = a.status_id
+     LEFT JOIN appointment_payments pay ON pay.id = (
+        SELECT p.id
+        FROM appointment_payments p
+        WHERE p.appointment_id = a.id AND p.status = 'approved'
+        ORDER BY p.paid_at DESC, p.id DESC
+        LIMIT 1
+     )
+     LEFT JOIN users pay_user ON pay_user.id = pay.registered_by_user_id
      WHERE " . implode(' AND ', $where) . "
      ORDER BY a.start_at DESC
      LIMIT 300",
@@ -192,14 +204,16 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
           <th>Sucursal</th>
           <th>Profesional</th>
           <th>Estado</th>
+          <th>Pago</th>
           <th>Origen</th>
           <th class="text-end">Acciones</th>
         </tr>
       </thead>
       <tbody>
         <?php if (!$appointments): ?>
-          <tr><td colspan="8" class="text-center text-muted py-4">No hay citas con esos filtros.</td></tr>
+          <tr><td colspan="9" class="text-center text-muted py-4">No hay citas con esos filtros.</td></tr>
         <?php else: foreach ($appointments as $a): ?>
+          <?php $isPaid = !empty($a['paid_payment_id']) || (($a['payment_status'] ?? '') === 'paid'); ?>
           <tr>
             <td>
               <strong><?= e(fmt_dt_short($a['start_at'])) ?></strong><br>
@@ -219,6 +233,21 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
               <?php endif; ?>
             </td>
             <td><span class="bnc-status <?= e($a['status_slug']) ?>"><?= e($a['status_name']) ?></span></td>
+            <td>
+              <div class="form-check form-check-inline m-0">
+                <input class="form-check-input bnc-payment-toggle"
+                       type="radio"
+                       name="paid-list-<?= (int) $a['id'] ?>"
+                       value="1"
+                       data-id="<?= (int) $a['id'] ?>"
+                       data-paid="<?= $isPaid ? '1' : '0' ?>"
+                       <?= $isPaid ? 'checked' : '' ?>
+                       <?= ($a['status_slug'] === 'atendida' && !$isPaid) ? '' : 'disabled' ?>>
+                <label class="form-check-label small <?= $isPaid ? 'text-success fw-semibold' : 'text-muted' ?>">
+                  <?= $isPaid ? 'Pagada' : 'No pagada' ?>
+                </label>
+              </div>
+            </td>
             <td><?= e(ucfirst((string) $a['source'])) ?></td>
             <td class="text-end">
               <div class="btn-group btn-group-sm">
@@ -261,14 +290,31 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
                   <div class="mb-2"><strong>Profesional:</strong> <?= !empty($a['professional_name']) ? e($a['professional_name']) : '<span class="text-muted">Sin asignar</span>' ?></div>
                   <div class="mb-2"><strong>Fecha:</strong> <?= e(fmt_dt($a['start_at'])) ?></div>
                   <div class="mb-2"><strong>Estado:</strong> <span class="bnc-status <?= e($a['status_slug']) ?>" data-status-pill><?= e($a['status_name']) ?></span></div>
-                  <?php if (!empty($a['payment_required'])): ?>
-                    <?php $paymentRow = PaymentService::paymentForAppointment((int) $a['id']); ?>
-                    <div class="mb-2"><strong>Pago:</strong>
-                      <span class="badge <?= ($a['payment_status'] ?? '') === 'paid' ? 'bg-success' : 'bg-warning text-dark' ?>"><?= e(PaymentService::paymentLabel($a['payment_status'] ?? null)) ?></span>
-                      <span class="ms-1"><?= fmt_price((float) $a['payment_amount_mxn']) ?></span>
-                      <?php if ($paymentRow && !empty($paymentRow['provider_payment_id'])): ?><br><small class="text-muted">Ref. <?= e($paymentRow['provider_payment_id']) ?> · <?= e($paymentRow['payment_method'] ?? 'Mercado Pago') ?></small><?php endif; ?>
+                  <div class="mb-2"><strong>Pago:</strong>
+                    <div class="form-check form-check-inline ms-2">
+                      <input class="form-check-input bnc-payment-toggle"
+                             type="radio"
+                             name="paid-modal-<?= (int) $a['id'] ?>"
+                             value="1"
+                             data-id="<?= (int) $a['id'] ?>"
+                             data-paid="<?= $isPaid ? '1' : '0' ?>"
+                             <?= $isPaid ? 'checked' : '' ?>
+                             <?= ($a['status_slug'] === 'atendida' && !$isPaid) ? '' : 'disabled' ?>>
+                      <label class="form-check-label <?= $isPaid ? 'text-success fw-semibold' : 'text-muted' ?>">
+                        <?= $isPaid ? 'Pagada' : 'No pagada' ?>
+                      </label>
                     </div>
-                  <?php endif; ?>
+                    <?php if ($isPaid): ?>
+                      <br><small class="text-muted">
+                        <?= e($a['paid_method'] ?: ($a['paid_provider'] ?: 'manual')) ?>
+                        <?php if (!empty($a['paid_reference'])): ?> · Ref. <?= e($a['paid_reference']) ?><?php endif; ?>
+                        <?php if (!empty($a['paid_at'])): ?> · <?= e(fmt_dt($a['paid_at'])) ?><?php endif; ?>
+                        <?php if (!empty($a['paid_registered_by'])): ?> · Registró <?= e($a['paid_registered_by']) ?><?php endif; ?>
+                      </small>
+                    <?php elseif ($a['status_slug'] !== 'atendida'): ?>
+                      <br><small class="text-muted">Se habilita cuando la cita esta Atendida.</small>
+                    <?php endif; ?>
+                  </div>
                   <?php if (!empty($a['receipt_folio'])): ?>
                     <div class="mb-2"><strong>Folio recibo:</strong> <code><?= e($a['receipt_folio']) ?></code>
                       <?php if ((int) ($a['receipt_sent'] ?? 0) === 1): ?>
@@ -355,6 +401,7 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
   const endpoints = {
     transition: <?= json_encode(url('api/cita-estado.json.php')) ?>,
     sendReceipt: <?= json_encode(url('api/cita-recibo-enviar.json.php')) ?>,
+    payment: <?= json_encode(url('api/cita-pago.json.php')) ?>,
   };
 
   function toast(type, msg) {
@@ -383,8 +430,41 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
   }
 
   document.body.addEventListener('click', async function (ev) {
+    const pay = ev.target.closest('.bnc-payment-toggle');
     const btnT = ev.target.closest('.bnc-transition');
     const btnR = ev.target.closest('.bnc-send-receipt');
+
+    if (pay) {
+      if (pay.disabled || pay.dataset.paid === '1') return;
+      ev.preventDefault();
+      if (pay.dataset.busy === '1') return;
+      if (!window.confirm('Confirmar que esta cita ya fue pagada? Se enviara el recibo al cliente.')) {
+        pay.checked = false;
+        return;
+      }
+
+      pay.dataset.busy = '1';
+      pay.disabled = true;
+      const { body } = await postJson(endpoints.payment, {
+        appointment_id: pay.dataset.id,
+        paid: '1',
+        method: 'manual',
+        send_receipt: '1'
+      });
+      pay.dataset.busy = '';
+
+      if (!body.ok) {
+        pay.checked = false;
+        pay.disabled = false;
+        toast('danger', body.error || 'No fue posible registrar el pago.');
+        return;
+      }
+      if (body.receipt_warning) toast('warning', 'Pago registrado, pero el recibo no pudo enviarse: ' + body.receipt_warning);
+      else if (body.receipt_sent) toast('success', 'Pago registrado y recibo enviado al cliente.');
+      else toast('success', 'Pago registrado correctamente.');
+      setTimeout(() => location.reload(), 700);
+      return;
+    }
 
     if (btnT) {
       ev.preventDefault();
