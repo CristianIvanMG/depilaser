@@ -158,7 +158,7 @@ if ($q !== '') {
     $where[] = '(' . implode(' OR ', $searchParts) . ')';
 }
 
-$perPageOptions = [25, 50, 100];
+$perPageOptions = [25, 50, 100, 300, 500];
 $perPage = (int) ($_GET['per_page'] ?? 50);
 if (!in_array($perPage, $perPageOptions, true)) {
     $perPage = 50;
@@ -249,12 +249,12 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
 <div class="bnc-card mb-4">
   <div class="bnc-card-header"><h2 class="h6 fw-bold mb-0">Buscar clientes</h2></div>
   <div class="bnc-card-body">
-    <form method="GET" class="row g-3 align-items-end">
-      <div class="col-md-8">
+    <form method="GET" class="row g-3 align-items-end bnc-client-search-form">
+      <div class="col-lg-6">
         <label class="bnc-label">Nombre, apellidos, correo o teléfono</label>
         <input name="q" class="form-control" value="<?= e($q) ?>" placeholder="Buscar cliente">
       </div>
-      <div class="col-md-2">
+      <div class="col-sm-6 col-lg-2">
         <label class="bnc-label">Por página</label>
         <select name="per_page" class="form-select">
           <?php foreach ($perPageOptions as $option): ?>
@@ -262,9 +262,11 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
           <?php endforeach; ?>
         </select>
       </div>
-      <div class="col-md-2 d-flex gap-2">
-        <button class="btn btn-bnc-primary" type="submit"><i class="bi bi-search"></i> Buscar</button>
-        <a class="btn btn-bnc-outline" href="<?= url('admin/usuarios.php') ?>">Limpiar</a>
+      <div class="col-sm-6 col-lg-4">
+        <div class="bnc-client-search-actions">
+          <button class="btn btn-bnc-primary" type="submit"><i class="bi bi-search"></i> Buscar</button>
+          <a class="btn btn-bnc-outline" href="<?= url('admin/usuarios.php') ?>">Limpiar</a>
+        </div>
       </div>
     </form>
   </div>

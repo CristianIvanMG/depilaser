@@ -83,10 +83,76 @@ body.bnc-admin {
   padding: 14px 22px;
   border-bottom: 1px solid var(--bnc-line);
 }
+.bnc-topbar-user {
+  align-items: center;
+  background: linear-gradient(180deg, #fff 0%, #fff7fb 100%);
+  border: 1px solid var(--bnc-line);
+  border-radius: 999px;
+  box-shadow: 0 10px 24px rgba(42, 16, 41, .08);
+  display: inline-flex;
+  gap: 10px;
+  max-width: 320px;
+  min-height: 44px;
+  padding: 5px 14px 5px 6px;
+}
+.bnc-topbar-user .bnc-avatar {
+  box-shadow: 0 8px 18px rgba(198, 61, 138, .22);
+  flex: 0 0 auto;
+}
+.bnc-topbar-user-copy {
+  display: grid;
+  line-height: 1.05;
+  min-width: 0;
+}
+.bnc-topbar-user-copy strong {
+  color: var(--bnc-ink);
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  max-width: 210px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bnc-topbar-user-copy small {
+  color: var(--bnc-pink-deep);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .9px;
+  text-transform: uppercase;
+}
 
 /* ── MAIN ── */
 .bnc-admin .bnc-main { padding: 24px; }
 @media (max-width: 575px) { .bnc-admin .bnc-main { padding: 16px; } }
+
+/* Catalogo de clientes */
+.bnc-client-search-form .form-control,
+.bnc-client-search-form .form-select {
+  min-height: 46px;
+}
+.bnc-client-search-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+.bnc-client-search-actions .btn {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+  min-height: 46px;
+  min-width: 128px;
+  padding-inline: 24px;
+  white-space: nowrap;
+}
+@media (max-width: 767.98px) {
+  .bnc-topbar { align-items: stretch; flex-wrap: wrap; }
+  .bnc-topbar > .ms-auto { margin-left: 0 !important; width: 100%; justify-content: space-between; }
+  .bnc-topbar-user { max-width: min(100%, 280px); }
+  .bnc-topbar-user-copy strong { max-width: 160px; }
+  .bnc-client-search-actions { justify-content: stretch; }
+  .bnc-client-search-actions .btn { flex: 1 1 0; min-width: 0; }
+}
 
 /* ── TABLES ── */
 .bnc-table { width: 100%; background: #fff; border-radius: var(--bnc-radius); overflow: hidden; box-shadow: var(--bnc-shadow); }

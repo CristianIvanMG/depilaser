@@ -100,6 +100,13 @@ $adminHome = Auth::isAdmin() ? url('admin/') : url('admin/calendario.php');
             <i class="bi bi-plus-lg"></i> Nueva cita
           </a>
         <?php endif; ?>
+        <div class="bnc-topbar-user">
+          <span class="bnc-avatar"><?= e(mb_substr($user['name'], 0, 1)) ?></span>
+          <span class="bnc-topbar-user-copy">
+            <strong><?= e($user['name']) ?></strong>
+            <small><?= e($user['role_slug']) ?></small>
+          </span>
+        </div>
       </div>
     </header>
 

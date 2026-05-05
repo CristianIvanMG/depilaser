@@ -102,6 +102,25 @@ $form = [
     'cancel_reason' => $_POST['cancel_reason'] ?? '',
 ];
 
+$selectedClientIds = array_values(array_unique(array_filter([
+    (int) ($appointment['user_id'] ?? 0),
+    (int) ($form['user_id'] ?? 0),
+])));
+if ($selectedClientIds) {
+    $loadedClientIds = array_map('intval', array_column($clients, 'id'));
+    $missingClientIds = array_values(array_diff($selectedClientIds, $loadedClientIds));
+    if ($missingClientIds) {
+        $missingClients = Database::all(
+            "SELECT u.id, u.name, u.email, u.phone
+             FROM users u
+             WHERE u.id IN (" . implode(',', array_fill(0, count($missingClientIds), '?')) . ")
+             ORDER BY u.name",
+            $missingClientIds
+        );
+        $clients = array_merge($missingClients, $clients);
+    }
+}
+
 function admin_validate_client_input(array $data): array
 {
     $identity = ClientProfile::normalizeName($data);
