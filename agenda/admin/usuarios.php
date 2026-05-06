@@ -155,6 +155,10 @@ if ($q !== '') {
         $searchParts[] = 'u.' . $nameCols['last'] . ' LIKE ?';
         $params[] = $like;
     }
+    if ($nameCols['first'] && $nameCols['last']) {
+        $searchParts[] = "TRIM(CONCAT_WS(' ', NULLIF(TRIM(COALESCE(u.{$nameCols['first']}, '')), ''), NULLIF(TRIM(COALESCE(u.{$nameCols['last']}, '')), ''))) LIKE ?";
+        $params[] = $like;
+    }
     $where[] = '(' . implode(' OR ', $searchParts) . ')';
 }
 
@@ -187,8 +191,16 @@ function admin_clients_url(int $page, string $q, int $perPage): string
 
 $profileCols = ClientProfile::selectExpr('u');
 $namePartCols = ClientProfile::selectNamePartsExpr('u');
+$nameCols = ClientProfile::nameColumns();
+$firstNameExpr = $nameCols['first']
+    ? "NULLIF(TRIM(COALESCE(u.{$nameCols['first']}, '')), '')"
+    : 'NULL';
+$lastNameExpr = $nameCols['last']
+    ? "NULLIF(TRIM(COALESCE(u.{$nameCols['last']}, '')), '')"
+    : 'NULL';
+$fullNameExpr = "COALESCE(NULLIF(TRIM(CONCAT_WS(' ', {$firstNameExpr}, {$lastNameExpr})), ''), NULLIF(TRIM(COALESCE(u.name, '')), ''), 'Sin nombre registrado')";
 $clients = Database::all(
-    "SELECT u.id, u.name, {$namePartCols}, u.email, u.phone, u.active, u.created_at, {$profileCols},
+    "SELECT u.id, u.name, {$fullNameExpr} AS client_full_name, {$namePartCols}, u.email, u.phone, u.active, u.created_at, {$profileCols},
             COUNT(a.id) AS appointment_count,
             SUM(CASE WHEN a.start_at >= NOW() AND st.slug IN ('programada','confirmada') THEN 1 ELSE 0 END) AS active_appointments
      FROM users u
@@ -197,7 +209,7 @@ $clients = Database::all(
      LEFT JOIN appointment_statuses st ON st.id = a.status_id
      WHERE " . implode(' AND ', $where) . "
      GROUP BY u.id
-     ORDER BY u.active DESC, u.name
+     ORDER BY u.active DESC, client_full_name
      LIMIT {$perPage} OFFSET {$offset}",
     $params
 );
@@ -281,8 +293,7 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
     <table class="bnc-table mb-0">
       <thead>
         <tr>
-          <th>Nombres</th>
-          <th>Apellidos</th>
+          <th>Nombre completo</th>
           <th>Contacto</th>
           <th>Citas</th>
           <th>Estado</th>
@@ -292,11 +303,10 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
       </thead>
       <tbody>
         <?php if (!$clients): ?>
-          <tr><td colspan="7" class="text-center text-muted py-4">No hay clientes con esa búsqueda.</td></tr>
+          <tr><td colspan="6" class="text-center text-muted py-4">No hay clientes con esa búsqueda.</td></tr>
         <?php else: foreach ($clients as $client): ?>
           <tr>
-            <td class="fw-bold"><?= e($client['first_name']) ?></td>
-            <td><?= e($client['last_name']) ?></td>
+            <td class="fw-bold"><?= e($client['client_full_name']) ?></td>
             <td><?= e($client['phone']) ?><br><small class="text-muted"><?= e($client['email']) ?></small></td>
             <td>
               <?= (int) $client['appointment_count'] ?> total<br>
