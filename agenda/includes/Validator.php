@@ -25,8 +25,8 @@ final class Validator
             $e['email'] = 'Correo electrónico inválido.';
         }
         $phone = preg_replace('/\D+/', '', $d['phone'] ?? '');
-        if (strlen($phone) < 10) {
-            $e['phone'] = 'Teléfono debe tener al menos 10 dígitos.';
+        if (strlen($phone) !== 10) {
+            $e['phone'] = 'Teléfono debe tener exactamente 10 dígitos.';
         }
         if (empty($d['password']) || strlen($d['password']) < 8) {
             $e['password'] = 'La contraseña debe tener mínimo 8 caracteres.';
@@ -43,7 +43,12 @@ final class Validator
     public static function login(array $d): array
     {
         $e = [];
-        if (empty($d['email']))    $e['email']    = 'Ingresa tu correo.';
+        $email = strtolower(trim((string) ($d['email'] ?? '')));
+        if ($email === '') {
+            $e['email'] = 'Ingresa tu correo.';
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $e['email'] = 'Ingresa un correo valido.';
+        }
         if (empty($d['password'])) $e['password'] = 'Ingresa tu contraseña.';
         return $e;
     }

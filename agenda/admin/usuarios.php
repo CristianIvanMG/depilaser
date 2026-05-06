@@ -46,8 +46,8 @@ function admin_validate_client(array $data, int $ignoreId = 0): array
             $errors['email'] = 'Ya existe un cliente con ese correo.';
         }
     }
-    if (strlen($client['phone']) < 10) {
-        $errors['phone'] = 'Ingresa un teléfono de al menos 10 dígitos.';
+    if (strlen($client['phone']) !== 10) {
+        $errors['phone'] = 'Ingresa un teléfono de exactamente 10 dígitos.';
     } else {
         $params = [$client['phone']];
         $ignoreSql = '';

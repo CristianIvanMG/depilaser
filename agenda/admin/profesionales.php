@@ -36,8 +36,8 @@ function prof_validate(array $data, int $ignoreId = 0): array
             $errs['email'] = 'Ya existe un usuario con ese correo.';
         }
     }
-    if (strlen($p['phone']) < 10) {
-        $errs['phone'] = 'Ingresa un telefono de al menos 10 digitos.';
+    if (strlen($p['phone']) !== 10) {
+        $errs['phone'] = 'Ingresa un telefono de exactamente 10 digitos.';
     } else {
         $params = [$p['phone']];
         $ignoreSql = '';

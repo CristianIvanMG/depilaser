@@ -38,7 +38,8 @@ function branch_validate(array $d, int $ignoreId = 0): array
     if (mb_strlen($branch['address']) < 5) $errors['address'] = 'Ingresa la dirección.';
     if (!$branch['city']) $errors['city'] = 'Ingresa la ciudad.';
     if (!$branch['state']) $errors['state'] = 'Ingresa el estado.';
-    if ($branch['phone'] && strlen($branch['phone']) < 10) $errors['phone'] = 'El teléfono debe tener al menos 10 dígitos.';
+    if ($branch['phone'] && strlen($branch['phone']) !== 10) $errors['phone'] = 'El teléfono debe tener exactamente 10 dígitos.';
+    if ($branch['whatsapp'] && strlen($branch['whatsapp']) !== 10) $errors['whatsapp'] = 'El WhatsApp debe tener exactamente 10 dígitos.';
     if ($branch['email'] && !filter_var($branch['email'], FILTER_VALIDATE_EMAIL)) $errors['email'] = 'Correo inválido.';
 
     if ($branch['laser_machine_capacity'] > $branch['cabin_capacity']) {
@@ -201,8 +202,16 @@ foreach ($modalBranches as $branch):
                 <?php if (isset($errors['laser_machine_capacity']) && $isErrored): ?><div class="invalid-feedback"><?= e($errors['laser_machine_capacity']) ?></div><?php endif; ?>
                 <div class="form-text">Controla cuántas citas de depilación láser pueden ocurrir al mismo tiempo en esta sucursal.</div>
               </div>
-              <div class="col-md-4"><label class="bnc-label">Teléfono</label><input name="phone" class="form-control" value="<?= e($isErrored ? ($_POST['phone'] ?? '') : $branch['phone']) ?>"></div>
-              <div class="col-md-4"><label class="bnc-label">WhatsApp</label><input name="whatsapp" class="form-control" value="<?= e($isErrored ? ($_POST['whatsapp'] ?? '') : $branch['whatsapp']) ?>"></div>
+              <div class="col-md-4">
+                <label class="bnc-label">Teléfono</label>
+                <input name="phone" class="form-control <?= isset($errors['phone']) && $isErrored ? 'is-invalid' : '' ?>" value="<?= e($isErrored ? ($_POST['phone'] ?? '') : $branch['phone']) ?>">
+                <?php if (isset($errors['phone']) && $isErrored): ?><div class="invalid-feedback"><?= e($errors['phone']) ?></div><?php endif; ?>
+              </div>
+              <div class="col-md-4">
+                <label class="bnc-label">WhatsApp</label>
+                <input name="whatsapp" class="form-control <?= isset($errors['whatsapp']) && $isErrored ? 'is-invalid' : '' ?>" value="<?= e($isErrored ? ($_POST['whatsapp'] ?? '') : $branch['whatsapp']) ?>">
+                <?php if (isset($errors['whatsapp']) && $isErrored): ?><div class="invalid-feedback"><?= e($errors['whatsapp']) ?></div><?php endif; ?>
+              </div>
               <div class="col-md-4"><label class="bnc-label">Correo</label><input type="email" name="email" class="form-control" value="<?= e($isErrored ? ($_POST['email'] ?? '') : $branch['email']) ?>"></div>
               <div class="col-md-8"><label class="bnc-label">Google Maps</label><input name="gmaps_url" class="form-control" value="<?= e($isErrored ? ($_POST['gmaps_url'] ?? '') : $branch['gmaps_url']) ?>"></div>
               <div class="col-md-2"><label class="bnc-label">Orden</label><input type="number" name="display_order" class="form-control" value="<?= e($isErrored ? ($_POST['display_order'] ?? 0) : $branch['display_order']) ?>"></div>

@@ -142,8 +142,8 @@ function admin_validate_client_input(array $data): array
     } elseif (Database::one('SELECT id FROM users WHERE email = ? LIMIT 1', [$email])) {
         $errors['client_email'] = 'Ya existe un cliente con ese correo.';
     }
-    if (strlen($phone) < 10) {
-        $errors['client_phone'] = 'Ingresa un telefono de al menos 10 digitos.';
+    if (strlen($phone) !== 10) {
+        $errors['client_phone'] = 'Ingresa un telefono de exactamente 10 digitos.';
     }
 
     return ['ok' => !$errors, 'errors' => $errors, 'data' => [

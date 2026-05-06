@@ -82,8 +82,8 @@ function validate_profile_payload(array $clean, int $userId): array
         $errors['email'] = 'Ese correo ya esta registrado en otra cuenta.';
     }
 
-    if (strlen($clean['phone']) < 10) {
-        $errors['phone'] = 'Ingresa un telefono de al menos 10 digitos.';
+    if (strlen($clean['phone']) !== 10) {
+        $errors['phone'] = 'Ingresa un telefono de exactamente 10 digitos.';
     } elseif (Database::one('SELECT id FROM users WHERE phone = ? AND id <> ? LIMIT 1', [$clean['phone'], $userId])) {
         $errors['phone'] = 'Ese telefono ya esta registrado en otra cuenta.';
     }
