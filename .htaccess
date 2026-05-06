@@ -106,25 +106,20 @@ RedirectMatch 404 /\.git(/|$)
 
 
 # --- Rewrite combinado: HTTPS forzado + sin www + URLs limpias sin .html ---
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
-  # 1) Forzar HTTPS (HTTPS confirmado estable)
-  RewriteCond %{HTTPS} !=on
+  # Canonical absoluto: HTTPS + sin WWW
+  RewriteCond %{HTTPS} !=on [OR]
+  RewriteCond %{HTTP_HOST} ^www\.depilasermexico\.com$ [NC]
   RewriteRule ^(.*)$ https://depilasermexico.com/$1 [R=301,L]
 
-  # 2) Canonical sin www (preferimos depilasermexico.com sobre www.depilasermexico.com)
-  RewriteCond %{HTTP_HOST} ^www\.depilasermexico\.com [NC]
-  RewriteRule ^(.*)$ https://depilasermexico.com/$1 [R=301,L]
-
-  # 3) URLs limpias: si /servicio existe como /servicio.html, servirlo (sin redirect)
-  RewriteCond %{THE_REQUEST} /index\.html [NC]
+  # Quitar index.html
+  RewriteCond %{THE_REQUEST} \s/index\.html [NC]
   RewriteRule ^index\.html$ / [R=301,L]
-
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_URI} !/$
-  RewriteRule ^(.*)$ https://depilasermexico.com/$1/ [R=301,L]
 </IfModule>
+
 
 # --- Paginas de error ---
 ErrorDocument 403 "Acceso denegado"
