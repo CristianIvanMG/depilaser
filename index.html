@@ -1493,38 +1493,158 @@
       position: fixed;
       bottom: 100px;
       right: 20px;
-      width: 320px;
-      height: 420px;
+      width: 360px;
+      max-width: calc(100vw - 24px);
+      height: 540px;
+      max-height: calc(100vh - 132px);
       background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, .25);
+      border: 1px solid rgba(197, 59, 109, .08);
+      border-radius: 18px;
+      box-shadow:
+        0 24px 60px rgba(20, 8, 20, .22),
+        0 2px 8px rgba(20, 8, 20, .06);
       box-sizing: border-box;
       z-index: 9999;
       flex-direction: column;
+      overflow: hidden;
+      /* respeta los radios sobre header/footer */
+      font-family: inherit;
     }
 
     #bella-chat.activo {
       display: flex
     }
 
+    /* HEADER del chat (sticky, contiene la X) */
+    .chat-head {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background: linear-gradient(135deg, #c53b6d, #e06b9a);
+      color: #fff;
+      border-bottom: 1px solid rgba(255, 255, 255, .14);
+      box-shadow: 0 1px 0 rgba(197, 59, 109, .12);
+    }
+
+    .chat-head__avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #fff;
+      color: #c53b6d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 15px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 10px rgba(20, 8, 20, .18);
+    }
+
+    .chat-head__title {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.18;
+      min-width: 0;
+    }
+
+    .chat-head__title strong {
+      font-size: 14.5px;
+      font-weight: 700;
+      letter-spacing: .1px;
+    }
+
+    .chat-head__title span {
+      font-size: 11.5px;
+      opacity: .95;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .chat-head__title span::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #5be58a;
+      box-shadow: 0 0 0 3px rgba(91, 229, 138, .25);
+    }
+
+    .chat-head__spacer {
+      flex: 1;
+    }
+
+    /* Botón X — ahora vive dentro del header, sin position absolute */
+    .chat-close {
+      position: static;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .18);
+      border: none;
+      color: #fff;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .2s ease, transform .2s ease;
+      flex-shrink: 0;
+    }
+
+    .chat-close:hover {
+      background: rgba(255, 255, 255, .32);
+      color: #fff;
+      transform: scale(1.04)
+    }
+
+    .chat-close:focus-visible {
+      outline: 3px solid rgba(255, 255, 255, .55);
+      outline-offset: 2px;
+    }
+
     #messages {
+      flex: 1 1 auto;
       display: flex;
       flex-direction: column;
       gap: 10px;
-      padding: 12px;
+      padding: 16px 14px;
       overflow-y: auto;
-      background: #f7f7f8;
-      flex: 1;
+      background: #faf6f8;
+      scroll-behavior: smooth;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    #messages::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    #messages::-webkit-scrollbar-thumb {
+      background: rgba(197, 59, 109, .25);
+      border-radius: 6px;
+    }
+
+    #messages::-webkit-scrollbar-thumb:hover {
+      background: rgba(197, 59, 109, .4)
     }
 
     #messages .user,
     #messages .bella {
-      max-width: 80%;
+      max-width: 82%;
       padding: 10px 14px;
-      border-radius: 16px;
+      border-radius: 18px;
       font-size: 14px;
-      line-height: 1.4;
+      line-height: 1.45;
       animation: fadeInUp .25s ease;
+      word-wrap: break-word;
+      overflow-wrap: anywhere;
+      box-sizing: border-box;
     }
 
     #messages .user {
@@ -1532,6 +1652,7 @@
       background: linear-gradient(135deg, #c53b6d, #e06b9a);
       color: #fff;
       border-bottom-right-radius: 6px;
+      box-shadow: 0 4px 10px rgba(197, 59, 109, .18);
     }
 
     #messages .bella {
@@ -1539,7 +1660,7 @@
       background: #fff;
       color: #333;
       border-bottom-left-radius: 6px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, .08);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, .06);
     }
 
     @keyframes fadeInUp {
@@ -1554,27 +1675,12 @@
       }
     }
 
-    .chat-close {
-      position: absolute;
-      top: 8px;
-      right: 10px;
-      background: none;
-      border: none;
-      font-size: 18px;
-      cursor: pointer;
-      color: #999;
-      z-index: 10;
-    }
-
-    .chat-close:hover {
-      color: #c53b6d
-    }
-
     .chat-input {
       display: flex;
       align-items: center;
       gap: 10px;
       padding: 12px;
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
       background: #fafafa;
       border-top: 1px solid #f0f0f0;
       flex-shrink: 0;
@@ -1596,7 +1702,11 @@
 
     .chat-input input:focus {
       border-color: #c53b6d;
-      box-shadow: 0 0 0 2px rgba(197, 59, 109, .15)
+      box-shadow: 0 0 0 3px rgba(197, 59, 109, .15)
+    }
+
+    .chat-input input::placeholder {
+      color: #b9a4ad
     }
 
     .chat-input button {
@@ -1618,6 +1728,38 @@
     .chat-input button:hover {
       transform: translateY(-1px);
       box-shadow: 0 10px 24px rgba(197, 59, 109, .45)
+    }
+
+    .chat-input button:focus-visible {
+      outline: 3px solid rgba(197, 59, 109, .35);
+      outline-offset: 2px;
+    }
+
+    /* Modo full-screen en móvil — pegado al viewport real */
+    @media (max-width: 640px) {
+      #bella-chat {
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        max-width: 100%;
+        height: 100dvh;
+        max-height: 100dvh;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      .chat-head {
+        padding-top: max(14px, env(safe-area-inset-top));
+      }
+
+      /* Acerca el FAB al borde para que no se mezcle con el chat full-screen */
+      .whatsapp-flotante {
+        bottom: 20px;
+        right: 20px;
+      }
     }
 
     /* =====================================================
@@ -2685,7 +2827,7 @@
             <h3 class="card-servicio-nombre">Lipólisis Láser</h3>
             <p class="card-servicio-desc">Reduce la grasa localizada de forma no invasiva. Ideal para abdomen, brazos y
               flancos.</p>
-            <span class="chip-precio">Consultar precio</span>
+            <span class="chip-precio">Desde $299 MXN</span>
             <a href="https://wa.me/525535433490?text=Hola%2C%20me%20interesa%20cotizar%20lip%C3%B3lisis%20l%C3%A1ser"
               class="btn-cotizar" target="_blank" rel="noopener noreferrer">💬 Cotizar ahora</a>
           </div>
@@ -2698,7 +2840,7 @@
             <h3 class="card-servicio-nombre">Cavitación</h3>
             <p class="card-servicio-desc">Ultrasonido de alta frecuencia para eliminar celulitis y afinar la silueta
               corporal.</p>
-            <span class="chip-precio">Consultar precio</span>
+            <span class="chip-precio">Desde $299 MXN</span>
             <a href="https://wa.me/525535433490?text=Hola%2C%20me%20interesa%20cotizar%20cavitaci%C3%B3n"
               class="btn-cotizar" target="_blank" rel="noopener noreferrer">💬 Cotizar ahora</a>
           </div>
@@ -2712,7 +2854,7 @@
             <h3 class="card-servicio-nombre">Radiofrecuencia Tripolar</h3>
             <p class="card-servicio-desc">Reafirma y tonifica la piel estimulando el colágeno de forma profunda y sin
               dolor.</p>
-            <span class="chip-precio">Consultar precio</span>
+            <span class="chip-precio">Desde $299 MXN</span>
             <a href="https://wa.me/525535433490?text=Hola%2C%20me%20interesa%20cotizar%20radiofrecuencia%20tripolar"
               class="btn-cotizar" target="_blank" rel="noopener noreferrer">💬 Cotizar ahora</a>
           </div>
@@ -2726,7 +2868,7 @@
             <h3 class="card-servicio-nombre">Electroestimulación</h3>
             <p class="card-servicio-desc">Tonifica y define músculos con corrientes eléctricas de baja frecuencia. Sin
               esfuerzo físico.</p>
-            <span class="chip-precio">Consultar precio</span>
+            <span class="chip-precio">Desde $299 MXN</span>
             <a href="https://wa.me/525535433490?text=Hola%2C%20me%20interesa%20cotizar%20electroestimulaci%C3%B3n"
               class="btn-cotizar" target="_blank" rel="noopener noreferrer">💬 Cotizar ahora</a>
           </div>
@@ -3210,12 +3352,20 @@
   <!-- BOTÓN FLOTANTE / CHAT -->
   <button id="chatToggle" class="whatsapp-flotante" aria-label="Abrir chat">💬</button>
 
-  <div id="bella-chat">
-    <button id="chatClose" class="chat-close" aria-label="Cerrar chat">✕</button>
-    <div id="messages"></div>
+  <div id="bella-chat" role="dialog" aria-labelledby="chatTitle" aria-modal="false">
+    <header class="chat-head">
+      <div class="chat-head__avatar" aria-hidden="true">P</div>
+      <div class="chat-head__title">
+        <strong id="chatTitle">Paola · BellaNick Clinic</strong>
+        <span>En línea · Responde rápido</span>
+      </div>
+      <div class="chat-head__spacer"></div>
+      <button id="chatClose" class="chat-close" type="button" aria-label="Cerrar chat">✕</button>
+    </header>
+    <div id="messages" aria-live="polite"></div>
     <div class="chat-input">
-      <input type="text" id="userInput" placeholder="¿Te ayudo a agendar?" aria-label="Escribe tu pregunta" />
-      <button id="sendBtn">Enviar</button>
+      <input type="text" id="userInput" placeholder="Escribe tu mensaje…" aria-label="Escribe tu pregunta" autocomplete="off" />
+      <button id="sendBtn" type="button">Enviar</button>
     </div>
   </div>
 
@@ -3322,6 +3472,15 @@
         }
       });
 
+      // Cuando se abre el HTML directamente con doble-click (protocolo file://)
+      // o sin host (p.ej. about:srcdoc), las rutas absolutas /php/... resuelven
+      // al disco local y el navegador bloquea por CORS. Cortocircuitamos
+      // silenciosamente para no contaminar la consola en pruebas locales.
+      // En producción (http/https) NUNCA se activa.
+      function chatBackendOffline() {
+        return location.protocol === 'file:' || !location.host;
+      }
+
       async function sendMessage() {
         if (!iaDisponible) { window.open('https://wa.me/525535433490', '_blank'); return; }
         var text = input.value.trim();
@@ -3330,6 +3489,12 @@
         var wantsWA = /\b(whatsapp|wa|wha|por whatsapp|mandame whatsapp|quiero whatsapp)\b/i.test(text);
         addMessage('user', text);
         input.value = '';
+
+        if (chatBackendOffline()) {
+          addMessage('bella', 'Para chatear con Paola, visita el sitio en https://depilasermexico.com 💖');
+          return;
+        }
+
         addMessage('bella', 'Escribiendo…');
 
         try {
@@ -3339,7 +3504,7 @@
             body: JSON.stringify({ message: text })
           });
           var data = JSON.parse(await res.text());
-          messages.lastChild.remove();
+          if (messages.lastChild) messages.lastChild.remove();
           addMessage('bella', data.reply);
 
           if (data.ia_disabled) {
@@ -3353,6 +3518,7 @@
             setTimeout(function () { window.open('https://wa.me/525535433490', '_blank'); }, 800);
           }
         } catch (e) {
+          if (messages.lastChild) messages.lastChild.remove();
           addMessage('bella', 'Hubo un problema técnico. ¿Prefieres que te atiendan por WhatsApp?');
         }
       }
@@ -3361,6 +3527,7 @@
       input.addEventListener('keypress', function (e) { if (e.key === 'Enter') sendMessage(); });
 
       async function resetSession() {
+        if (chatBackendOffline()) return;
         try { await fetch('/php/reset_session.php', { method: 'POST', credentials: 'same-origin', cache: 'no-store' }); } catch (e) { }
       }
 
