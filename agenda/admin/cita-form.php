@@ -142,6 +142,38 @@ $clientSearchOptions = array_map(static fn($client) => [
     'phone' => (string) ($client['phone'] ?? ''),
     'label' => trim(($client['name'] ?? '') . ' - ' . (($client['phone'] ?? '') ?: ($client['email'] ?? ''))),
 ], $clients);
+$selectedService = null;
+foreach ($services as $service) {
+    if ((int) $service['id'] === (int) ($form['service_id'] ?? 0)) {
+        $selectedService = $service;
+        break;
+    }
+}
+$serviceSearchOptions = array_map(static function ($service) {
+    $type = ServiceCatalogService::normalizeType($service['item_type'] ?? 'service');
+    $sessions = (int) ($service['sessions_count'] ?? 1);
+    $label = $service['name'] . ' - ' . (int) $service['duration_min'] . ' min';
+    if ($type === ServiceCatalogService::TYPE_PACKAGE) {
+        $label .= ' - ' . $sessions . ' sesion(es)';
+    }
+    return [
+        'id' => (int) $service['id'],
+        'name' => (string) ($service['name'] ?? ''),
+        'duration' => (int) ($service['duration_min'] ?? 0),
+        'sessions' => $sessions,
+        'type' => $type,
+        'typeLabel' => ServiceCatalogService::typeLabel($service['item_type'] ?? 'service'),
+        'label' => $label,
+    ];
+}, $services);
+$selectedServiceLabel = '';
+if ($selectedService) {
+    $selectedServiceType = ServiceCatalogService::normalizeType($selectedService['item_type'] ?? 'service');
+    $selectedServiceLabel = $selectedService['name'] . ' - ' . (int) $selectedService['duration_min'] . ' min';
+    if ($selectedServiceType === ServiceCatalogService::TYPE_PACKAGE) {
+        $selectedServiceLabel .= ' - ' . (int) $selectedService['sessions_count'] . ' sesion(es)';
+    }
+}
 
 function admin_validate_client_input(array $data): array
 {
@@ -684,25 +716,28 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
 
           <div class="col-md-6">
             <label class="bnc-label">Servicio o paquete</label>
-            <select name="service_id" class="form-select <?= isset($errors['service_id']) ? 'is-invalid' : '' ?>">
-              <option value="">Seleccionar...</option>
-              <?php $currentGroup = null; ?>
-              <?php foreach ($services as $service): ?>
-                <?php
-                  $group = ServiceCatalogService::typeLabel($service['item_type'] ?? 'service');
-                  if ($group !== $currentGroup):
-                    if ($currentGroup !== null) echo '</optgroup>';
-                    $currentGroup = $group;
-                ?>
-                  <optgroup label="<?= e($group) ?>">
-                <?php endif; ?>
-                <option value="<?= (int) $service['id'] ?>" <?= (int) $form['service_id'] === (int) $service['id'] ? 'selected' : '' ?>>
-                  <?= e($service['name']) ?> - <?= (int) $service['duration_min'] ?> min<?= ServiceCatalogService::normalizeType($service['item_type'] ?? 'service') === ServiceCatalogService::TYPE_PACKAGE ? ' - ' . (int) $service['sessions_count'] . ' sesion(es)' : '' ?>
-                </option>
-              <?php endforeach; ?>
-              <?php if ($currentGroup !== null) echo '</optgroup>'; ?>
-            </select>
-            <?php if (isset($errors['service_id'])): ?><div class="invalid-feedback"><?= e($errors['service_id']) ?></div><?php endif; ?>
+            <input type="hidden" name="service_id" id="serviceIdInput" value="<?= e((string) $form['service_id']) ?>">
+            <div class="bnc-client-combobox">
+              <input
+                type="text"
+                id="serviceSearchInput"
+                class="form-control bnc-client-search <?= isset($errors['service_id']) ? 'is-invalid' : '' ?>"
+                value="<?= e($selectedServiceLabel) ?>"
+                placeholder="Buscar servicio o paquete..."
+                autocomplete="off"
+                role="combobox"
+                aria-autocomplete="list"
+                aria-expanded="false"
+                aria-controls="serviceSearchMenu">
+              <button class="bnc-client-toggle" type="button" id="serviceSearchToggle" aria-label="Mostrar servicios">
+                <i class="bi bi-chevron-down"></i>
+              </button>
+            </div>
+            <div id="serviceSearchMenu" class="bnc-client-menu" role="listbox"></div>
+            <div class="form-text" id="serviceSelectedHint">
+              <?= $selectedService ? 'Seleccionado: ' . e(ServiceCatalogService::typeLabel($selectedService['item_type'] ?? 'service')) : 'Escribe para buscar servicios y paquetes activos.' ?>
+            </div>
+            <?php if (isset($errors['service_id'])): ?><div class="invalid-feedback d-block"><?= e($errors['service_id']) ?></div><?php endif; ?>
           </div>
 
           <input type="hidden" name="start_at" id="startAtInput" value="<?= e($form['start_at']) ?>">
@@ -915,8 +950,13 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
     const clientSearchToggle = document.getElementById('clientSearchToggle');
     const clientSearchMenu = document.getElementById('clientSearchMenu');
     const clientSelectedHint = document.getElementById('clientSelectedHint');
+    const serviceIdInput = document.getElementById('serviceIdInput');
+    const serviceSearchInput = document.getElementById('serviceSearchInput');
+    const serviceSearchToggle = document.getElementById('serviceSearchToggle');
+    const serviceSearchMenu = document.getElementById('serviceSearchMenu');
+    const serviceSelectedHint = document.getElementById('serviceSelectedHint');
     const branchSelect = document.querySelector('select[name="branch_id"]');
-    const serviceSelect = document.querySelector('select[name="service_id"]');
+    const serviceSelect = serviceIdInput;
     const statusSelect = document.querySelector('select[name="status_id"]');
     const startInput = document.getElementById('startAtInput');
     const availabilityDateInput = document.getElementById('availabilityDateInput');
@@ -926,9 +966,12 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
     const slotsBox = document.getElementById('slotsBox');
     const selectedSlotSummary = document.getElementById('selectedSlotSummary');
     const clientSearchData = <?= json_encode($clientSearchOptions, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+    const serviceSearchData = <?= json_encode($serviceSearchOptions, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
     const clientResultLimit = 60;
     let clientVisibleOptions = [];
     let clientActiveIndex = -1;
+    let serviceVisibleOptions = [];
+    let serviceActiveIndex = -1;
     let slotRequest = null;
     let appointmentSubmitting = false;
     let selectedBusyProfessionals = [];
@@ -1047,6 +1090,88 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
       closeClientMenu();
     }
 
+    function serviceSearchHaystack(service) {
+      return normalizeClientText(`${service.name} ${service.typeLabel} ${service.label} ${service.duration} ${service.sessions}`);
+    }
+
+    function positionServiceMenu() {
+      if (!serviceSearchInput || !serviceSearchMenu || !serviceSearchMenu.classList.contains('show')) return;
+      const rect = serviceSearchInput.getBoundingClientRect();
+      const sideGap = 12;
+      const left = Math.max(sideGap, rect.left);
+      const availableWidth = Math.max(220, window.innerWidth - left - sideGap);
+      const width = Math.min(Math.max(rect.width, 240), availableWidth);
+      const spaceBelow = window.innerHeight - rect.bottom - 14;
+      serviceSearchMenu.style.left = `${left}px`;
+      serviceSearchMenu.style.top = `${rect.bottom + 6}px`;
+      serviceSearchMenu.style.width = `${width}px`;
+      serviceSearchMenu.style.maxHeight = `${Math.max(120, Math.min(360, spaceBelow))}px`;
+    }
+
+    function openServiceMenu() {
+      if (!serviceSearchInput || !serviceSearchMenu) return;
+      if (window.innerHeight - serviceSearchInput.getBoundingClientRect().bottom < 150) {
+        serviceSearchInput.scrollIntoView({ block: 'center' });
+      }
+      serviceSearchMenu.classList.add('show');
+      serviceSearchInput.setAttribute('aria-expanded', 'true');
+      requestAnimationFrame(positionServiceMenu);
+    }
+
+    function closeServiceMenu() {
+      if (!serviceSearchInput || !serviceSearchMenu) return;
+      serviceSearchMenu.classList.remove('show');
+      serviceSearchInput.setAttribute('aria-expanded', 'false');
+      serviceActiveIndex = -1;
+      updateServiceActiveOption();
+    }
+
+    function updateServiceActiveOption() {
+      if (!serviceSearchMenu) return;
+      serviceSearchMenu.querySelectorAll('.bnc-client-option').forEach((option, index) => {
+        option.classList.toggle('active', index === serviceActiveIndex);
+        if (index === serviceActiveIndex) option.scrollIntoView({ block: 'nearest' });
+      });
+    }
+
+    function renderServiceOptions(query = '') {
+      if (!serviceSearchMenu) return;
+      const normalizedQuery = normalizeClientText(query);
+      const tokens = normalizedQuery.split(/\s+/).filter(Boolean);
+      const matches = serviceSearchData.filter(service => {
+        if (!tokens.length) return true;
+        const haystack = service.searchText || serviceSearchHaystack(service);
+        return tokens.every(token => haystack.includes(token));
+      });
+      serviceVisibleOptions = matches.slice(0, clientResultLimit);
+      serviceActiveIndex = serviceVisibleOptions.length ? 0 : -1;
+
+      if (!serviceVisibleOptions.length) {
+        serviceSearchMenu.innerHTML = '<div class="bnc-client-empty">No se encontraron servicios o paquetes con esa busqueda.</div>';
+        return;
+      }
+
+      const moreLabel = matches.length > clientResultLimit
+        ? `<div class="bnc-client-empty">Mostrando ${clientResultLimit} de ${matches.length}. Escribe mas para afinar la busqueda.</div>`
+        : '';
+      serviceSearchMenu.innerHTML = serviceVisibleOptions.map((service, index) => `
+        <button type="button" class="bnc-client-option ${index === serviceActiveIndex ? 'active' : ''}" role="option" data-service-index="${index}">
+          <span class="bnc-client-name">${escapeHtml(service.name || 'Servicio sin nombre')}</span>
+          <span class="bnc-client-meta">${escapeHtml(`${service.typeLabel} - ${service.duration} min${service.type === 'package' ? ` - ${service.sessions} sesion(es)` : ''}`)}</span>
+        </button>
+      `).join('') + moreLabel;
+    }
+
+    function selectService(service) {
+      if (!service || !serviceIdInput || !serviceSearchInput) return;
+      serviceIdInput.value = service.id;
+      serviceSearchInput.value = service.label || service.name || '';
+      serviceSearchInput.classList.remove('is-invalid');
+      if (serviceSelectedHint) serviceSelectedHint.textContent = `Seleccionado: ${service.typeLabel || 'Servicio'}`;
+      closeServiceMenu();
+      serviceIdInput.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
     function renderSlotMessage(type, message) {
       const klass = type === 'danger' ? 'alert-danger' : type === 'success' ? 'alert-success' : 'alert-warning';
       slotsBox.innerHTML = `<div class="alert ${klass} small py-2 mb-0">${escapeHtml(message)}</div>`;
@@ -1118,6 +1243,7 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
 
       setFieldState(branchSelect, !branchId);
       setFieldState(serviceSelect, !serviceId);
+      if (serviceSearchInput) setFieldState(serviceSearchInput, !serviceId);
       setFieldState(availabilityDateInput, !date || date < todayIso);
 
       if (!branchId || !serviceId || !date) {
@@ -1287,6 +1413,66 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
       window.addEventListener('scroll', positionClientMenu, true);
     }
 
+    if (serviceSearchInput && serviceSearchMenu) {
+      serviceSearchData.forEach(service => {
+        service.searchText = serviceSearchHaystack(service);
+      });
+      renderServiceOptions(serviceSearchInput.value);
+      serviceSearchInput.addEventListener('focus', () => {
+        renderServiceOptions(serviceSearchInput.value);
+        openServiceMenu();
+      });
+      serviceSearchInput.addEventListener('input', () => {
+        serviceIdInput.value = '';
+        serviceSearchInput.classList.remove('is-invalid');
+        if (serviceSelectedHint) serviceSelectedHint.textContent = 'Selecciona un servicio o paquete de la lista filtrada.';
+        renderServiceOptions(serviceSearchInput.value);
+        openServiceMenu();
+        serviceIdInput.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+      serviceSearchInput.addEventListener('keydown', event => {
+        if (!serviceSearchMenu.classList.contains('show') && ['ArrowDown', 'ArrowUp'].includes(event.key)) {
+          openServiceMenu();
+          return;
+        }
+        if (event.key === 'ArrowDown') {
+          event.preventDefault();
+          serviceActiveIndex = Math.min(serviceActiveIndex + 1, serviceVisibleOptions.length - 1);
+          updateServiceActiveOption();
+        } else if (event.key === 'ArrowUp') {
+          event.preventDefault();
+          serviceActiveIndex = Math.max(serviceActiveIndex - 1, 0);
+          updateServiceActiveOption();
+        } else if (event.key === 'Enter' && serviceSearchMenu.classList.contains('show')) {
+          event.preventDefault();
+          selectService(serviceVisibleOptions[serviceActiveIndex]);
+        } else if (event.key === 'Escape') {
+          closeServiceMenu();
+        }
+      });
+      serviceSearchMenu.addEventListener('mousedown', event => {
+        const option = event.target.closest('.bnc-client-option');
+        if (!option) return;
+        event.preventDefault();
+        selectService(serviceVisibleOptions[Number(option.dataset.serviceIndex)]);
+      });
+      serviceSearchToggle?.addEventListener('click', () => {
+        if (serviceSearchMenu.classList.contains('show')) {
+          closeServiceMenu();
+        } else {
+          renderServiceOptions(serviceSearchInput.value);
+          serviceSearchInput.focus();
+          openServiceMenu();
+        }
+      });
+      document.addEventListener('mousedown', event => {
+        if (serviceSearchInput.contains(event.target) || serviceSearchMenu.contains(event.target) || serviceSearchToggle?.contains(event.target)) return;
+        closeServiceMenu();
+      });
+      window.addEventListener('resize', positionServiceMenu);
+      window.addEventListener('scroll', positionServiceMenu, true);
+    }
+
     radios.forEach(radio => radio.addEventListener('change', syncClientMode));
     appointmentForm.addEventListener('submit', function (event) {
       if (appointmentSubmitting) {
@@ -1301,6 +1487,15 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         renderClientOptions(clientSearchInput?.value || '');
         openClientMenu();
         clientSearchInput?.focus();
+        return;
+      }
+      if (serviceIdInput && !serviceIdInput.value) {
+        event.preventDefault();
+        serviceSearchInput?.classList.add('is-invalid');
+        if (serviceSelectedHint) serviceSelectedHint.textContent = 'Selecciona un servicio o paquete antes de guardar.';
+        renderServiceOptions(serviceSearchInput?.value || '');
+        openServiceMenu();
+        serviceSearchInput?.focus();
         return;
       }
       if (!startInput.value) {
