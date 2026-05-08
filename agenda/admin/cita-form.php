@@ -67,8 +67,7 @@ $clients = Database::all(
      FROM users u
      JOIN roles r ON r.id = u.role_id
      WHERE r.slug = 'cliente' AND u.active = 1
-     ORDER BY u.name
-     LIMIT 300"
+     ORDER BY u.name"
 );
 $sourceOptions = AppointmentService::sourceOptions();
 
@@ -126,6 +125,23 @@ if ($selectedClientIds) {
         $clients = array_merge($missingClients, $clients);
     }
 }
+$selectedClient = null;
+foreach ($clients as $client) {
+    if ((int) $client['id'] === (int) ($form['user_id'] ?? 0)) {
+        $selectedClient = $client;
+        break;
+    }
+}
+$selectedClientLabel = $selectedClient
+    ? trim($selectedClient['name'] . ' - ' . (($selectedClient['phone'] ?? '') ?: ($selectedClient['email'] ?? '')))
+    : '';
+$clientSearchOptions = array_map(static fn($client) => [
+    'id' => (int) $client['id'],
+    'name' => (string) ($client['name'] ?? ''),
+    'email' => (string) ($client['email'] ?? ''),
+    'phone' => (string) ($client['phone'] ?? ''),
+    'label' => trim(($client['name'] ?? '') . ' - ' . (($client['phone'] ?? '') ?: ($client['email'] ?? ''))),
+], $clients);
 
 function admin_validate_client_input(array $data): array
 {
@@ -496,6 +512,82 @@ $pageTitle = $isEdit ? 'Editar cita' : 'Nueva cita';
 require __DIR__ . '/../includes/layouts/header_admin.php';
 ?>
 
+<style>
+  .bnc-client-combobox {
+    position: relative;
+  }
+
+  .bnc-client-search {
+    padding-right: 2.75rem;
+  }
+
+  .bnc-client-toggle {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    color: #374151;
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    position: absolute;
+    right: .65rem;
+    top: 0;
+    width: 2rem;
+  }
+
+  .bnc-client-menu {
+    background: #fff;
+    border: 1px solid #f0cfe0;
+    border-radius: 14px;
+    box-shadow: 0 18px 40px rgba(58, 12, 43, .16);
+    display: none;
+    overflow-y: auto;
+    padding: .35rem;
+    position: fixed;
+    z-index: 1080;
+  }
+
+  .bnc-client-menu.show {
+    display: block;
+  }
+
+  .bnc-client-option {
+    background: transparent;
+    border: 0;
+    border-radius: 10px;
+    color: #15051a;
+    display: block;
+    padding: .7rem .8rem;
+    text-align: left;
+    width: 100%;
+  }
+
+  .bnc-client-option:hover,
+  .bnc-client-option.active {
+    background: #fff1f7;
+  }
+
+  .bnc-client-name {
+    display: block;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .bnc-client-meta {
+    color: #6b7280;
+    display: block;
+    font-size: .85rem;
+    line-height: 1.35;
+    margin-top: .2rem;
+    word-break: break-word;
+  }
+
+  .bnc-client-empty {
+    color: #6b7280;
+    padding: .75rem .85rem;
+  }
+</style>
+
 <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
   <a href="<?= url('admin/') ?>" class="btn btn-sm btn-bnc-outline"><i class="bi bi-arrow-left"></i> Dashboard</a>
   <a href="<?= url('admin/calendario.php') ?>" class="btn btn-sm btn-bnc-outline"><i class="bi bi-calendar3"></i> Calendario</a>
@@ -536,15 +628,28 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
             <?php endif; ?>
 
             <div id="existingClientBox">
-              <select name="user_id" class="form-select <?= isset($errors['user_id']) ? 'is-invalid' : '' ?>">
-                <option value="">Seleccionar cliente...</option>
-                <?php foreach ($clients as $client): ?>
-                  <option value="<?= (int) $client['id'] ?>" <?= (int) $form['user_id'] === (int) $client['id'] ? 'selected' : '' ?>>
-                    <?= e($client['name']) ?> - <?= e($client['phone'] ?: $client['email']) ?>
-                  </option>
-                <?php endforeach; ?>
-              </select>
-              <?php if (isset($errors['user_id'])): ?><div class="invalid-feedback"><?= e($errors['user_id']) ?></div><?php endif; ?>
+              <input type="hidden" name="user_id" id="clientUserIdInput" value="<?= e((string) $form['user_id']) ?>">
+              <div class="bnc-client-combobox">
+                <input
+                  type="text"
+                  id="clientSearchInput"
+                  class="form-control bnc-client-search <?= isset($errors['user_id']) ? 'is-invalid' : '' ?>"
+                  value="<?= e($selectedClientLabel) ?>"
+                  placeholder="Buscar cliente por nombre, correo o telefono..."
+                  autocomplete="off"
+                  role="combobox"
+                  aria-autocomplete="list"
+                  aria-expanded="false"
+                  aria-controls="clientSearchMenu">
+                <button class="bnc-client-toggle" type="button" id="clientSearchToggle" aria-label="Mostrar clientes">
+                  <i class="bi bi-chevron-down"></i>
+                </button>
+              </div>
+              <div id="clientSearchMenu" class="bnc-client-menu" role="listbox"></div>
+              <div class="form-text" id="clientSelectedHint">
+                <?= $selectedClient ? 'Cliente seleccionado: ' . e($selectedClient['name']) : 'Escribe para buscar entre los clientes activos.' ?>
+              </div>
+              <?php if (isset($errors['user_id'])): ?><div class="invalid-feedback d-block"><?= e($errors['user_id']) ?></div><?php endif; ?>
             </div>
 
             <div id="newClientBox" class="row g-3 d-none">
@@ -805,6 +910,11 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
     const existing = document.getElementById('existingClientBox');
     const created = document.getElementById('newClientBox');
     const radios = document.querySelectorAll('input[name="client_mode"]');
+    const clientUserIdInput = document.getElementById('clientUserIdInput');
+    const clientSearchInput = document.getElementById('clientSearchInput');
+    const clientSearchToggle = document.getElementById('clientSearchToggle');
+    const clientSearchMenu = document.getElementById('clientSearchMenu');
+    const clientSelectedHint = document.getElementById('clientSelectedHint');
     const branchSelect = document.querySelector('select[name="branch_id"]');
     const serviceSelect = document.querySelector('select[name="service_id"]');
     const statusSelect = document.querySelector('select[name="status_id"]');
@@ -815,6 +925,10 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
     const saveAppointmentBtn = document.getElementById('saveAppointmentBtn');
     const slotsBox = document.getElementById('slotsBox');
     const selectedSlotSummary = document.getElementById('selectedSlotSummary');
+    const clientSearchData = <?= json_encode($clientSearchOptions, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+    const clientResultLimit = 60;
+    let clientVisibleOptions = [];
+    let clientActiveIndex = -1;
     let slotRequest = null;
     let appointmentSubmitting = false;
     let selectedBusyProfessionals = [];
@@ -823,6 +937,8 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
       const mode = document.querySelector('input[name="client_mode"]:checked')?.value || 'existing';
       existing.classList.toggle('d-none', mode === 'new');
       created.classList.toggle('d-none', mode !== 'new');
+      if (clientSearchInput) clientSearchInput.disabled = mode === 'new';
+      if (mode === 'new') closeClientMenu();
     }
 
     function setFieldState(field, isInvalid) {
@@ -837,6 +953,98 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         '"': '&quot;',
         "'": '&#039;'
       }[char]));
+    }
+
+    function normalizeClientText(value) {
+      return String(value ?? '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+    }
+
+    function clientSearchHaystack(client) {
+      return normalizeClientText(`${client.name} ${client.email} ${client.phone}`);
+    }
+
+    function positionClientMenu() {
+      if (!clientSearchInput || !clientSearchMenu || !clientSearchMenu.classList.contains('show')) return;
+      const rect = clientSearchInput.getBoundingClientRect();
+      const sideGap = 12;
+      const left = Math.max(sideGap, rect.left);
+      const availableWidth = Math.max(220, window.innerWidth - left - sideGap);
+      const width = Math.min(Math.max(rect.width, 240), availableWidth);
+      const spaceBelow = window.innerHeight - rect.bottom - 14;
+      clientSearchMenu.style.left = `${left}px`;
+      clientSearchMenu.style.top = `${rect.bottom + 6}px`;
+      clientSearchMenu.style.width = `${width}px`;
+      clientSearchMenu.style.maxHeight = `${Math.max(120, Math.min(360, spaceBelow))}px`;
+    }
+
+    function openClientMenu() {
+      if (!clientSearchInput || !clientSearchMenu || clientSearchInput.disabled) return;
+      if (window.innerHeight - clientSearchInput.getBoundingClientRect().bottom < 150) {
+        clientSearchInput.scrollIntoView({ block: 'center' });
+      }
+      clientSearchMenu.classList.add('show');
+      clientSearchInput.setAttribute('aria-expanded', 'true');
+      requestAnimationFrame(positionClientMenu);
+    }
+
+    function closeClientMenu() {
+      if (!clientSearchInput || !clientSearchMenu) return;
+      clientSearchMenu.classList.remove('show');
+      clientSearchInput.setAttribute('aria-expanded', 'false');
+      clientActiveIndex = -1;
+      updateClientActiveOption();
+    }
+
+    function updateClientActiveOption() {
+      if (!clientSearchMenu) return;
+      clientSearchMenu.querySelectorAll('.bnc-client-option').forEach((option, index) => {
+        option.classList.toggle('active', index === clientActiveIndex);
+        if (index === clientActiveIndex) option.scrollIntoView({ block: 'nearest' });
+      });
+    }
+
+    function renderClientOptions(query = '') {
+      if (!clientSearchMenu) return;
+      const normalizedQuery = normalizeClientText(query);
+      const tokens = normalizedQuery.split(/\s+/).filter(Boolean);
+      const matches = clientSearchData.filter(client => {
+        if (!tokens.length) return true;
+        const haystack = client.searchText || clientSearchHaystack(client);
+        return tokens.every(token => haystack.includes(token));
+      });
+      clientVisibleOptions = matches.slice(0, clientResultLimit);
+      clientActiveIndex = clientVisibleOptions.length ? 0 : -1;
+
+      if (!clientVisibleOptions.length) {
+        clientSearchMenu.innerHTML = '<div class="bnc-client-empty">No se encontraron clientes con esa busqueda.</div>';
+        return;
+      }
+
+      const moreLabel = matches.length > clientResultLimit
+        ? `<div class="bnc-client-empty">Mostrando ${clientResultLimit} de ${matches.length}. Escribe mas para afinar la busqueda.</div>`
+        : '';
+      clientSearchMenu.innerHTML = clientVisibleOptions.map((client, index) => {
+        const meta = [client.phone, client.email].filter(Boolean).join(' - ');
+        return `
+          <button type="button" class="bnc-client-option ${index === clientActiveIndex ? 'active' : ''}" role="option" data-client-index="${index}">
+            <span class="bnc-client-name">${escapeHtml(client.name || 'Cliente sin nombre')}</span>
+            <span class="bnc-client-meta">${escapeHtml(meta || `ID ${client.id}`)}</span>
+          </button>
+        `;
+      }).join('') + moreLabel;
+    }
+
+    function selectClient(client) {
+      if (!client || !clientUserIdInput || !clientSearchInput) return;
+      clientUserIdInput.value = client.id;
+      clientSearchInput.value = client.label || client.name || '';
+      clientSearchInput.classList.remove('is-invalid');
+      if (clientSelectedHint) clientSelectedHint.textContent = `Cliente seleccionado: ${client.name || client.label}`;
+      closeClientMenu();
     }
 
     function renderSlotMessage(type, message) {
@@ -1020,10 +1228,79 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
       syncProfessionals();
     }
 
+    if (clientSearchInput && clientSearchMenu) {
+      clientSearchData.forEach(client => {
+        client.searchText = clientSearchHaystack(client);
+      });
+      renderClientOptions(clientSearchInput.value);
+      clientSearchInput.addEventListener('focus', () => {
+        renderClientOptions(clientSearchInput.value);
+        openClientMenu();
+      });
+      clientSearchInput.addEventListener('input', () => {
+        clientUserIdInput.value = '';
+        clientSearchInput.classList.remove('is-invalid');
+        if (clientSelectedHint) clientSelectedHint.textContent = 'Selecciona un cliente de la lista filtrada.';
+        renderClientOptions(clientSearchInput.value);
+        openClientMenu();
+      });
+      clientSearchInput.addEventListener('keydown', event => {
+        if (!clientSearchMenu.classList.contains('show') && ['ArrowDown', 'ArrowUp'].includes(event.key)) {
+          openClientMenu();
+          return;
+        }
+        if (event.key === 'ArrowDown') {
+          event.preventDefault();
+          clientActiveIndex = Math.min(clientActiveIndex + 1, clientVisibleOptions.length - 1);
+          updateClientActiveOption();
+        } else if (event.key === 'ArrowUp') {
+          event.preventDefault();
+          clientActiveIndex = Math.max(clientActiveIndex - 1, 0);
+          updateClientActiveOption();
+        } else if (event.key === 'Enter' && clientSearchMenu.classList.contains('show')) {
+          event.preventDefault();
+          selectClient(clientVisibleOptions[clientActiveIndex]);
+        } else if (event.key === 'Escape') {
+          closeClientMenu();
+        }
+      });
+      clientSearchMenu.addEventListener('mousedown', event => {
+        const option = event.target.closest('.bnc-client-option');
+        if (!option) return;
+        event.preventDefault();
+        selectClient(clientVisibleOptions[Number(option.dataset.clientIndex)]);
+      });
+      clientSearchToggle?.addEventListener('click', () => {
+        if (clientSearchMenu.classList.contains('show')) {
+          closeClientMenu();
+        } else {
+          renderClientOptions(clientSearchInput.value);
+          clientSearchInput.focus();
+          openClientMenu();
+        }
+      });
+      document.addEventListener('mousedown', event => {
+        if (clientSearchInput.contains(event.target) || clientSearchMenu.contains(event.target) || clientSearchToggle?.contains(event.target)) return;
+        closeClientMenu();
+      });
+      window.addEventListener('resize', positionClientMenu);
+      window.addEventListener('scroll', positionClientMenu, true);
+    }
+
     radios.forEach(radio => radio.addEventListener('change', syncClientMode));
     appointmentForm.addEventListener('submit', function (event) {
       if (appointmentSubmitting) {
         event.preventDefault();
+        return;
+      }
+      const clientMode = document.querySelector('input[name="client_mode"]:checked')?.value || 'existing';
+      if (clientMode !== 'new' && clientUserIdInput && !clientUserIdInput.value) {
+        event.preventDefault();
+        clientSearchInput?.classList.add('is-invalid');
+        if (clientSelectedHint) clientSelectedHint.textContent = 'Selecciona un cliente existente antes de guardar.';
+        renderClientOptions(clientSearchInput?.value || '');
+        openClientMenu();
+        clientSearchInput?.focus();
         return;
       }
       if (!startInput.value) {
