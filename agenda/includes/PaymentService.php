@@ -7,6 +7,9 @@ final class PaymentService
 
     public static function ensureSchema(): void
     {
+        if (class_exists('ServiceCatalogService')) {
+            ServiceCatalogService::ensureSchema();
+        }
         self::ensureServiceColumn('payment_required', 'TINYINT(1) NOT NULL DEFAULT 0');
         self::ensureServiceColumn("payment_mode", "ENUM('none','deposit','full') NOT NULL DEFAULT 'none'");
         self::ensureServiceColumn('deposit_amount_mxn', 'DECIMAL(10,2) NULL');
@@ -115,7 +118,8 @@ final class PaymentService
         $payerEmail = filter_var((string) $d['client_email'], FILTER_VALIDATE_EMAIL)
             ? (string) $d['client_email']
             : 'pagos@bellanickclinic.com';
-        $itemTitle = trim('BellaNick - ' . (string) $d['service_name']);
+        $itemType = class_exists('ServiceCatalogService') ? ServiceCatalogService::paymentItemLabel($d) : 'Servicio';
+        $itemTitle = trim('BellaNick - ' . $itemType . ' - ' . (string) $d['service_name']);
         if ($itemTitle === 'BellaNick -') {
             $itemTitle = 'BellaNick - Cita';
         }
@@ -637,7 +641,9 @@ final class PaymentService
         return Database::one(
             "SELECT a.*, st.slug AS status_slug,
                     u.name AS client_name, u.email AS client_email,
-                    s.name AS service_name, s.price_mxn,
+                    s.name AS service_name, " . ServiceCatalogService::priceSql('s') . " AS price_mxn,
+                    COALESCE(s.item_type, 'service') AS item_type,
+                    COALESCE(s.sessions_count, 1) AS sessions_count,
                     b.id AS branch_id, b.slug AS branch_slug, b.name AS branch_name
              FROM appointments a
              JOIN appointment_statuses st ON st.id = a.status_id

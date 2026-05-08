@@ -7,6 +7,7 @@ $user = Auth::user();
 global $CONFIG;
 $cfg = $CONFIG['business'];
 PaymentService::ensureSchema();
+ServiceCatalogService::ensureSchema();
 PaymentService::expirePendingPayments();
 
 // ── Validaciones de límites ──
@@ -35,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $errors = Validator::appointmentCreate($_POST);
     if (!$errors) {
         // Verificar service y branch existen
-        $svc = Database::one('SELECT id, duration_min, name, price_mxn, payment_required, payment_mode, deposit_amount_mxn FROM services WHERE id = ? AND active = 1', [$serviceId]);
+        $svc = Database::one('SELECT ' . ServiceCatalogService::activeCatalogSqlSelect() . ' FROM services s WHERE s.id = ? AND s.active = 1', [$serviceId]);
         $br  = Database::one('SELECT id FROM branches WHERE id = ? AND active = 1', [$branchId]);
         if (!$svc || !$br) {
             $errors['_'] = 'Servicio o sucursal inválido.';
@@ -131,14 +132,16 @@ $selectedDate    = $_GET['date'] ?? $_POST['date'] ?? '';
 $services = [];
 if ($selectedBranch) {
     $services = Database::all(
-        'SELECT s.id, s.slug, s.name, s.description, s.duration_min, s.price_mxn, s.payment_required, s.payment_mode, s.deposit_amount_mxn
+        'SELECT ' . ServiceCatalogService::activeCatalogSqlSelect() . '
          FROM services s
          JOIN service_branches sb ON sb.service_id = s.id
          WHERE sb.branch_id = ? AND s.active = 1
-         ORDER BY s.display_order, s.name',
+         ORDER BY s.item_type, s.display_order, s.name',
         [$selectedBranch]
     );
 }
+$serviceIds = array_column($services, 'id');
+$packageItemsByService = ServiceCatalogService::packageItemsForServices($serviceIds);
 
 $step = 1;
 if ($selectedBranch)              $step = 2;
@@ -191,16 +194,28 @@ require __DIR__ . '/includes/layouts/header_client.php';
     <div class="mb-3"><a href="<?= url('agendar.php') ?>" class="small text-decoration-none text-muted">← Cambiar sucursal</a></div>
     <div class="row g-3">
       <?php foreach ($services as $s): ?>
+        <?php $isPackage = ServiceCatalogService::normalizeType($s['item_type'] ?? 'service') === ServiceCatalogService::TYPE_PACKAGE; ?>
         <div class="col-12 col-md-6 col-lg-4">
           <a href="?branch=<?= $selectedBranch ?>&amp;service=<?= (int) $s['id'] ?>" class="text-decoration-none text-reset">
             <div class="bnc-card h-100" style="cursor:pointer;">
               <div class="bnc-card-body">
-                <h3 class="h6 fw-bold mb-1"><?= e($s['name']) ?></h3>
+                <div class="d-flex justify-content-between gap-2 align-items-start mb-1">
+                  <h3 class="h6 fw-bold mb-0"><?= e($s['name']) ?></h3>
+                  <?= $isPackage ? '<span class="badge bg-primary">Paquete</span>' : '<span class="badge bg-light text-dark border">Servicio</span>' ?>
+                </div>
                 <?php if ($s['description']): ?>
                   <p class="small text-muted mb-2"><?= e($s['description']) ?></p>
                 <?php endif; ?>
+                <?php if ($isPackage && !empty($packageItemsByService[(int) $s['id']])): ?>
+                  <p class="small text-muted mb-2">
+                    Incluye <?= e(implode(', ', array_map(
+                        fn($i) => (int) $i['sessions_count'] . 'x ' . $i['name'],
+                        $packageItemsByService[(int) $s['id']]
+                    ))) ?>
+                  </p>
+                <?php endif; ?>
                 <div class="d-flex justify-content-between align-items-center mt-3">
-                  <span class="small text-muted"><i class="bi bi-clock"></i> <?= (int) $s['duration_min'] ?> min</span>
+                  <span class="small text-muted"><i class="bi bi-clock"></i> <?= (int) $s['duration_min'] ?> min<?= $isPackage ? ' · ' . (int) $s['sessions_count'] . ' sesion(es)' : '' ?></span>
                   <span class="fw-bold" style="color:var(--bnc-pink)"><?= fmt_price((float) $s['price_mxn']) ?></span>
                 </div>
               </div>
@@ -213,9 +228,11 @@ require __DIR__ . '/includes/layouts/header_client.php';
   <?php else: ?>
     <!-- ════════ PASO 3: FECHA + HORA ════════ -->
     <?php
-      $svc = Database::one('SELECT name, duration_min, price_mxn, payment_required, payment_mode, deposit_amount_mxn FROM services WHERE id = ?', [$selectedService]);
+      $svc = Database::one('SELECT ' . ServiceCatalogService::activeCatalogSqlSelect() . ' FROM services s WHERE s.id = ?', [$selectedService]);
       $br  = Database::one('SELECT name, address FROM branches WHERE id = ?', [$selectedBranch]);
       $paymentCfg = PaymentService::servicePaymentConfig($svc ?: []);
+      $isPackage = $svc && ServiceCatalogService::normalizeType($svc['item_type'] ?? 'service') === ServiceCatalogService::TYPE_PACKAGE;
+      $selectedPackageItems = $isPackage ? ServiceCatalogService::packageItemsForServices([(int) $selectedService]) : [];
       $minDate = date('Y-m-d', time() + $cfg['booking_min_hours'] * 3600);
       $maxDate = date('Y-m-d', time() + $cfg['booking_max_days'] * 86400);
     ?>
@@ -273,9 +290,17 @@ require __DIR__ . '/includes/layouts/header_client.php';
               <div class="small text-muted"><?= e($br['address']) ?></div>
             </div>
             <div class="mb-3">
-              <small class="text-muted text-uppercase d-block mb-1" style="font-size:11px; letter-spacing:.5px">Servicio</small>
+              <small class="text-muted text-uppercase d-block mb-1" style="font-size:11px; letter-spacing:.5px"><?= $isPackage ? 'Paquete' : 'Servicio' ?></small>
               <strong><?= e($svc['name']) ?></strong>
-              <div class="small text-muted"><?= (int) $svc['duration_min'] ?> minutos</div>
+              <div class="small text-muted"><?= (int) $svc['duration_min'] ?> minutos<?= $isPackage ? ' · ' . (int) $svc['sessions_count'] . ' sesion(es)' : '' ?></div>
+              <?php if ($isPackage && !empty($selectedPackageItems[(int) $selectedService])): ?>
+                <div class="small text-muted mt-1">
+                  Incluye <?= e(implode(', ', array_map(
+                      fn($i) => (int) $i['sessions_count'] . 'x ' . $i['name'],
+                      $selectedPackageItems[(int) $selectedService]
+                  ))) ?>
+                </div>
+              <?php endif; ?>
             </div>
             <div class="mb-3">
               <small class="text-muted text-uppercase d-block mb-1" style="font-size:11px; letter-spacing:.5px">Fecha y hora</small>

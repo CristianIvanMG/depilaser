@@ -4,6 +4,7 @@ Auth::requireLogin();
 Auth::requireVerifiedEmail();
 
 PaymentService::ensureSchema();
+ServiceCatalogService::ensureSchema();
 
 $user = Auth::user();
 $appointmentId = (int) ($_GET['appointment_id'] ?? 0);
@@ -11,7 +12,7 @@ $result = (string) ($_GET['result'] ?? '');
 
 $appointment = Database::one(
     "SELECT a.*, st.slug AS status_slug, st.name AS status_name,
-            s.name AS service_name, s.price_mxn,
+            s.name AS service_name, " . ServiceCatalogService::priceSql('s') . " AS price_mxn, COALESCE(s.item_type, 'service') AS item_type,
             b.name AS branch_name
      FROM appointments a
      JOIN appointment_statuses st ON st.id = a.status_id
@@ -33,7 +34,7 @@ if ($appointment['payment_status'] !== 'paid' && in_array($result, ['success', '
     if (!empty($returnSync['paid'])) {
         $appointment = Database::one(
             "SELECT a.*, st.slug AS status_slug, st.name AS status_name,
-                    s.name AS service_name, s.price_mxn,
+                    s.name AS service_name, " . ServiceCatalogService::priceSql('s') . " AS price_mxn, COALESCE(s.item_type, 'service') AS item_type,
                     b.name AS branch_name
              FROM appointments a
              JOIN appointment_statuses st ON st.id = a.status_id
@@ -140,7 +141,7 @@ require __DIR__ . '/includes/layouts/header_client.php';
             </div>
           <?php endif; ?>
 
-          <div class="mb-3"><small class="text-muted text-uppercase">Servicio</small><br><strong><?= e($appointment['service_name']) ?></strong></div>
+          <div class="mb-3"><small class="text-muted text-uppercase"><?= e(ServiceCatalogService::typeLabel($appointment['item_type'] ?? 'service')) ?></small><br><strong><?= e($appointment['service_name']) ?></strong></div>
           <div class="mb-3"><small class="text-muted text-uppercase">Sucursal</small><br><strong><?= e($appointment['branch_name']) ?></strong></div>
           <div class="mb-3"><small class="text-muted text-uppercase">Fecha y hora</small><br><strong><?= e(fmt_dt($appointment['start_at'])) ?></strong></div>
           <div class="mb-4"><small class="text-muted text-uppercase">Monto a pagar</small><br><strong class="h4" style="color:var(--bnc-pink)"><?= fmt_price((float) $appointment['payment_amount_mxn']) ?></strong></div>

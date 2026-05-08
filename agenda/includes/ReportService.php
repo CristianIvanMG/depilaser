@@ -5,6 +5,9 @@ final class ReportService
 {
     public static function filters(array $input): array
     {
+        if (class_exists('ServiceCatalogService')) {
+            ServiceCatalogService::ensureSchema();
+        }
         $today = new DateTimeImmutable('today');
         $defaultFrom = $today->modify('first day of this month')->format('Y-m-d');
         $defaultTo = $today->modify('last day of this month')->format('Y-m-d');
@@ -77,7 +80,7 @@ final class ReportService
                     SUM(st.slug = 'atendida') AS attended,
                     SUM(st.slug = 'cancelada') AS cancelled,
                     SUM(st.slug = 'no_asistio') AS no_show,
-                    COALESCE(SUM(CASE WHEN st.slug='atendida' THEN s.price_mxn ELSE 0 END),0) AS revenue
+                    COALESCE(SUM(CASE WHEN st.slug='atendida' THEN " . self::serviceRevenueSql('s') . " ELSE 0 END),0) AS revenue
              FROM appointments a
              JOIN appointment_statuses st ON st.id = a.status_id
              JOIN services s ON s.id = a.service_id
@@ -183,7 +186,7 @@ final class ReportService
         $base = self::where($f, "st.slug = 'atendida'");
         return Database::all(
             "SELECT DATE_FORMAT(a.start_at, '%Y-%m') AS label,
-                    COALESCE(SUM(s.price_mxn),0) AS value
+                    COALESCE(SUM(" . self::serviceRevenueSql('s') . "),0) AS value
              FROM appointments a
              JOIN appointment_statuses st ON st.id = a.status_id
              JOIN services s ON s.id = a.service_id
@@ -197,7 +200,7 @@ final class ReportService
     {
         $base = self::where($f, "st.slug = 'atendida'");
         return Database::all(
-            "SELECT b.name AS label, COALESCE(SUM(s.price_mxn),0) AS value
+            "SELECT b.name AS label, COALESCE(SUM(" . self::serviceRevenueSql('s') . "),0) AS value
              FROM appointments a
              JOIN appointment_statuses st ON st.id = a.status_id
              JOIN services s ON s.id = a.service_id
@@ -230,7 +233,7 @@ final class ReportService
                     COUNT(*) AS total_appointments,
                     SUM(st.slug = 'atendida') AS attended,
                     SUM(st.slug = 'no_asistio') AS no_show,
-                    COALESCE(SUM(CASE WHEN st.slug='atendida' THEN s.price_mxn ELSE 0 END),0) AS revenue
+                    COALESCE(SUM(CASE WHEN st.slug='atendida' THEN " . self::serviceRevenueSql('s') . " ELSE 0 END),0) AS revenue
              FROM appointments a
              JOIN appointment_statuses st ON st.id = a.status_id
              JOIN services s ON s.id = a.service_id
@@ -250,7 +253,7 @@ final class ReportService
             "SELECT COALESCE(cu.name, 'Sistema / Web') AS creator,
                     COUNT(*) AS created_count,
                     SUM(st.slug = 'atendida') AS converted_attended,
-                    COALESCE(SUM(CASE WHEN st.slug='atendida' THEN s.price_mxn ELSE 0 END),0) AS revenue
+                    COALESCE(SUM(CASE WHEN st.slug='atendida' THEN " . self::serviceRevenueSql('s') . " ELSE 0 END),0) AS revenue
              FROM appointments a
              JOIN appointment_statuses st ON st.id = a.status_id
              JOIN services s ON s.id = a.service_id
@@ -352,6 +355,18 @@ final class ReportService
         }
 
         return ['sql' => 'WHERE ' . implode(' AND ', $where), 'params' => $params];
+    }
+
+    private static function serviceRevenueSql(string $alias): string
+    {
+        if (class_exists('ServiceCatalogService')) {
+            ServiceCatalogService::ensureSchema();
+        }
+        return "CASE
+            WHEN COALESCE({$alias}.item_type, 'service') = 'package'
+            THEN COALESCE({$alias}.precio_final, {$alias}.price_mxn)
+            ELSE {$alias}.price_mxn
+        END";
     }
 
     private static function validDate(string $date): ?string

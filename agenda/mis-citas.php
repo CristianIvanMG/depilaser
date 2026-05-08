@@ -3,6 +3,7 @@ require_once __DIR__ . '/includes/bootstrap.php';
 Auth::requireLogin();
 Auth::requireVerifiedEmail();
 $user = Auth::user();
+ServiceCatalogService::ensureSchema();
 
 global $CONFIG;
 $cancelMinHours = (int) $CONFIG['business']['cancel_min_hours'];
@@ -39,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'cance
 
 // Listas
 $upcoming = Database::all(
-    "SELECT a.*, s.name AS service_name, s.duration_min, s.price_mxn,
+    "SELECT a.*, s.name AS service_name, s.duration_min, " . ServiceCatalogService::priceSql('s') . " AS price_mxn, COALESCE(s.item_type, 'service') AS item_type,
             b.name AS branch_name, b.address AS branch_address, b.whatsapp,
             st.slug AS status_slug, st.name AS status_name, st.color_hex
      FROM appointments a
@@ -52,7 +53,7 @@ $upcoming = Database::all(
 );
 
 $past = Database::all(
-    "SELECT a.*, s.name AS service_name, s.duration_min,
+    "SELECT a.*, s.name AS service_name, s.duration_min, COALESCE(s.item_type, 'service') AS item_type,
             b.name AS branch_name,
             st.slug AS status_slug, st.name AS status_name
      FROM appointments a
@@ -97,6 +98,7 @@ require __DIR__ . '/includes/layouts/header_client.php';
           <div class="flex-grow-1">
             <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
               <strong><?= e($a['service_name']) ?></strong>
+              <span class="badge bg-light text-dark border"><?= e(ServiceCatalogService::typeLabel($a['item_type'] ?? 'service')) ?></span>
               <span class="bnc-status <?= e($a['status_slug']) ?>"><?= e($a['status_name']) ?></span>
             </div>
             <div class="small text-muted"><i class="bi bi-geo-alt"></i> <?= e($a['branch_name']) ?> · <?= (int) $a['duration_min'] ?> min · <?= fmt_price((float) $a['price_mxn']) ?></div>
@@ -157,6 +159,7 @@ require __DIR__ . '/includes/layouts/header_client.php';
           <div class="flex-grow-1">
             <div class="d-flex align-items-center gap-2 mb-1">
               <strong><?= e($a['service_name']) ?></strong>
+              <span class="badge bg-light text-dark border"><?= e(ServiceCatalogService::typeLabel($a['item_type'] ?? 'service')) ?></span>
               <span class="bnc-status <?= e($a['status_slug']) ?>"><?= e($a['status_name']) ?></span>
             </div>
             <div class="small text-muted"><i class="bi bi-geo-alt"></i> <?= e($a['branch_name']) ?> · <?= (int) $a['duration_min'] ?> min</div>

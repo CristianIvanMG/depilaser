@@ -14,6 +14,7 @@ require_once __DIR__ . '/../includes/bootstrap.php';
 
 header('Content-Type: application/json; charset=utf-8');
 AppointmentService::ensureMachinerySchema();
+ServiceCatalogService::ensureSchema();
 
 // Solo usuarios autenticados
 if (!Auth::check()) {
@@ -72,7 +73,10 @@ if ($dateTs > $maxTs) {
 }
 
 // Servicio
-$svc = Database::one('SELECT id, duration_min FROM services WHERE id = ? AND active = 1', [$serviceId]);
+$svc = Database::one(
+    "SELECT id, duration_min, COALESCE(item_type, 'service') AS item_type FROM services WHERE id = ? AND active = 1",
+    [$serviceId]
+);
 if (!$svc) {
     http_response_code(404);
     echo json_encode(['ok' => false, 'error' => 'Servicio no encontrado o inactivo']);

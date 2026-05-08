@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../includes/bootstrap.php';
 Auth::requireAdmin();
 PaymentService::ensureSchema();
+ServiceCatalogService::ensureSchema();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::check($_POST[Csrf::FIELD] ?? '');
@@ -9,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $required = isset($_POST['payment_required']) ? 1 : 0;
     $mode = in_array(($_POST['payment_mode'] ?? 'none'), ['none','deposit','full'], true) ? $_POST['payment_mode'] : 'none';
     $deposit = max(0, (float) ($_POST['deposit_amount_mxn'] ?? 0));
-    $service = Database::one('SELECT id, price_mxn FROM services WHERE id = ? LIMIT 1', [$serviceId]);
+    $service = Database::one("SELECT id, " . ServiceCatalogService::priceSql() . " AS price_mxn, COALESCE(item_type, 'service') AS item_type FROM services s WHERE id = ? LIMIT 1", [$serviceId]);
     if (!$service) {
         flash('danger', 'Servicio no encontrado.');
     } else {
@@ -18,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $deposit = 0;
         }
         if ($required && $mode === 'deposit' && ($deposit <= 0 || $deposit > (float) $service['price_mxn'])) {
-            flash('danger', 'El anticipo debe ser mayor a cero y no superar el precio del servicio.');
+            flash('danger', 'El anticipo debe ser mayor a cero y no superar el precio configurado.');
         } elseif ($required && $mode === 'none') {
             flash('danger', 'Selecciona anticipo o pago total.');
         } else {
@@ -33,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     redirect('admin/pagos-servicios.php');
 }
 
-$services = Database::all('SELECT id, name, duration_min, price_mxn, payment_required, payment_mode, deposit_amount_mxn, active FROM services ORDER BY active DESC, display_order, name');
+$services = Database::all("SELECT id, name, duration_min, " . ServiceCatalogService::priceSql() . " AS price_mxn, payment_required, payment_mode, deposit_amount_mxn, active, COALESCE(item_type, 'service') AS item_type FROM services s ORDER BY active DESC, item_type, display_order, name");
 $pageTitle = 'Pagos por servicio';
 require __DIR__ . '/../includes/layouts/header_admin.php';
 ?>
@@ -44,18 +45,18 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
 
 <div class="bnc-card">
   <div class="bnc-card-header">
-    <h2 class="h6 fw-bold mb-0">Pago anticipado por servicio</h2>
+    <h2 class="h6 fw-bold mb-0">Pago anticipado por servicio o paquete</h2>
   </div>
   <div class="table-responsive">
     <table class="bnc-table mb-0">
-      <thead><tr><th>Servicio</th><th>Precio</th><th>Requiere pago</th><th>Tipo</th><th>Anticipo</th><th class="text-end">Guardar</th></tr></thead>
+      <thead><tr><th>Registro</th><th>Precio</th><th>Requiere pago</th><th>Tipo de cobro</th><th>Anticipo</th><th class="text-end">Guardar</th></tr></thead>
       <tbody>
         <?php foreach ($services as $service): ?>
           <tr>
             <form method="POST">
               <?= Csrf::input() ?>
               <input type="hidden" name="service_id" value="<?= (int) $service['id'] ?>">
-              <td><strong><?= e($service['name']) ?></strong><br><small class="text-muted"><?= (int) $service['duration_min'] ?> min</small></td>
+              <td><strong><?= e($service['name']) ?></strong><br><small class="text-muted"><?= e(ServiceCatalogService::typeLabel($service['item_type'] ?? 'service')) ?> · <?= (int) $service['duration_min'] ?> min</small></td>
               <td><?= fmt_price((float) $service['price_mxn']) ?></td>
               <td>
                 <div class="form-check form-switch">

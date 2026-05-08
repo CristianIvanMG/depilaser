@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../includes/bootstrap.php';
 Auth::requireAdmin();
+ServiceCatalogService::ensureSchema();
 
 // KPIs
 $today = date('Y-m-d');
@@ -23,7 +24,7 @@ $kpiClientes = (int) (Database::one(
 )['n'] ?? 0);
 
 $kpiIngresoMes = (float) (Database::one(
-    "SELECT COALESCE(SUM(s.price_mxn),0) AS t
+    "SELECT COALESCE(SUM(" . ServiceCatalogService::priceSql('s') . "),0) AS t
      FROM appointments a
      JOIN services s ON s.id = a.service_id
      JOIN appointment_statuses st ON st.id = a.status_id

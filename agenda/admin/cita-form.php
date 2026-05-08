@@ -20,6 +20,7 @@ AppointmentService::ensureProfessionalSchema();
 AppointmentService::ensureMachinerySchema();
 EmailNotificationService::ensureSchema();
 PaymentService::ensureSchema();
+ServiceCatalogService::ensureSchema();
 
 $statuses = Database::all('SELECT id, slug, name FROM appointment_statuses ORDER BY id');
 $statusBySlug = [];
@@ -54,7 +55,12 @@ $professionals = array_map(fn($p) => [
     'branches' => $proBranches[(int) $p['id']] ?? [],
 ], $professionalsRows);
 $services = Database::all(
-    'SELECT id, name, duration_min, price_mxn FROM services WHERE active = 1 ORDER BY display_order, name'
+    "SELECT id, name, duration_min, price_mxn,
+            COALESCE(item_type, 'service') AS item_type,
+            COALESCE(sessions_count, 1) AS sessions_count
+     FROM services
+     WHERE active = 1
+     ORDER BY item_type, display_order, name"
 );
 $clients = Database::all(
     "SELECT u.id, u.name, u.email, u.phone
@@ -572,14 +578,24 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
           </div>
 
           <div class="col-md-6">
-            <label class="bnc-label">Servicio</label>
+            <label class="bnc-label">Servicio o paquete</label>
             <select name="service_id" class="form-select <?= isset($errors['service_id']) ? 'is-invalid' : '' ?>">
-              <option value="">Seleccionar servicio...</option>
+              <option value="">Seleccionar...</option>
+              <?php $currentGroup = null; ?>
               <?php foreach ($services as $service): ?>
+                <?php
+                  $group = ServiceCatalogService::typeLabel($service['item_type'] ?? 'service');
+                  if ($group !== $currentGroup):
+                    if ($currentGroup !== null) echo '</optgroup>';
+                    $currentGroup = $group;
+                ?>
+                  <optgroup label="<?= e($group) ?>">
+                <?php endif; ?>
                 <option value="<?= (int) $service['id'] ?>" <?= (int) $form['service_id'] === (int) $service['id'] ? 'selected' : '' ?>>
-                  <?= e($service['name']) ?> - <?= (int) $service['duration_min'] ?> min
+                  <?= e($service['name']) ?> - <?= (int) $service['duration_min'] ?> min<?= ServiceCatalogService::normalizeType($service['item_type'] ?? 'service') === ServiceCatalogService::TYPE_PACKAGE ? ' - ' . (int) $service['sessions_count'] . ' sesion(es)' : '' ?>
                 </option>
               <?php endforeach; ?>
+              <?php if ($currentGroup !== null) echo '</optgroup>'; ?>
             </select>
             <?php if (isset($errors['service_id'])): ?><div class="invalid-feedback"><?= e($errors['service_id']) ?></div><?php endif; ?>
           </div>

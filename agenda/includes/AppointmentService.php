@@ -211,9 +211,24 @@ final class AppointmentService
 
     public static function serviceResourceKey(int $serviceId): ?string
     {
-        $service = Database::one('SELECT category, name FROM services WHERE id = ? LIMIT 1', [$serviceId]);
+        $service = Database::one("SELECT category, name, COALESCE(item_type, 'service') AS item_type FROM services WHERE id = ? LIMIT 1", [$serviceId]);
         if (!$service) {
             return null;
+        }
+        if (($service['item_type'] ?? 'service') === 'package' && self::tableExists('service_package_items')) {
+            $items = Database::all(
+                'SELECT s.id
+                 FROM service_package_items spi
+                 JOIN services s ON s.id = spi.included_service_id
+                 WHERE spi.package_service_id = ?',
+                [$serviceId]
+            );
+            foreach ($items as $item) {
+                $key = self::serviceResourceKey((int) $item['id']);
+                if ($key) {
+                    return $key;
+                }
+            }
         }
         $raw = mb_strtolower(trim((string) ($service['category'] ?: $service['name'])));
         $normalized = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $raw) ?: $raw;
@@ -276,7 +291,24 @@ final class AppointmentService
              WHERE a.branch_id = ?
                AND st.slug IN ('programada','confirmada','atendida')
                AND a.start_at < ? AND a.end_at > ?
-               AND (LOWER(s.category) LIKE '%depil%' OR LOWER(s.category) LIKE '%laser%' OR LOWER(s.name) LIKE '%depil%' OR LOWER(s.name) LIKE '%laser%')
+               AND (
+                    LOWER(s.category) LIKE '%depil%'
+                    OR LOWER(s.category) LIKE '%laser%'
+                    OR LOWER(s.name) LIKE '%depil%'
+                    OR LOWER(s.name) LIKE '%laser%'
+                    OR EXISTS (
+                        SELECT 1
+                        FROM service_package_items spi
+                        JOIN services si ON si.id = spi.included_service_id
+                        WHERE spi.package_service_id = s.id
+                          AND (
+                            LOWER(si.category) LIKE '%depil%'
+                            OR LOWER(si.category) LIKE '%laser%'
+                            OR LOWER(si.name) LIKE '%depil%'
+                            OR LOWER(si.name) LIKE '%laser%'
+                          )
+                    )
+               )
                {$paymentSql}
                {$ignoreSql}
              {$lockSql}";

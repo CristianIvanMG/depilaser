@@ -1346,176 +1346,8 @@
 
     /* =====================================================
        WHATSAPP FLOTANTE / CHAT
+       Estilos movidos a /assets/css/chat.css (single source of truth)
     ===================================================== */
-    .whatsapp-flotante {
-      position: fixed;
-      bottom: 28px;
-      right: 28px;
-      width: 60px;
-      height: 60px;
-      background: #25D366;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-      box-shadow: 0 4px 20px rgba(37, 211, 102, .5);
-      z-index: 9999;
-      transition: var(--tr);
-      cursor: pointer;
-      border: none;
-    }
-
-    .whatsapp-flotante:hover {
-      transform: scale(1.1);
-      box-shadow: 0 8px 28px rgba(37, 211, 102, .65)
-    }
-
-    .whatsapp-flotante::after {
-      content: '¡Escríbenos!';
-      position: absolute;
-      right: 70px;
-      background: var(--ct);
-      color: #fff;
-      padding: 6px 14px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      white-space: nowrap;
-      opacity: 0;
-      transition: opacity .3s;
-      pointer-events: none;
-    }
-
-    .whatsapp-flotante:hover::after {
-      opacity: 1
-    }
-
-    #bella-chat {
-      display: none;
-      position: fixed;
-      bottom: 100px;
-      right: 20px;
-      width: 320px;
-      height: 420px;
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, .25);
-      z-index: 9999;
-      flex-direction: column;
-    }
-
-    #bella-chat.activo {
-      display: flex
-    }
-
-    #messages {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      padding: 12px;
-      overflow-y: auto;
-      background: #f7f7f8;
-      flex: 1;
-    }
-
-    #messages .user,
-    #messages .bella {
-      max-width: 80%;
-      padding: 10px 14px;
-      border-radius: 16px;
-      font-size: 14px;
-      line-height: 1.4;
-      animation: fadeInUp .25s ease;
-    }
-
-    #messages .user {
-      align-self: flex-end;
-      background: linear-gradient(135deg, #c53b6d, #e06b9a);
-      color: #fff;
-      border-bottom-right-radius: 6px;
-    }
-
-    #messages .bella {
-      align-self: flex-start;
-      background: #fff;
-      color: #333;
-      border-bottom-left-radius: 6px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, .08);
-    }
-
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(4px)
-      }
-
-      to {
-        opacity: 1;
-        transform: none
-      }
-    }
-
-    .chat-close {
-      position: absolute;
-      top: 8px;
-      right: 10px;
-      background: none;
-      border: none;
-      font-size: 18px;
-      cursor: pointer;
-      color: #999;
-      z-index: 10;
-    }
-
-    .chat-close:hover {
-      color: #c53b6d
-    }
-
-    .chat-input {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px;
-      background: #fafafa;
-      border-top: 1px solid #f0f0f0;
-      flex-shrink: 0;
-    }
-
-    .chat-input input {
-      flex: 1;
-      padding: 12px 14px;
-      border-radius: 999px;
-      border: 1px solid #e5e5e5;
-      font-size: 14px;
-      outline: none;
-      background: #fff;
-      color: #333;
-      transition: all .25s;
-    }
-
-    .chat-input input:focus {
-      border-color: #c53b6d;
-      box-shadow: 0 0 0 2px rgba(197, 59, 109, .15)
-    }
-
-    .chat-input button {
-      padding: 12px 18px;
-      border-radius: 999px;
-      border: none;
-      background: linear-gradient(135deg, #c53b6d, #e06b9a);
-      color: #fff;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all .25s;
-      box-shadow: 0 6px 16px rgba(197, 59, 109, .35);
-    }
-
-    .chat-input button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 10px 24px rgba(197, 59, 109, .45)
-    }
 
     /* =====================================================
        RESPONSIVE — breakpoint único en 900px
@@ -2641,6 +2473,10 @@
       outline-offset: 2px
     }
   </style>
+
+  <!-- Chat / Bot widget — CSS y JS externos (idempotentes, comportamiento idéntico al inline) -->
+  <link rel="stylesheet" href="/assets/css/chat.css">
+  <script src="/assets/js/chat.js" defer></script>
 </head>
 
 <body>
@@ -3304,17 +3140,9 @@
   </footer>
 
 
-  <!-- BOTÓN FLOTANTE / CHAT -->
-  <button id="chatToggle" class="whatsapp-flotante" aria-label="Abrir chat">💬</button>
-
-  <div id="bella-chat">
-    <button id="chatClose" class="chat-close" aria-label="Cerrar chat">✕</button>
-    <div id="messages"></div>
-    <div class="chat-input">
-      <input type="text" id="userInput" placeholder="¿Te ayudo a agendar?" aria-label="Escribe tu pregunta" />
-      <button id="sendBtn">Enviar</button>
-    </div>
-  </div>
+  <!-- BOTÓN FLOTANTE / CHAT
+       Markup ahora se inyecta automáticamente desde /assets/js/chat.js
+       (idempotente: si ya existe #bella-chat o #chatToggle inline, no se duplica). -->
 
 
   <script>
@@ -3373,88 +3201,11 @@
         }
       });
 
-      /* ── CHAT ── */
-      var chat = document.getElementById('bella-chat');
-      var toggleBtn = document.getElementById('chatToggle');
-      var closeBtn = document.getElementById('chatClose');
-      var sendBtn = document.getElementById('sendBtn');
-      var input = document.getElementById('userInput');
-      var messages = document.getElementById('messages');
-      var iaDisponible = true;
-
-      function addMessage(type, text) {
-        var div = document.createElement('div');
-        div.className = type;
-        div.innerText = text;
-        messages.appendChild(div);
-        messages.scrollTop = messages.scrollHeight;
-      }
-
-      function openChat() {
-        chat.classList.add('activo');
-        if (!messages.innerHTML) {
-          addMessage('bella', '👋 Bienvenida a BellaNick Clinic. ¿Te ayudo a agendar una cita o resolver una duda?');
-        }
-      }
-
-      function closeChat() {
-        chat.classList.remove('activo');
-        messages.innerHTML = '';
-        resetSession();
-        sessionStorage.setItem('chatClosed', 'true');
-      }
-
-      toggleBtn.addEventListener('click', openChat);
-      closeBtn.addEventListener('click', function (e) { e.stopPropagation(); closeChat(); });
-
-      // Auto-abrir al cargar (solo desktop, una vez por sesión)
-      window.addEventListener('load', function () {
-        if (!sessionStorage.getItem('chatClosed') && window.innerWidth > 480) {
-          setTimeout(openChat, 1200);
-        }
-      });
-
-      async function sendMessage() {
-        if (!iaDisponible) { window.open('https://wa.me/525535433490', '_blank'); return; }
-        var text = input.value.trim();
-        if (!text) return;
-
-        var wantsWA = /\b(whatsapp|wa|wha|por whatsapp|mandame whatsapp|quiero whatsapp)\b/i.test(text);
-        addMessage('user', text);
-        input.value = '';
-        addMessage('bella', 'Escribiendo…');
-
-        try {
-          var res = await fetch('/php/chat.php?ts=' + Date.now(), {
-            method: 'POST', credentials: 'same-origin', cache: 'no-store',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: text })
-          });
-          var data = JSON.parse(await res.text());
-          messages.lastChild.remove();
-          addMessage('bella', data.reply);
-
-          if (data.ia_disabled) {
-            iaDisponible = false;
-            closeChat();
-            setTimeout(function () { window.open('https://wa.me/525535433490', '_blank'); }, 1200);
-            return;
-          }
-          if (wantsWA) {
-            closeChat();
-            setTimeout(function () { window.open('https://wa.me/525535433490', '_blank'); }, 800);
-          }
-        } catch (e) {
-          addMessage('bella', 'Hubo un problema técnico. ¿Prefieres que te atiendan por WhatsApp?');
-        }
-      }
-
-      sendBtn.addEventListener('click', sendMessage);
-      input.addEventListener('keypress', function (e) { if (e.key === 'Enter') sendMessage(); });
-
-      async function resetSession() {
-        try { await fetch('/php/reset_session.php', { method: 'POST', credentials: 'same-origin', cache: 'no-store' }); } catch (e) { }
-      }
+      /* ── CHAT ──
+         Lógica del chat movida a /assets/js/chat.js.
+         No hace falta nada más en este IIFE para el chat: el script externo
+         se carga con `defer`, detecta si ya existe #bella-chat / #chatToggle
+         (idempotente) y, si no, inyecta el widget y conecta los listeners. */
 
     })();
   </script>

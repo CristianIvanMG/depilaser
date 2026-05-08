@@ -19,13 +19,16 @@ final class ReceiptService
     /** Datos completos de la cita + relaciones. */
     public static function hydrate(int $appointmentId): ?array
     {
+        if (class_exists('ServiceCatalogService')) {
+            ServiceCatalogService::ensureSchema();
+        }
         $row = Database::one(
             "SELECT a.id, a.code, a.start_at, a.end_at, a.notes_admin, a.notes_client,
                     a.status_id, a.receipt_folio, a.receipt_sent, a.receipt_sent_at,
                     a.attended_at, a.confirmed_at, a.cancelled_at, a.cancel_reason,
                     a.empathy_email_sent, a.empathy_email_sent_at,
                     u.name AS client_name, u.email AS client_email, u.phone AS client_phone,
-                    s.name AS service_name, s.duration_min, s.price_mxn,
+                    s.name AS service_name, s.duration_min, " . ServiceCatalogService::priceSql('s') . " AS price_mxn,
                     b.name AS branch_name, b.address AS branch_address, b.city AS branch_city,
                     b.state AS branch_state, b.phone AS branch_phone, b.email AS branch_email,
                     b.gmaps_url,
