@@ -137,11 +137,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         redirect('admin/usuarios.php');
     }
+
+    if ($action === 'activate' && $clientId) {
+        $client = Database::one(
+            "SELECT u.id, u.name, u.active
+             FROM users u
+             JOIN roles r ON r.id = u.role_id
+             WHERE u.id = ? AND r.slug = 'cliente' LIMIT 1",
+            [$clientId]
+        );
+        if (!$client) {
+            flash('danger', 'Cliente no encontrado.');
+        } elseif ((int) $client['active'] === 1) {
+            flash('info', 'El cliente ya estaba activo.');
+        } else {
+            Database::exec('UPDATE users SET active = 1 WHERE id = ?', [$clientId]);
+            Auth::audit('admin_client_activate', 'user', $clientId);
+            flash('success', 'Cliente activado correctamente. Ya puede seleccionarse al agendar.');
+        }
+        redirect('admin/usuarios.php');
+    }
 }
 
 $q = trim($_GET['q'] ?? '');
+$statusFilter = $_GET['status'] ?? 'all';
+if (!in_array($statusFilter, ['all', 'active', 'inactive'], true)) {
+    $statusFilter = 'all';
+}
 $where = ["r.slug = 'cliente'"];
 $params = [];
+if ($statusFilter === 'active') {
+    $where[] = 'u.active = 1';
+} elseif ($statusFilter === 'inactive') {
+    $where[] = 'u.active = 0';
+}
 if ($q !== '') {
     $nameCols = ClientProfile::nameColumns();
     $searchParts = ['u.name LIKE ?', 'u.email LIKE ?', 'u.phone LIKE ?'];
@@ -182,7 +211,8 @@ $offset = ($page - 1) * $perPage;
 
 function admin_clients_url(int $page, string $q, int $perPage): string
 {
-    $query = ['page' => $page, 'per_page' => $perPage];
+    global $statusFilter;
+    $query = ['page' => $page, 'per_page' => $perPage, 'status' => $statusFilter];
     if ($q !== '') {
         $query['q'] = $q;
     }
@@ -274,7 +304,15 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
           <?php endforeach; ?>
         </select>
       </div>
-      <div class="col-sm-6 col-lg-4">
+      <div class="col-sm-6 col-lg-2">
+        <label class="bnc-label">Estado</label>
+        <select name="status" class="form-select">
+          <option value="all" <?= $statusFilter === 'all' ? 'selected' : '' ?>>Todos</option>
+          <option value="active" <?= $statusFilter === 'active' ? 'selected' : '' ?>>Activos</option>
+          <option value="inactive" <?= $statusFilter === 'inactive' ? 'selected' : '' ?>>Inactivos</option>
+        </select>
+      </div>
+      <div class="col-sm-6 col-lg-2">
         <div class="bnc-client-search-actions">
           <button class="btn btn-bnc-primary" type="submit"><i class="bi bi-search"></i> Buscar</button>
           <a class="btn btn-bnc-outline" href="<?= url('admin/usuarios.php') ?>">Limpiar</a>
@@ -320,6 +358,8 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
                 <button class="btn btn-bnc-outline" data-bs-toggle="modal" data-bs-target="#clientEditModal-<?= (int) $client['id'] ?>"><i class="bi bi-pencil"></i></button>
                 <?php if ($client['active']): ?>
                   <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#clientDeleteModal-<?= (int) $client['id'] ?>"><i class="bi bi-person-dash"></i></button>
+                <?php else: ?>
+                  <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#clientActivateModal-<?= (int) $client['id'] ?>"><i class="bi bi-person-check"></i></button>
                 <?php endif; ?>
               </div>
             </td>
@@ -608,6 +648,34 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
       </div>
     </div>
   </div>
+
+  <?php if (!$client['active']): ?>
+    <div class="modal fade" id="clientActivateModal-<?= (int) $client['id'] ?>" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:16px">
+          <form method="POST">
+            <?= Csrf::input() ?>
+            <input type="hidden" name="action" value="activate">
+            <input type="hidden" name="client_id" value="<?= (int) $client['id'] ?>">
+            <div class="modal-header">
+              <h5 class="modal-title">Activar cliente</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <p class="mb-2">Este cliente volvera a aparecer en la seleccion al agendar citas.</p>
+              <div class="alert alert-info mb-0">
+                Confirma solo si el registro corresponde al cliente correcto y sus datos de contacto son validos.
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-light" data-bs-dismiss="modal">Volver</button>
+              <button class="btn btn-success" type="submit">Activar cliente</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  <?php endif; ?>
 <?php endforeach; ?>
 
 <?php if ($errors): ?>

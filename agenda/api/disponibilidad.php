@@ -13,6 +13,7 @@
 require_once __DIR__ . '/../includes/bootstrap.php';
 
 header('Content-Type: application/json; charset=utf-8');
+AppointmentService::ensureAppointmentDurationSchema();
 AppointmentService::ensureMachinerySchema();
 ServiceCatalogService::ensureSchema();
 
@@ -83,8 +84,7 @@ if (!$svc) {
     exit;
 }
 $duration = (int) $svc['duration_min'];
-$padding  = (int) $cfg['slot_padding_min'];
-$step     = $duration + $padding;
+$step = max(5, (int) ($cfg['slot_interval_min'] ?? 15));
 
 // Branch + verificar que ofrece el servicio
 $ofrece = Database::one(

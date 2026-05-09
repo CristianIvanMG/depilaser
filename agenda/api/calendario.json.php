@@ -8,6 +8,7 @@ require_once __DIR__ . '/../includes/bootstrap.php';
 header('Content-Type: application/json; charset=utf-8');
 
 // Asegura que exista el esquema de profesionales y de recibos
+try { AppointmentService::ensureAppointmentDurationSchema(); } catch (\Throwable $e) { /* silencioso */ }
 try { AppointmentService::ensureProfessionalSchema(); } catch (\Throwable $e) { /* silencioso */ }
 try { AppointmentService::ensureReceiptSchema(); } catch (\Throwable $e) { /* silencioso */ }
 try { PaymentService::ensureSchema(); } catch (\Throwable $e) { /* silencioso */ }

@@ -5,12 +5,34 @@ final class AppointmentService
 {
     public const BLOCKING_STATUSES = ['programada', 'confirmada', 'atendida'];
 
+    public static function ensureAppointmentDurationSchema(): void
+    {
+        if (!self::columnExists('appointments', 'end_at')) {
+            Database::exec('ALTER TABLE appointments ADD COLUMN end_at DATETIME NULL AFTER start_at');
+        }
+
+        if (self::columnExists('appointments', 'end_at')) {
+            try {
+                Database::exec(
+                    "UPDATE appointments a
+                     JOIN services s ON s.id = a.service_id
+                     SET a.end_at = DATE_ADD(a.start_at, INTERVAL GREATEST(COALESCE(s.duration_min, 30), 5) MINUTE)
+                     WHERE a.start_at IS NOT NULL
+                       AND (a.end_at IS NULL OR a.end_at <= a.start_at)"
+                );
+            } catch (Throwable $e) {
+                error_log('[appointments-duration] no pude normalizar end_at: ' . $e->getMessage());
+            }
+        }
+    }
+
     public static function validateSchedule(
         int $branchId,
         int $serviceId,
         string $startAt,
         ?int $ignoreAppointmentId = null
     ): array {
+        self::ensureAppointmentDurationSchema();
         self::ensureMachinerySchema();
         $errors = [];
 

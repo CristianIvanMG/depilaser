@@ -37,6 +37,7 @@ final class ClientProfile
     /** Auto-migración fase 5. Idempotente. */
     public static function ensureSchema(): void
     {
+        self::ensureNameSchema();
         $cols = [
             'birth_date' => 'DATE NULL',
             'gender'     => "ENUM('femenino','masculino','no_binario','prefiero_no_decir') NULL",
@@ -53,11 +54,58 @@ final class ClientProfile
         }
     }
 
+    public static function ensureNameSchema(): void
+    {
+        $created = false;
+        $nameCols = self::nameColumns();
+        if (!$nameCols['first']) {
+            try {
+                Database::exec('ALTER TABLE users ADD COLUMN first_name VARCHAR(120) NULL AFTER name');
+                $created = true;
+            } catch (\Throwable $e) {
+                error_log('[client-profile] no pude crear first_name: ' . $e->getMessage());
+            }
+        }
+        if (!$nameCols['last']) {
+            $afterFirst = $nameCols['first'] ?: 'name';
+            try {
+                Database::exec("ALTER TABLE users ADD COLUMN last_name VARCHAR(160) NULL AFTER {$afterFirst}");
+                $created = true;
+            } catch (\Throwable $e) {
+                error_log('[client-profile] no pude crear last_name: ' . $e->getMessage());
+            }
+        }
+        $nameCols = self::nameColumns();
+        $firstCol = $nameCols['first'] ?: 'first_name';
+        $lastCol = $nameCols['last'] ?: 'last_name';
+        if ($created || $nameCols['first'] || $nameCols['last']) {
+            try {
+                Database::exec(
+                    "UPDATE users
+                     SET {$firstCol} = CASE
+                            WHEN ({$firstCol} IS NULL OR TRIM({$firstCol}) = '') AND name IS NOT NULL
+                            THEN TRIM(SUBSTRING_INDEX(name, ' ', 1))
+                            ELSE {$firstCol}
+                         END,
+                         {$lastCol} = CASE
+                            WHEN ({$lastCol} IS NULL OR TRIM({$lastCol}) = '') AND name IS NOT NULL AND LOCATE(' ', TRIM(name)) > 0
+                            THEN TRIM(SUBSTRING(TRIM(name), LOCATE(' ', TRIM(name)) + 1))
+                            ELSE {$lastCol}
+                         END
+                     WHERE name IS NOT NULL
+                       AND (({$firstCol} IS NULL OR TRIM({$firstCol}) = '') OR ({$lastCol} IS NULL OR TRIM({$lastCol}) = ''))"
+                );
+            } catch (\Throwable $e) {
+                error_log('[client-profile] no pude normalizar nombres: ' . $e->getMessage());
+            }
+        }
+    }
+
     /** ¿Existe la columna en users? Cachea por petición. */
     public static function hasColumn(string $col): bool
     {
         static $cache = [];
-        if (array_key_exists($col, $cache)) return $cache[$col];
+        if (($cache[$col] ?? false) === true) return true;
         try {
             $row = Database::one(
                 'SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
@@ -66,7 +114,7 @@ final class ClientProfile
             );
             return $cache[$col] = (bool) $row;
         } catch (\Throwable $e) {
-            return $cache[$col] = false;
+            return false;
         }
     }
 
@@ -78,9 +126,6 @@ final class ClientProfile
      */
     public static function nameColumns(): array
     {
-        static $cols = null;
-        if ($cols !== null) return $cols;
-
         $firstCandidates = ['first_name', 'nombres', 'nombre', 'given_name'];
         $lastCandidates  = ['last_name', 'apellidos', 'apellido', 'family_name'];
 
@@ -100,7 +145,7 @@ final class ClientProfile
             }
         }
 
-        return $cols = ['first' => $first, 'last' => $last];
+        return ['first' => $first, 'last' => $last];
     }
 
     /**

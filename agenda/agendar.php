@@ -8,6 +8,7 @@ global $CONFIG;
 $cfg = $CONFIG['business'];
 PaymentService::ensureSchema();
 ServiceCatalogService::ensureSchema();
+AppointmentService::ensureAppointmentDurationSchema();
 PaymentService::expirePendingPayments();
 
 // ── Validaciones de límites ──

@@ -17,6 +17,7 @@ function admin_appointment_form_nonce(): string
 
 // Asegura schema de Profesionales (auto-migracion suave)
 AppointmentService::ensureProfessionalSchema();
+AppointmentService::ensureAppointmentDurationSchema();
 AppointmentService::ensureMachinerySchema();
 EmailNotificationService::ensureSchema();
 PaymentService::ensureSchema();
@@ -289,12 +290,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$validatedClient['ok']) {
                 $errors = array_merge($errors, $validatedClient['errors']);
             }
-        } elseif (!$userId || !Database::one(
-            "SELECT u.id FROM users u JOIN roles r ON r.id = u.role_id
-             WHERE u.id = ? AND u.active = 1 AND r.slug = 'cliente' LIMIT 1",
-            [$userId]
-        )) {
-            $errors['user_id'] = 'Selecciona un cliente.';
+        } else {
+            $selectedUser = $userId ? Database::one(
+                "SELECT u.id, u.active FROM users u JOIN roles r ON r.id = u.role_id
+                 WHERE u.id = ? AND r.slug = 'cliente' LIMIT 1",
+                [$userId]
+            ) : null;
+            if (!$selectedUser) {
+                $errors['user_id'] = 'Selecciona un cliente.';
+            } elseif ((int) $selectedUser['active'] !== 1) {
+                $errors['user_id'] = 'Este cliente esta inactivo. Activalo primero desde Clientes para poder agendar.';
+            }
         }
 
         $branchId = (int) ($_POST['branch_id'] ?? 0);
