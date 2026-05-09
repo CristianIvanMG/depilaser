@@ -94,6 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 Database::exec($sql, $params);
                 Auth::audit('admin_client_update', 'user', $clientId);
                 flash('success', 'Cliente actualizado correctamente.');
+                redirect('admin/usuarios.php?updated=' . $clientId);
             } else {
                 $roleId = (int) Database::one("SELECT id FROM roles WHERE slug = 'cliente' LIMIT 1")['id'];
                 $cols = ['role_id', 'name', 'email', 'phone'];
@@ -164,6 +165,7 @@ $statusFilter = $_GET['status'] ?? 'all';
 if (!in_array($statusFilter, ['all', 'active', 'inactive'], true)) {
     $statusFilter = 'all';
 }
+$updatedId = max(0, (int) ($_GET['updated'] ?? 0));
 $where = ["r.slug = 'cliente'"];
 $params = [];
 if ($statusFilter === 'active') {
@@ -229,6 +231,11 @@ $lastNameExpr = $nameCols['last']
     ? "NULLIF(TRIM(COALESCE(u.{$nameCols['last']}, '')), '')"
     : 'NULL';
 $fullNameExpr = "COALESCE(NULLIF(TRIM(CONCAT_WS(' ', {$firstNameExpr}, {$lastNameExpr})), ''), NULLIF(TRIM(COALESCE(u.name, '')), ''), 'Sin nombre registrado')";
+$orderSql = $updatedId > 0 ? 'CASE WHEN u.id = ? THEN 0 ELSE 1 END, u.active DESC, client_full_name' : 'u.active DESC, client_full_name';
+$queryParams = $params;
+if ($updatedId > 0) {
+    $queryParams[] = $updatedId;
+}
 $clients = Database::all(
     "SELECT u.id, u.name, {$fullNameExpr} AS client_full_name, {$namePartCols}, u.email, u.phone, u.active, u.created_at, {$profileCols},
             COUNT(a.id) AS appointment_count,
@@ -239,9 +246,9 @@ $clients = Database::all(
      LEFT JOIN appointment_statuses st ON st.id = a.status_id
      WHERE " . implode(' AND ', $where) . "
      GROUP BY u.id
-     ORDER BY u.active DESC, client_full_name
+     ORDER BY {$orderSql}
      LIMIT {$perPage} OFFSET {$offset}",
-    $params
+    $queryParams
 );
 
 foreach ($clients as &$client) {
@@ -280,6 +287,74 @@ $pageTitle = 'Clientes';
 require __DIR__ . '/../includes/layouts/header_admin.php';
 ?>
 
+<style>
+  .bnc-client-search-form {
+    align-items: end;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: minmax(260px, 1fr) minmax(150px, 220px) minmax(150px, 220px) minmax(220px, auto);
+  }
+
+  .bnc-client-search-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .75rem;
+    justify-content: flex-end;
+  }
+
+  .bnc-client-search-actions .btn {
+    min-width: 120px;
+    white-space: nowrap;
+  }
+
+  .bnc-client-table {
+    min-width: 980px;
+  }
+
+  .bnc-client-status-cell .badge {
+    white-space: nowrap;
+  }
+
+  .bnc-client-actions {
+    min-width: 150px;
+    white-space: nowrap;
+  }
+
+  .bnc-client-actions .btn-group {
+    display: inline-flex;
+    flex-wrap: nowrap;
+  }
+
+  .bnc-client-row-updated {
+    box-shadow: inset 4px 0 0 #d63b93;
+  }
+
+  .bnc-client-row-updated td {
+    background: #fff7fb;
+  }
+
+  @media (max-width: 1199.98px) {
+    .bnc-client-search-form {
+      grid-template-columns: minmax(240px, 1fr) minmax(150px, 200px) minmax(150px, 200px);
+    }
+
+    .bnc-client-search-actions {
+      grid-column: 1 / -1;
+      justify-content: flex-start;
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    .bnc-client-search-form {
+      grid-template-columns: 1fr;
+    }
+
+    .bnc-client-search-actions .btn {
+      flex: 1 1 140px;
+    }
+  }
+</style>
+
 <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
   <button class="btn btn-bnc-primary btn-sm" data-bs-toggle="modal" data-bs-target="#clientCreateModal"><i class="bi bi-person-plus"></i> Nuevo cliente</button>
 </div>
@@ -291,12 +366,12 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
 <div class="bnc-card mb-4">
   <div class="bnc-card-header"><h2 class="h6 fw-bold mb-0">Buscar clientes</h2></div>
   <div class="bnc-card-body">
-    <form method="GET" class="row g-3 align-items-end bnc-client-search-form">
-      <div class="col-lg-6">
+    <form method="GET" class="bnc-client-search-form">
+      <div>
         <label class="bnc-label">Nombre, apellidos, correo o teléfono</label>
         <input name="q" class="form-control" value="<?= e($q) ?>" placeholder="Buscar cliente">
       </div>
-      <div class="col-sm-6 col-lg-2">
+      <div>
         <label class="bnc-label">Por página</label>
         <select name="per_page" class="form-select">
           <?php foreach ($perPageOptions as $option): ?>
@@ -304,7 +379,7 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
           <?php endforeach; ?>
         </select>
       </div>
-      <div class="col-sm-6 col-lg-2">
+      <div>
         <label class="bnc-label">Estado</label>
         <select name="status" class="form-select">
           <option value="all" <?= $statusFilter === 'all' ? 'selected' : '' ?>>Todos</option>
@@ -312,7 +387,7 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
           <option value="inactive" <?= $statusFilter === 'inactive' ? 'selected' : '' ?>>Inactivos</option>
         </select>
       </div>
-      <div class="col-sm-6 col-lg-2">
+      <div>
         <div class="bnc-client-search-actions">
           <button class="btn btn-bnc-primary" type="submit"><i class="bi bi-search"></i> Buscar</button>
           <a class="btn btn-bnc-outline" href="<?= url('admin/usuarios.php') ?>">Limpiar</a>
@@ -328,7 +403,7 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
     <span class="badge bg-secondary"><?= number_format($totalClients) ?> resultado(s)</span>
   </div>
   <div class="table-responsive">
-    <table class="bnc-table mb-0">
+    <table class="bnc-table bnc-client-table mb-0">
       <thead>
         <tr>
           <th>Nombre completo</th>
@@ -343,16 +418,16 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         <?php if (!$clients): ?>
           <tr><td colspan="6" class="text-center text-muted py-4">No hay clientes con esa búsqueda.</td></tr>
         <?php else: foreach ($clients as $client): ?>
-          <tr>
+          <tr class="<?= $updatedId === (int) $client['id'] ? 'bnc-client-row-updated' : '' ?>">
             <td class="fw-bold"><?= e($client['client_full_name']) ?></td>
             <td><?= e($client['phone']) ?><br><small class="text-muted"><?= e($client['email']) ?></small></td>
             <td>
               <?= (int) $client['appointment_count'] ?> total<br>
               <small class="text-muted"><?= (int) $client['active_appointments'] ?> activa(s)</small>
             </td>
-            <td><?= $client['active'] ? '<span class="badge bg-success">Activo</span>' : '<span class="badge bg-secondary">Inactivo</span>' ?></td>
+            <td class="bnc-client-status-cell"><?= $client['active'] ? '<span class="badge bg-success">Activo</span>' : '<span class="badge bg-secondary">Inactivo</span>' ?></td>
             <td><?= e(fmt_dt_short($client['created_at'])) ?></td>
-            <td class="text-end">
+            <td class="text-end bnc-client-actions">
               <div class="btn-group btn-group-sm">
                 <button class="btn btn-bnc-outline" data-bs-toggle="modal" data-bs-target="#historyModal-<?= (int) $client['id'] ?>"><i class="bi bi-clock-history"></i></button>
                 <button class="btn btn-bnc-outline" data-bs-toggle="modal" data-bs-target="#clientEditModal-<?= (int) $client['id'] ?>"><i class="bi bi-pencil"></i></button>
