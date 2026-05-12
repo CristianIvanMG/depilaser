@@ -997,108 +997,10 @@
       text-align: center
     }
 
-    /* CHAT */
-    .whatsapp-flotante {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 58px;
-      height: 58px;
-      border-radius: 50%;
-      background: #25D366;
-      color: #fff;
-      font-size: 26px;
-      box-shadow: 0 6px 20px rgba(37, 211, 102, .4);
-      cursor: pointer;
-      z-index: 90
-    }
-
-    #bella-chat {
-      position: fixed;
-      bottom: 90px;
-      right: 20px;
-      width: 340px;
-      max-width: calc(100vw - 40px);
-      height: 460px;
-      background: #fff;
-      border-radius: 18px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, .2);
-      display: none;
-      flex-direction: column;
-      overflow: hidden;
-      z-index: 91
-    }
-
-    #bella-chat.activo {
-      display: flex
-    }
-
-    .chat-close {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: rgba(0, 0, 0, .08);
-      font-size: 14px;
-      z-index: 2
-    }
-
-    #messages {
-      flex: 1;
-      padding: 40px 16px 16px;
-      overflow-y: auto;
-      font-size: 14px;
-      background: #f7f7f8
-    }
-
-    #messages .bella,
-    #messages .user {
-      padding: 10px 14px;
-      border-radius: 14px;
-      margin-bottom: 8px;
-      max-width: 82%;
-      line-height: 1.45
-    }
-
-    #messages .bella {
-      background: #fff;
-      color: var(--ct);
-      border: 1px solid var(--cgb)
-    }
-
-    #messages .user {
-      background: var(--cp);
-      color: #fff;
-      margin-left: auto
-    }
-
-    .chat-input {
-      display: flex;
-      padding: 10px;
-      border-top: 1px solid var(--cgb);
-      gap: 8px;
-      background: #fff
-    }
-
-    .chat-input input {
-      flex: 1;
-      padding: 10px 12px;
-      border-radius: 20px;
-      border: 1px solid var(--cgb);
-      font-size: 14px;
-      outline: none
-    }
-
-    .chat-input button {
-      padding: 10px 16px;
-      background: var(--cp);
-      color: #fff;
-      border-radius: 20px;
-      font-weight: 600;
-      font-size: 13px
-    }
+    /* =====================================================
+       WHATSAPP FLOTANTE / CHAT
+       Estilos movidos a /assets/css/chat.css (single source of truth)
+    ===================================================== */
 
     nav,
     main,
@@ -1369,6 +1271,10 @@
       outline-offset: 2px
     }
   </style>
+
+  <!-- Chat / Bot widget — CSS y JS externos (idempotentes, comportamiento idéntico al inline) -->
+  <link rel="stylesheet" href="/assets/css/chat.css">
+  <script src="/assets/js/chat.js" defer></script>
   <script id="bn-localbusiness-schema" type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -1505,6 +1411,14 @@
       }
     ]
   }
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-4G1PPNT5GW"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-4G1PPNT5GW');
   </script>
 </head>
 
@@ -1835,13 +1749,9 @@
     </div>
   </footer>
 
-  <button id="chatToggle" class="whatsapp-flotante" aria-label="Abrir chat">💬</button>
-  <div id="bella-chat">
-    <button id="chatClose" class="chat-close" aria-label="Cerrar chat">✕</button>
-    <div id="messages"></div>
-    <div class="chat-input"><input type="text" id="userInput" placeholder="¿Te ayudo?"
-        aria-label="Escribe tu pregunta" /><button id="sendBtn">Enviar</button></div>
-  </div>
+  <!-- BOTÓN FLOTANTE / CHAT
+       Markup ahora se inyecta automáticamente desde /assets/js/chat.js
+       (idempotente: si ya existe #bella-chat o #chatToggle inline, no se duplica). -->
 
   <script>
     function toggleDD(id) {
@@ -1858,37 +1768,6 @@
       ham.classList.toggle('open'); panel.classList.toggle('open');
     }
     window.toggleMobile = toggleMobile;
-
-    (function () {
-      var chat = document.getElementById('bella-chat');
-      var toggleBtn = document.getElementById('chatToggle');
-      var closeBtn = document.getElementById('chatClose');
-      var sendBtn = document.getElementById('sendBtn');
-      var input = document.getElementById('userInput');
-      var messages = document.getElementById('messages');
-      var iaDisponible = true;
-      function addMessage(type, text) { var div = document.createElement('div'); div.className = type; div.innerText = text; messages.appendChild(div); messages.scrollTop = messages.scrollHeight; }
-      function openChat() { chat.classList.add('activo'); if (!messages.innerHTML) addMessage('bella', '👋 Hola, soy Paola de BellaNick. ¿Quieres cotizar abdomen completo?'); }
-      function closeChat() { chat.classList.remove('activo'); messages.innerHTML = ''; sessionStorage.setItem('chatClosed', 'true'); }
-      toggleBtn.addEventListener('click', openChat);
-      closeBtn.addEventListener('click', function (e) { e.stopPropagation(); closeChat(); });
-      async function sendMessage() {
-        if (!iaDisponible) { window.open('https://wa.me/525535433490', '_blank'); return; }
-        var text = input.value.trim(); if (!text) return;
-        addMessage('user', text); input.value = ''; addMessage('bella', 'Escribiendo…');
-        try {
-          var res = await fetch('/php/chat.php?ts=' + Date.now(), { method: 'POST', credentials: 'same-origin', cache: 'no-store', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: text }) });
-          var data = JSON.parse(await res.text());
-          messages.lastChild.remove(); addMessage('bella', data.reply);
-          if (data.ia_disabled) { iaDisponible = false; setTimeout(function () { window.open('https://wa.me/525535433490', '_blank'); }, 900); }
-        } catch (e) {
-          messages.lastChild.remove(); addMessage('bella', 'Hubo un error. ¿Continuamos por WhatsApp?');
-          setTimeout(function () { window.open('https://wa.me/525535433490', '_blank'); }, 900);
-        }
-      }
-      sendBtn.addEventListener('click', sendMessage);
-      input.addEventListener('keydown', function (e) { if (e.key === 'Enter') sendMessage(); });
-    })();
   </script>
 </body>
 
