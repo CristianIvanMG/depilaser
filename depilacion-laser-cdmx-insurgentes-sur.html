@@ -2477,6 +2477,143 @@
   <!-- Chat / Bot widget — CSS y JS externos (idempotentes, comportamiento idéntico al inline) -->
   <link rel="stylesheet" href="/assets/css/chat.css">
   <script src="/assets/js/chat.js" defer></script>
+  <script id="bn-localbusiness-schema" type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": ["Organization", "LocalBusiness", "HealthAndBeautyBusiness"],
+        "@id": "https://depilasermexico.com/#organization",
+        "name": "BellaNick Clinic",
+        "alternateName": "Depilaser Mexico",
+        "url": "https://depilasermexico.com/",
+        "logo": "https://depilasermexico.com/assets/img/logo/logo.webp",
+        "image": "https://depilasermexico.com/assets/img/logo/logo.webp",
+        "email": "administracion@depilasermexico.com",
+        "telephone": "+525535433490",
+        "priceRange": "$99 - $2999 MXN",
+        "currenciesAccepted": "MXN",
+        "paymentAccepted": "Cash, Credit Card, Debit Card, Bank Transfer",
+        "areaServed": [
+          { "@type": "AdministrativeArea", "name": "Ciudad de Mexico" },
+          { "@type": "AdministrativeArea", "name": "Queretaro" }
+        ],
+        "sameAs": [
+          "https://www.instagram.com/bellanickclinic/",
+          "https://www.facebook.com/BellaNickClinic",
+          "https://www.tiktok.com/@bellanickclinic"
+        ],
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "5.0",
+          "bestRating": "5",
+          "worstRating": "1",
+          "reviewCount": "50"
+        },
+        "department": [
+          { "@id": "https://depilasermexico.com/#roma-sur" },
+          { "@id": "https://depilasermexico.com/#insurgentes-sur" },
+          { "@id": "https://depilasermexico.com/#queretaro" }
+        ]
+      },
+      {
+        "@type": ["LocalBusiness", "HealthAndBeautyBusiness"],
+        "@id": "https://depilasermexico.com/#roma-sur",
+        "name": "BellaNick Clinic Roma Sur",
+        "url": "https://depilasermexico.com/depilacion-laser-cdmx-roma-sur.html",
+        "image": "https://depilasermexico.com/assets/img/gallery/BellaNickRomaSur.webp",
+        "logo": "https://depilasermexico.com/assets/img/logo/logo.webp",
+        "telephone": "+525535433490",
+        "email": "administracion@depilasermexico.com",
+        "priceRange": "$99 - $2999 MXN",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Monterrey 325",
+          "addressLocality": "Roma Sur, Cuauhtemoc",
+          "addressRegion": "Ciudad de Mexico",
+          "postalCode": "06760",
+          "addressCountry": "MX"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 19.4049,
+          "longitude": -99.1638
+        },
+        "openingHoursSpecification": [
+          { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday"], "opens": "10:00", "closes": "19:00" },
+          { "@type": "OpeningHoursSpecification", "dayOfWeek": "Friday", "opens": "10:00", "closes": "20:00" },
+          { "@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "10:00", "closes": "18:00" }
+        ],
+        "parentOrganization": { "@id": "https://depilasermexico.com/#organization" },
+        "aggregateRating": { "@type": "AggregateRating", "ratingValue": "5.0", "bestRating": "5", "worstRating": "1", "reviewCount": "50" }
+      },
+      {
+        "@type": ["LocalBusiness", "HealthAndBeautyBusiness"],
+        "@id": "https://depilasermexico.com/#insurgentes-sur",
+        "name": "BellaNick Clinic Insurgentes Sur",
+        "url": "https://depilasermexico.com/depilacion-laser-cdmx-insurgentes-sur.html",
+        "image": "https://depilasermexico.com/assets/img/gallery/BellaNickInsurgentesSur.webp",
+        "logo": "https://depilasermexico.com/assets/img/logo/logo.webp",
+        "telephone": "+525556622079",
+        "email": "administracion@depilasermexico.com",
+        "priceRange": "$99 - $2999 MXN",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Av. Insurgentes Sur 1799",
+          "addressLocality": "Guadalupe Inn, Alvaro Obregon",
+          "addressRegion": "Ciudad de Mexico",
+          "postalCode": "01020",
+          "addressCountry": "MX"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 19.3566,
+          "longitude": -99.1873
+        },
+        "openingHoursSpecification": [
+          { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "opens": "10:00", "closes": "20:00" },
+          { "@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "10:00", "closes": "18:00" }
+        ],
+        "parentOrganization": { "@id": "https://depilasermexico.com/#organization" },
+        "aggregateRating": { "@type": "AggregateRating", "ratingValue": "5.0", "bestRating": "5", "worstRating": "1", "reviewCount": "50" }
+      },
+      {
+        "@type": ["LocalBusiness", "HealthAndBeautyBusiness"],
+        "@id": "https://depilasermexico.com/#queretaro",
+        "name": "BellaNick Clinic Queretaro",
+        "url": "https://depilasermexico.com/depilacion-laser-queretaro-corregidora.html",
+        "image": "https://depilasermexico.com/assets/img/hero/h1_hero1.webp",
+        "logo": "https://depilasermexico.com/assets/img/logo/logo.webp",
+        "telephone": "+524422218227",
+        "email": "administracion@depilasermexico.com",
+        "priceRange": "$99 - $2999 MXN",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Plaza Lugo, Camino a Vanegas 28, Local 29",
+          "addressLocality": "Corregidora",
+          "addressRegion": "Queretaro",
+          "postalCode": "76900",
+          "addressCountry": "MX"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 20.5535327,
+          "longitude": -100.4293315
+        },
+        "openingHoursSpecification": [
+          { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "opens": "10:00", "closes": "20:30" },
+          { "@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "10:00", "closes": "18:00" }
+        ],
+        "sameAs": [
+          "https://www.instagram.com/bellanickclinicqro/",
+          "https://www.facebook.com/61577831189576/"
+        ],
+        "parentOrganization": { "@id": "https://depilasermexico.com/#organization" },
+        "aggregateRating": { "@type": "AggregateRating", "ratingValue": "5.0", "bestRating": "5", "worstRating": "1", "reviewCount": "50" }
+      }
+    ]
+  }
+  </script>
 </head>
 
 <body>
