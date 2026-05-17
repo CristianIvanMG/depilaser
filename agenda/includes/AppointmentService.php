@@ -537,9 +537,9 @@ final class AppointmentService
      * Reglas clinicas:
      *   programada  -> confirmada | cancelada
      *   confirmada  -> atendida   | no_asistio | cancelada
-     *   atendida    -> (terminal, solo recibo)
-     *   cancelada   -> (terminal)
-     *   no_asistio  -> (terminal)
+     *   atendida    -> (final, solo recibo)
+     *   cancelada   -> (final)
+     *   no_asistio  -> (final)
      */
     public static function allowedTransitions(string $fromSlug): array
     {
@@ -553,7 +553,20 @@ final class AppointmentService
         return $map[$fromSlug] ?? [];
     }
 
-    public static function statusTimingError(string $toSlug, string $appointmentStartAt): ?string
+    public static function canCloseOut(string $appointmentStartAt, ?string $appointmentEndAt = null): bool
+    {
+        $startTs = strtotime($appointmentStartAt);
+        if (!$startTs) {
+            return false;
+        }
+        $endTs = $appointmentEndAt ? strtotime($appointmentEndAt) : false;
+        if (!$endTs || $endTs < $startTs) {
+            $endTs = $startTs;
+        }
+        return time() >= $endTs;
+    }
+
+    public static function statusTimingError(string $toSlug, string $appointmentStartAt, ?string $appointmentEndAt = null): ?string
     {
         if (!in_array($toSlug, ['atendida', 'no_asistio'], true)) {
             return null;
@@ -562,16 +575,10 @@ final class AppointmentService
         if (!$startTs) {
             return 'La fecha de la cita no es válida para cambiar el estado.';
         }
-        $now = time();
-        if (date('Y-m-d', $startTs) !== date('Y-m-d', $now)) {
+        if (!self::canCloseOut($appointmentStartAt, $appointmentEndAt)) {
             return $toSlug === 'atendida'
-                ? 'Solo puedes marcar una cita como Atendida el mismo día de la cita, después de su horario.'
-                : 'Solo puedes marcar No asistió el mismo día de la cita, después de su horario.';
-        }
-        if ($now < $startTs) {
-            return $toSlug === 'atendida'
-                ? 'Aún no es momento de marcar esta cita como Atendida.'
-                : 'Aún no es momento de marcar esta cita como No asistió.';
+                ? 'Solo puedes marcar una cita confirmada como Atendida cuando su hora de inicio y fin ya pasaron.'
+                : 'Solo puedes marcar No asistió cuando la hora de inicio y fin de la cita ya pasaron.';
         }
         return null;
     }
@@ -604,7 +611,7 @@ final class AppointmentService
         if (!in_array($toSlug, $allowed, true)) {
             return ['ok' => false, 'error' => 'Transición no válida desde "' . $from . '".'];
         }
-        $timingError = self::statusTimingError($toSlug, (string) $appt['start_at']);
+        $timingError = self::statusTimingError($toSlug, (string) $appt['start_at'], $appt['end_at'] ?? null);
         if ($timingError) {
             return ['ok' => false, 'error' => $timingError];
         }

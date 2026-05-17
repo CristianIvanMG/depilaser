@@ -272,6 +272,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($action === 'save') {
+        if ($isEdit && in_array((string) ($appointment['status_slug'] ?? ''), ['atendida', 'cancelada', 'no_asistio'], true)) {
+            flash('warning', 'Esta cita esta en un estado final y ya no permite modificar sus datos.');
+            redirect('admin/cita-form.php?id=' . $appointmentId);
+        }
         if (!$isEdit) {
             $submittedNonce = (string) ($_POST['form_nonce'] ?? '');
             $sessionNonce = (string) ($_SESSION['admin_appointment_form_nonce'] ?? '');
@@ -342,7 +346,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         if ($schedule['ok'] && $statusChanged) {
-            $timingError = AppointmentService::statusTimingError($statusSlug, $schedule['start_sql']);
+            $timingError = AppointmentService::statusTimingError($statusSlug, $schedule['start_sql'], $schedule['end_sql']);
             if ($timingError) {
                 $errors['status_id'] = $timingError;
             }
@@ -546,6 +550,7 @@ if (!$isEdit && empty($_SESSION['admin_appointment_form_nonce'])) {
     admin_appointment_form_nonce();
 }
 
+$finalStatus = $isEdit && in_array((string) ($appointment['status_slug'] ?? ''), ['atendida', 'cancelada', 'no_asistio'], true);
 $pageTitle = $isEdit ? 'Editar cita' : 'Nueva cita';
 require __DIR__ . '/../includes/layouts/header_admin.php';
 ?>
@@ -814,11 +819,15 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
 
           <div class="col-md-6">
             <label class="bnc-label">Estado</label>
-            <select name="status_id" class="form-select <?= isset($errors['status_id']) ? 'is-invalid' : '' ?>">
+            <?php if ($finalStatus): ?>
+              <input type="hidden" name="status_id" value="<?= (int) $form['status_id'] ?>">
+            <?php endif; ?>
+            <select name="status_id" class="form-select <?= isset($errors['status_id']) ? 'is-invalid' : '' ?>" <?= $finalStatus ? 'disabled' : '' ?>>
               <?php foreach ($statuses as $status): ?>
                 <option value="<?= (int) $status['id'] ?>" data-slug="<?= e($status['slug']) ?>" <?= (int) $form['status_id'] === (int) $status['id'] ? 'selected' : '' ?>><?= e($status['name']) ?></option>
               <?php endforeach; ?>
             </select>
+            <?php if ($finalStatus): ?><div class="form-text">Esta cita esta en un estado final y ya no permite cambiar estado.</div><?php endif; ?>
             <?php if (isset($errors['status_id'])): ?><div class="invalid-feedback"><?= e($errors['status_id']) ?></div><?php endif; ?>
           </div>
 
@@ -839,10 +848,14 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         </div>
       </div>
       <div class="bnc-card-body border-top d-flex flex-wrap gap-2 justify-content-between">
-        <button type="submit" class="btn btn-bnc-primary" id="saveAppointmentBtn"><i class="bi bi-check2-circle"></i> Guardar cita</button>
+        <?php if ($finalStatus): ?>
+          <div class="alert alert-warning mb-0 py-2">Esta cita ya esta en un estado final. Sus datos quedan bloqueados para evitar modificaciones posteriores.</div>
+        <?php else: ?>
+          <button type="submit" class="btn btn-bnc-primary" id="saveAppointmentBtn"><i class="bi bi-check2-circle"></i> Guardar cita</button>
+        <?php endif; ?>
         <?php if ($isEdit): ?>
           <div class="d-flex flex-wrap gap-2">
-            <?php if (($appointment['status_slug'] ?? '') !== 'cancelada'): ?>
+            <?php if (!$finalStatus): ?>
               <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelModal"><i class="bi bi-calendar-x"></i> Cancelar</button>
             <?php endif; ?>
             <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#deleteModal"><i class="bi bi-trash3"></i> Eliminar</button>
@@ -1223,8 +1236,11 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
       if (!startInput.value) return false;
       const start = new Date(startInput.value);
       if (Number.isNaN(start.getTime())) return false;
+      const selectedService = serviceSearchData.find(service => String(service.id) === String(serviceSelect?.value || ''));
+      const duration = Math.max(0, Number(selectedService?.duration || 0));
+      const end = duration ? new Date(start.getTime() + duration * 60000) : start;
       const now = new Date();
-      return start.toDateString() === now.toDateString() && now >= start;
+      return now >= end;
     }
 
     function syncStatusOptions() {
@@ -1520,8 +1536,10 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         return;
       }
       appointmentSubmitting = true;
-      saveAppointmentBtn.disabled = true;
-      saveAppointmentBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Guardando...';
+      if (saveAppointmentBtn) {
+        saveAppointmentBtn.disabled = true;
+        saveAppointmentBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Guardando...';
+      }
       appointmentForm.querySelectorAll('button, input, select, textarea').forEach(control => {
         if (control !== saveAppointmentBtn && control.type !== 'hidden') control.readOnly = true;
       });

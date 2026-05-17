@@ -214,7 +214,13 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
           </div>
         `;
         const editLink = document.getElementById('apptEditLink');
-        if (editLink) editLink.href = '<?= url('admin/cita-form.php') ?>?id=' + id;
+        if (editLink) {
+          const isFinal = ['atendida', 'cancelada', 'no_asistio'].includes(a.status_slug || '');
+          editLink.href = isFinal ? '#' : '<?= url('admin/cita-form.php') ?>?id=' + id;
+          editLink.classList.toggle('disabled', isFinal);
+          editLink.setAttribute('aria-disabled', isFinal ? 'true' : 'false');
+          editLink.title = isFinal ? 'Cita en estado final; no permite edicion.' : 'Editar cita';
+        }
         const quickActions = document.getElementById('apptQuickActions');
         if (quickActions) quickActions.innerHTML = canManageCalendar ? buildQuickActions(id, a) : '';
         new bootstrap.Modal(document.getElementById('apptModal')).show();
@@ -249,10 +255,13 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
 
     function canCloseOutAppointment(a) {
       const startRaw = a.start_at || '';
+      const endRaw = a.end_at || '';
       const start = startRaw ? new Date(startRaw.replace(' ', 'T')) : null;
       if (!start || Number.isNaN(start.getTime())) return false;
+      const end = endRaw ? new Date(endRaw.replace(' ', 'T')) : start;
+      if (Number.isNaN(end.getTime())) return false;
       const now = new Date();
-      return start.toDateString() === now.toDateString() && now >= start;
+      return now >= end;
     }
 
     function buildQuickActions(id, a) {
@@ -266,7 +275,7 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         html += `<button type="button" class="btn btn-success btn-sm bnc-transition" data-id="${id}" data-to="confirmada" data-confirm="¿Confirmar la cita?"><i class="bi bi-check2-circle"></i> Confirmar</button>`;
       }
       if (list.includes('atendida')) {
-        html += `<button type="button" class="btn btn-bnc-primary btn-sm bnc-transition" data-id="${id}" data-to="atendida" data-confirm="¿Marcar como atendida y generar recibo?" data-send-email="ask"><i class="bi bi-clipboard2-check"></i> Atender</button>`;
+        html += `<button type="button" class="btn btn-bnc-primary btn-sm bnc-transition" data-id="${id}" data-to="atendida" data-confirm="¿Estas seguro de marcar esta reserva como Atendida? Despues de confirmarlo, el estado ya no podra modificarse." data-send-email="ask"><i class="bi bi-clipboard2-check"></i> Atender</button>`;
       }
       if (list.includes('no_asistio')) {
         html += `<button type="button" class="btn btn-warning btn-sm bnc-transition" data-id="${id}" data-to="no_asistio" data-confirm="¿Marcar como NO asistió? Se enviará un correo empático al cliente." data-send-email="auto"><i class="bi bi-person-x"></i> No asistió</button>`;
@@ -275,14 +284,14 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         html += `<button type="button" class="btn btn-outline-danger btn-sm bnc-transition" data-id="${id}" data-to="cancelada" data-prompt-reason="1" data-send-email="auto"><i class="bi bi-calendar-x"></i> Cancelar</button>`;
       }
       if (slug === 'confirmada' && !canCloseOutAppointment(a)) {
-        html += '<small class="text-muted me-auto">Atendida y No asistió se habilitan el día de la cita, después del horario programado.</small>';
+        html += '<small class="text-muted me-auto">Atendida y No asistio se habilitan cuando la hora de inicio y fin ya pasaron.</small>';
       }
       if (slug === 'atendida') {
         html += `<a class="btn btn-success btn-sm" href="${RECIBO_URL}?id=${id}" target="_blank" rel="noopener"><i class="bi bi-receipt"></i> Ver recibo</a>`;
         const sent = !!a.receipt_sent;
         html += `<button type="button" class="btn btn-outline-success btn-sm bnc-send-receipt" data-id="${id}" data-already="${sent ? '1' : '0'}"><i class="bi bi-envelope-paper${sent ? '-fill' : ''}"></i> ${sent ? 'Reenviar recibo' : 'Enviar recibo'}</button>`;
       }
-      if (!html) html = '<small class="text-muted me-auto">Cita en estado terminal — sin acciones rápidas.</small>';
+      if (!html) html = '<small class="text-muted me-auto">Cita en estado final - sin acciones rápidas.</small>';
       return html;
     }
 
@@ -374,7 +383,7 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         if (body.waitlist?.ok) toast('success', 'Estado actualizado. Se promovió automáticamente a un cliente de la lista de espera.');
         else if (body.receipt_warning) toast('warning', 'Estado cambiado, recibo no enviado: ' + body.receipt_warning);
         else if (body.status_email_warning) toast('warning', 'Estado cambiado, notificación no enviada: ' + body.status_email_warning);
-        else if (body.receipt_sent) toast('success', '¡Atendida! Recibo enviado al cliente.');
+        else if (body.receipt_sent) toast('success', 'Cita marcada como Atendida. Recibo enviado al cliente.');
         else if (body.status_email_sent) toast('success', 'Estado actualizado y notificación enviada al cliente.');
         else toast('success', 'Estado actualizado a “' + (body.status?.name || t.dataset.to) + '”.');
         // Cierra modal y refresca eventos

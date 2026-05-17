@@ -214,6 +214,7 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
           <tr><td colspan="9" class="text-center text-muted py-4">No hay citas con esos filtros.</td></tr>
         <?php else: foreach ($appointments as $a): ?>
           <?php $isPaid = !empty($a['paid_payment_id']) || (($a['payment_status'] ?? '') === 'paid'); ?>
+          <?php $isFinal = in_array((string) $a['status_slug'], ['atendida', 'cancelada', 'no_asistio'], true); ?>
           <tr>
             <td>
               <strong><?= e(fmt_dt_short($a['start_at'])) ?></strong><br>
@@ -268,13 +269,20 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
                     <i class="bi bi-envelope-paper<?= ((int) ($a['receipt_sent'] ?? 0) === 1) ? '-fill' : '' ?>"></i>
                   </button>
                 <?php endif; ?>
-                <a class="btn btn-bnc-outline" href="<?= url('admin/cita-form.php?id=' . (int) $a['id']) ?>" title="Editar"><i class="bi bi-pencil"></i></a>
+                <?php if ($isFinal): ?>
+                  <button type="button" class="btn btn-bnc-outline" disabled title="Cita en estado final; no permite edicion"><i class="bi bi-pencil"></i></button>
+                <?php else: ?>
+                  <a class="btn btn-bnc-outline" href="<?= url('admin/cita-form.php?id=' . (int) $a['id']) ?>" title="Editar"><i class="bi bi-pencil"></i></a>
+                <?php endif; ?>
                 <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#deleteModal-<?= (int) $a['id'] ?>" title="Eliminar"><i class="bi bi-trash3"></i></button>
               </div>
             </td>
           </tr>
 
-          <?php $allowed = AppointmentService::allowedTransitions($a['status_slug']); ?>
+          <?php
+            $allowed = AppointmentService::allowedTransitions($a['status_slug']);
+            $canCloseOut = AppointmentService::canCloseOut((string) $a['start_at'], $a['end_at'] ?? null);
+          ?>
           <div class="modal fade" id="detailModal-<?= (int) $a['id'] ?>" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
               <div class="modal-content" style="border-radius:16px">
@@ -332,15 +340,18 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
                         <i class="bi bi-check2-circle"></i> Confirmar
                       </button>
                     <?php endif; ?>
-                    <?php if (in_array('atendida', $allowed, true)): ?>
-                      <button type="button" class="btn btn-bnc-primary btn-sm bnc-transition" data-id="<?= (int) $a['id'] ?>" data-to="atendida" data-confirm="¿Marcar como atendida y generar recibo?" data-send-email="ask">
+                    <?php if (in_array('atendida', $allowed, true) && $canCloseOut): ?>
+                      <button type="button" class="btn btn-bnc-primary btn-sm bnc-transition" data-id="<?= (int) $a['id'] ?>" data-to="atendida" data-confirm="¿Estas seguro de marcar esta reserva como Atendida? Despues de confirmarlo, el estado ya no podra modificarse." data-send-email="ask">
                         <i class="bi bi-clipboard2-check"></i> Atender
                       </button>
                     <?php endif; ?>
-                    <?php if (in_array('no_asistio', $allowed, true)): ?>
+                    <?php if (in_array('no_asistio', $allowed, true) && $canCloseOut): ?>
                       <button type="button" class="btn btn-warning btn-sm bnc-transition" data-id="<?= (int) $a['id'] ?>" data-to="no_asistio" data-confirm="¿Marcar como NO asistió? Se enviará un correo empático al cliente." data-send-email="auto">
                         <i class="bi bi-person-x"></i> No asistió
                       </button>
+                    <?php endif; ?>
+                    <?php if ($a['status_slug'] === 'confirmada' && !$canCloseOut): ?>
+                      <small class="text-muted me-auto">Atendida y No asistio se habilitan cuando la hora de inicio y fin ya pasaron.</small>
                     <?php endif; ?>
                     <?php if (in_array('cancelada', $allowed, true)): ?>
                       <button type="button" class="btn btn-outline-danger btn-sm bnc-transition" data-id="<?= (int) $a['id'] ?>" data-to="cancelada" data-prompt-reason="1" data-send-email="auto">
@@ -358,7 +369,11 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
                     <?php endif; ?>
                   </div>
                   <div class="d-flex justify-content-between w-100 pt-2">
-                    <a class="btn btn-light btn-sm" href="<?= url('admin/cita-form.php?id=' . (int) $a['id']) ?>"><i class="bi bi-pencil"></i> Editar</a>
+                    <?php if ($isFinal): ?>
+                      <button type="button" class="btn btn-light btn-sm" disabled><i class="bi bi-lock"></i> Sin edicion</button>
+                    <?php else: ?>
+                      <a class="btn btn-light btn-sm" href="<?= url('admin/cita-form.php?id=' . (int) $a['id']) ?>"><i class="bi bi-pencil"></i> Editar</a>
+                    <?php endif; ?>
                     <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button>
                   </div>
                 </div>
@@ -506,7 +521,7 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
       if (body.waitlist?.ok) toast('success', 'Estado actualizado. Se promovió automáticamente a un cliente de la lista de espera.');
       else if (body.receipt_warning) toast('warning', 'Estado cambiado, pero el recibo no pudo enviarse: ' + body.receipt_warning);
       else if (body.empathy_warning) toast('warning', 'Estado cambiado, pero el correo empático no pudo enviarse: ' + body.empathy_warning);
-      else if (body.receipt_sent) toast('success', '¡Atendida! Recibo enviado al cliente.');
+      else if (body.receipt_sent) toast('success', 'Cita marcada como Atendida. Recibo enviado al cliente.');
       else if (body.empathy_sent) toast('success', 'Estado actualizado y correo enviado al cliente.');
       else toast('success', 'Estado actualizado a “' + (body.status?.name || to) + '”.');
 
