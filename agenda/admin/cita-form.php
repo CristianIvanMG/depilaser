@@ -986,6 +986,7 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
     const selectedSlotSummary = document.getElementById('selectedSlotSummary');
     const clientSearchData = <?= json_encode($clientSearchOptions, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
     const serviceSearchData = <?= json_encode($serviceSearchOptions, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+    const currentStatusSlug = <?= json_encode((string) ($appointment['status_slug'] ?? 'programada')) ?>;
     const clientResultLimit = 60;
     let clientVisibleOptions = [];
     let clientActiveIndex = -1;
@@ -1243,16 +1244,34 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
       return now >= end;
     }
 
+    function statusOptionBlocked(slug, canClose) {
+      if (!slug) return false;
+      if (['atendida', 'cancelada', 'no_asistio'].includes(currentStatusSlug)) {
+        return slug !== currentStatusSlug;
+      }
+      if (currentStatusSlug === 'confirmada') {
+        if (slug === 'programada') return true;
+        if (['atendida', 'no_asistio'].includes(slug)) return !canClose;
+        return !['confirmada', 'atendida', 'no_asistio', 'cancelada'].includes(slug);
+      }
+      if (currentStatusSlug === 'programada') {
+        if (['atendida', 'no_asistio'].includes(slug)) return true;
+        return !['programada', 'confirmada', 'cancelada'].includes(slug);
+      }
+      return ['atendida', 'no_asistio'].includes(slug) && !canClose;
+    }
+
     function syncStatusOptions() {
       if (!statusSelect) return;
       const canClose = canCloseOutSelectedTime();
       Array.from(statusSelect.options).forEach(option => {
         const slug = option.dataset.slug || '';
-        const blocked = ['atendida', 'no_asistio'].includes(slug) && !canClose && !option.selected;
+        const blocked = statusOptionBlocked(slug, canClose) && !option.selected;
         option.disabled = blocked;
       });
       if (statusSelect.selectedOptions[0]?.disabled) {
-        const fallback = Array.from(statusSelect.options).find(option => option.dataset.slug === 'programada' && !option.disabled);
+        const fallback = Array.from(statusSelect.options).find(option => option.dataset.slug === currentStatusSlug && !option.disabled)
+          || Array.from(statusSelect.options).find(option => option.dataset.slug === 'programada' && !option.disabled);
         if (fallback) statusSelect.value = fallback.value;
       }
     }

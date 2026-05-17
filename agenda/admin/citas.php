@@ -341,8 +341,8 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
                       </button>
                     <?php endif; ?>
                     <?php if (in_array('atendida', $allowed, true) && $canCloseOut): ?>
-                      <button type="button" class="btn btn-bnc-primary btn-sm bnc-transition" data-id="<?= (int) $a['id'] ?>" data-to="atendida" data-confirm="¿Estas seguro de marcar esta reserva como Atendida? Despues de confirmarlo, el estado ya no podra modificarse." data-send-email="ask">
-                        <i class="bi bi-clipboard2-check"></i> Atender
+                      <button type="button" class="btn btn-success btn-sm bnc-transition" data-id="<?= (int) $a['id'] ?>" data-to="atendida" data-confirm="¿Estas seguro de marcar esta reserva como Atendida? Despues de confirmarlo, el estado ya no podra modificarse." data-send-email="ask">
+                        <i class="bi bi-clipboard2-check"></i> Atendida
                       </button>
                     <?php endif; ?>
                     <?php if (in_array('no_asistio', $allowed, true) && $canCloseOut): ?>

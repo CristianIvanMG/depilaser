@@ -275,7 +275,7 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         html += `<button type="button" class="btn btn-success btn-sm bnc-transition" data-id="${id}" data-to="confirmada" data-confirm="¿Confirmar la cita?"><i class="bi bi-check2-circle"></i> Confirmar</button>`;
       }
       if (list.includes('atendida')) {
-        html += `<button type="button" class="btn btn-bnc-primary btn-sm bnc-transition" data-id="${id}" data-to="atendida" data-confirm="¿Estas seguro de marcar esta reserva como Atendida? Despues de confirmarlo, el estado ya no podra modificarse." data-send-email="ask"><i class="bi bi-clipboard2-check"></i> Atender</button>`;
+        html += `<button type="button" class="btn btn-success btn-sm bnc-transition" data-id="${id}" data-to="atendida" data-confirm="¿Estas seguro de marcar esta reserva como Atendida? Despues de confirmarlo, el estado ya no podra modificarse." data-send-email="ask"><i class="bi bi-clipboard2-check"></i> Atendida</button>`;
       }
       if (list.includes('no_asistio')) {
         html += `<button type="button" class="btn btn-warning btn-sm bnc-transition" data-id="${id}" data-to="no_asistio" data-confirm="¿Marcar como NO asistió? Se enviará un correo empático al cliente." data-send-email="auto"><i class="bi bi-person-x"></i> No asistió</button>`;
