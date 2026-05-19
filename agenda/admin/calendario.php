@@ -65,11 +65,30 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
 </div>
 
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
+<style>
+  #calendar .fc-popover {
+    max-height: min(72vh, 560px);
+    max-width: min(92vw, 520px);
+    overflow: hidden;
+    z-index: 1070;
+  }
+
+  #calendar .fc-popover-body {
+    max-height: calc(min(72vh, 560px) - 46px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  #calendar .fc-popover .fc-daygrid-event {
+    cursor: pointer;
+  }
+</style>
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/locales/es.global.min.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const el = document.getElementById('calendar');
+    const apptModalEl = document.getElementById('apptModal');
     const branchFilter = document.getElementById('branchFilter');
     const refreshBtn = document.getElementById('calendarRefreshBtn');
     const canManageCalendar = <?= $canManageCalendar ? 'true' : 'false' ?>;
@@ -92,6 +111,10 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
 
     function calendarHeight() {
       return Math.max(620, window.innerHeight - 250);
+    }
+
+    function closeCalendarPopovers() {
+      el.querySelectorAll('.fc-popover').forEach(popover => popover.remove());
     }
 
     const cal = new FullCalendar.Calendar(el, {
@@ -161,6 +184,9 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         };
       },
       eventClick: function (info) {
+        info.jsEvent?.preventDefault();
+        info.jsEvent?.stopPropagation();
+        closeCalendarPopovers();
         const a = info.event.extendedProps;
         const id = info.event.id;
         const statusClass = 'bnc-status-' + String(a.status_slug || 'programada').replace(/_/g, '-');
@@ -223,7 +249,7 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         }
         const quickActions = document.getElementById('apptQuickActions');
         if (quickActions) quickActions.innerHTML = canManageCalendar ? buildQuickActions(id, a) : '';
-        new bootstrap.Modal(document.getElementById('apptModal')).show();
+        bootstrap.Modal.getOrCreateInstance(apptModalEl).show();
       }
     });
     cal.render();

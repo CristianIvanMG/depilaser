@@ -1462,6 +1462,10 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
       serviceSearchInput.addEventListener('focus', () => {
         renderServiceOptions(serviceSearchInput.value);
         openServiceMenu();
+        serviceSearchInput.select();
+      });
+      serviceSearchInput.addEventListener('click', () => {
+        serviceSearchInput.select();
       });
       serviceSearchInput.addEventListener('input', () => {
         serviceIdInput.value = '';
@@ -1564,16 +1568,19 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
       });
     });
     loadSlotsBtn.addEventListener('click', loadSlots);
-    [branchSelect, serviceSelect].forEach(field => {
-      field.addEventListener('change', () => {
-        startInput.value = '';
-        selectedBusyProfessionals = [];
-        syncSelectedSlot();
-        syncStatusOptions();
-        syncProfessionals();
-        if (branchSelect.value && serviceSelect.value && availabilityDateInput.value) loadSlots();
-        else resetSlots('Selecciona sucursal, servicio y fecha para ver horarios.');
-      });
+    branchSelect.addEventListener('change', () => {
+      startInput.value = '';
+      selectedBusyProfessionals = [];
+      syncSelectedSlot();
+      syncStatusOptions();
+      syncProfessionals();
+      if (branchSelect.value && serviceSelect.value && availabilityDateInput.value) loadSlots();
+      else resetSlots('Selecciona sucursal, servicio y fecha para ver horarios.');
+    });
+    serviceSelect.addEventListener('change', () => {
+      syncStatusOptions();
+      syncProfessionals();
+      resetSlots('El horario elegido se mantiene. Usa "Ver horarios libres" solo si necesitas cambiarlo.');
     });
     availabilityDateInput.addEventListener('change', () => {
       startInput.value = '';
