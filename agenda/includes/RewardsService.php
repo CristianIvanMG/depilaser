@@ -37,10 +37,7 @@ final class RewardsService
                 created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 INDEX idx_attendance_client_date (client_id, scanned_at),
                 INDEX idx_attendance_branch_date (branch_id, scanned_at),
-                INDEX idx_attendance_admin (scanned_by_id),
-                CONSTRAINT fk_attendance_client FOREIGN KEY (client_id) REFERENCES users(id),
-                CONSTRAINT fk_attendance_branch FOREIGN KEY (branch_id) REFERENCES branches(id),
-                CONSTRAINT fk_attendance_admin FOREIGN KEY (scanned_by_id) REFERENCES users(id)
+                INDEX idx_attendance_admin (scanned_by_id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
         );
 
@@ -58,10 +55,7 @@ final class RewardsService
                 created_by_id INT NULL,
                 created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 INDEX idx_client_rewards_client (client_id, status),
-                INDEX idx_client_rewards_config (config_id),
-                CONSTRAINT fk_client_rewards_client FOREIGN KEY (client_id) REFERENCES users(id),
-                CONSTRAINT fk_client_rewards_config FOREIGN KEY (config_id) REFERENCES reward_configs(id),
-                CONSTRAINT fk_client_rewards_creator FOREIGN KEY (created_by_id) REFERENCES users(id)
+                INDEX idx_client_rewards_config (config_id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
         );
 
@@ -74,10 +68,7 @@ final class RewardsService
                 admin_id INT NOT NULL,
                 reason VARCHAR(255) NULL,
                 created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                INDEX idx_reward_resets_client (client_id, reset_at),
-                CONSTRAINT fk_reward_resets_client FOREIGN KEY (client_id) REFERENCES users(id),
-                CONSTRAINT fk_reward_resets_config FOREIGN KEY (config_id) REFERENCES reward_configs(id),
-                CONSTRAINT fk_reward_resets_admin FOREIGN KEY (admin_id) REFERENCES users(id)
+                INDEX idx_reward_resets_client (client_id, reset_at)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
         );
 
@@ -90,10 +81,7 @@ final class RewardsService
                 reason VARCHAR(255) NULL,
                 admin_id INT NOT NULL,
                 created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                INDEX idx_reward_adjustments_client (client_id, created_at),
-                CONSTRAINT fk_reward_adjustments_client FOREIGN KEY (client_id) REFERENCES users(id),
-                CONSTRAINT fk_reward_adjustments_config FOREIGN KEY (config_id) REFERENCES reward_configs(id),
-                CONSTRAINT fk_reward_adjustments_admin FOREIGN KEY (admin_id) REFERENCES users(id)
+                INDEX idx_reward_adjustments_client (client_id, created_at)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
         );
 
