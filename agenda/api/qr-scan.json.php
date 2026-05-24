@@ -33,6 +33,12 @@ if (!Csrf::valid($csrf)) {
     exit;
 }
 
+if (!$branchId) {
+    http_response_code(422);
+    echo json_encode(['ok' => false, 'error' => 'Selecciona una sucursal antes de escanear el QR.']);
+    exit;
+}
+
 if ($token === '') {
     http_response_code(422);
     echo json_encode(['ok' => false, 'error' => 'No se recibio ningun QR.']);

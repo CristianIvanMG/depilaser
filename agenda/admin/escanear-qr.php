@@ -105,11 +105,12 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         <div class="bnc-card-header"><h3 class="h6 fw-bold mb-0">Sucursal</h3></div>
         <div class="bnc-card-body">
           <select id="branchId" class="form-select">
-            <option value="">Sin sucursal especifica</option>
+            <option value="">Selecciona sucursal...</option>
             <?php foreach ($branches as $branch): ?>
               <option value="<?= (int) $branch['id'] ?>"><?= e($branch['name']) ?></option>
             <?php endforeach; ?>
           </select>
+          <div class="form-text">Obligatorio para registrar la asistencia en la sucursal correcta.</div>
         </div>
       </div>
 
@@ -165,6 +166,13 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
 
     async function onScanSuccess(decodedText) {
       if (busy) return;
+      if (!branchId.value) {
+        renderResult('error', '<strong>Selecciona una sucursal antes de escanear.</strong><div class="small mt-1">La asistencia no se registrara hasta elegir la sucursal correspondiente.</div>');
+        branchId.classList.add('is-invalid');
+        branchId.focus();
+        return;
+      }
+      branchId.classList.remove('is-invalid');
       busy = true;
       await pauseScanner();
       renderResult('border bg-white', '<div class="spinner-border spinner-border-sm me-2"></div> Validando QR...');
@@ -210,6 +218,12 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
       busy = false;
       await resumeScanner();
       renderResult('border bg-white', '<div class="text-muted small">Escaner activo.</div><strong>Acerca el QR del cliente.</strong>');
+    });
+    branchId.addEventListener('change', () => {
+      branchId.classList.toggle('is-invalid', !branchId.value);
+      if (branchId.value) {
+        renderResult('border bg-white', '<div class="text-muted small">Sucursal seleccionada.</div><strong>Acerca el QR del cliente.</strong>');
+      }
     });
 
     startScanner();
