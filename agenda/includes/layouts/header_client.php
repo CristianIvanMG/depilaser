@@ -34,6 +34,7 @@ $user = Auth::user();
           <li class="nav-item"><a class="nav-link <?= is_active('index.php') ?: (basename($_SERVER['SCRIPT_NAME']) === 'index.php' ? 'active' : '') ?>" href="<?= url('') ?>"><i class="bi bi-house-door"></i> Inicio</a></li>
           <li class="nav-item"><a class="nav-link <?= is_active('agendar') ?>" href="<?= url('agendar.php') ?>"><i class="bi bi-calendar-plus"></i> Nueva cita</a></li>
           <li class="nav-item"><a class="nav-link <?= is_active('mis-citas') ?>" href="<?= url('mis-citas.php') ?>"><i class="bi bi-calendar-check"></i> Mis citas</a></li>
+          <li class="nav-item"><a class="nav-link <?= is_active('recompensas') ?>" href="<?= url('recompensas.php') ?>"><i class="bi bi-gift"></i> Recompensas</a></li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" data-bs-toggle="dropdown">
               <span class="bnc-avatar"><?= e(mb_substr($user['name'], 0, 1)) ?></span>
@@ -41,6 +42,7 @@ $user = Auth::user();
             </a>
             <ul class="dropdown-menu dropdown-menu-end shadow-sm">
               <li><a class="dropdown-item" href="<?= url('perfil.php') ?>"><i class="bi bi-person-circle me-2"></i>Mi perfil</a></li>
+              <li><a class="dropdown-item" href="<?= url('recompensas.php') ?>"><i class="bi bi-gift me-2"></i>Mis recompensas</a></li>
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item text-danger" href="<?= url('logout.php') ?>"><i class="bi bi-box-arrow-right me-2"></i>Salir</a></li>
             </ul>

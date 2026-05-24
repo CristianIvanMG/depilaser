@@ -40,9 +40,15 @@ $adminHome = Auth::isAdmin() ? url('admin/') : url('admin/calendario.php');
       <a href="<?= url('admin/calendario.php') ?>" class="bnc-nav-item <?= is_active('calendario') ?>">
         <i class="bi bi-calendar3"></i><span>Calendario</span>
       </a>
+      <a href="<?= url('admin/escanear-qr.php') ?>" class="bnc-nav-item <?= is_active('escanear-qr') ?>">
+        <i class="bi bi-qr-code-scan"></i><span>Escanear QR</span>
+      </a>
       <?php if (Auth::isAdmin()): ?>
       <a href="<?= url('admin/citas.php') ?>" class="bnc-nav-item <?= is_active('citas') ?>">
         <i class="bi bi-list-check"></i><span>Citas</span>
+      </a>
+      <a href="<?= url('admin/recompensas.php') ?>" class="bnc-nav-item <?= is_active('recompensas') ?>">
+        <i class="bi bi-gift"></i><span>Recompensas</span>
       </a>
       <a href="<?= url('admin/reportes.php') ?>" class="bnc-nav-item <?= is_active('reportes') ?>">
         <i class="bi bi-graph-up-arrow"></i><span>Reportes</span>

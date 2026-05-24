@@ -138,10 +138,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $form = $errors ? profile_payload($_POST) : $profile;
 $completion = profile_completion($form);
+RewardsService::ensureSchema();
+$rewardProgress = RewardsService::progressForClient($userId);
+$rewardQrToken = RewardsService::qrTokenForUser(['id' => $userId, 'name' => $form['name'] ?? $profile['name'] ?? 'Cliente']);
 
 $pageTitle = 'Mi perfil';
 require __DIR__ . '/includes/layouts/header_client.php';
 ?>
+
+<style>
+  .bnc-profile-qr {
+    background: linear-gradient(145deg, #fff 0%, #fff5fa 100%);
+    border: 1px solid #f2d6e5;
+    border-radius: 18px;
+    padding: 1rem;
+    text-align: center;
+  }
+  .bnc-profile-qr-box {
+    align-items: center;
+    background: #fff;
+    border: 1px solid #f2d6e5;
+    border-radius: 16px;
+    display: flex;
+    justify-content: center;
+    margin: .75rem auto;
+    min-height: 190px;
+    width: 210px;
+  }
+</style>
 
 <section class="container py-4">
   <div class="bnc-profile-hero mb-4">
@@ -190,6 +214,17 @@ require __DIR__ . '/includes/layouts/header_client.php';
 
           <div class="alert alert-light border small mt-4 mb-0">
             Mantener tu informacion completa nos ayuda a darte seguimiento con mas claridad.
+          </div>
+
+          <div class="bnc-profile-qr mt-3">
+            <div class="small text-uppercase fw-bold text-muted">QR de asistencia</div>
+            <div id="profileRewardQr" class="bnc-profile-qr-box" data-token="<?= e($rewardQrToken) ?>">
+              <span class="text-muted small">Generando QR...</span>
+            </div>
+            <div class="small fw-bold mb-1"><?= (int) $rewardProgress['current'] ?>/<?= (int) $rewardProgress['required'] ?> visitas</div>
+            <a href="<?= url('recompensas.php') ?>" class="btn btn-bnc-outline btn-sm w-100">
+              <i class="bi bi-gift"></i> Ver recompensas
+            </a>
           </div>
         </div>
       </div>
@@ -257,5 +292,22 @@ require __DIR__ . '/includes/layouts/header_client.php';
     </div>
   </div>
 </section>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const box = document.getElementById('profileRewardQr');
+    if (!box || !window.QRCode) return;
+    box.innerHTML = '';
+    new QRCode(box, {
+      text: box.dataset.token || '',
+      width: 170,
+      height: 170,
+      colorDark: '#15051a',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  });
+</script>
 
 <?php require __DIR__ . '/includes/layouts/footer.php'; ?>
