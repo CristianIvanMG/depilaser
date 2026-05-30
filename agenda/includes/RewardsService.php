@@ -5,10 +5,12 @@ final class RewardsService
 {
     private const TOKEN_TTL_SECONDS = 43200; // 12 horas
     private const DUPLICATE_WINDOW_MINUTES = 30;
+    private const CLIENT_CHECKIN_BEFORE_MINUTES = 15;
+    private const CLIENT_CHECKIN_AFTER_MINUTES = 30;
 
     public static function ensureSchema(): void
     {
-        Database::exec(
+        self::execSchema(
             "CREATE TABLE IF NOT EXISTS reward_configs (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 name VARCHAR(120) NOT NULL,
@@ -24,7 +26,7 @@ final class RewardsService
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
         );
 
-        Database::exec(
+        self::execSchema(
             "CREATE TABLE IF NOT EXISTS attendance_logs (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 client_id INT NOT NULL,
@@ -41,7 +43,7 @@ final class RewardsService
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
         );
 
-        Database::exec(
+        self::execSchema(
             "CREATE TABLE IF NOT EXISTS client_rewards (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 client_id INT NOT NULL,
@@ -59,7 +61,7 @@ final class RewardsService
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
         );
 
-        Database::exec(
+        self::execSchema(
             "CREATE TABLE IF NOT EXISTS reward_counter_resets (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 client_id INT NOT NULL,
@@ -72,7 +74,7 @@ final class RewardsService
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
         );
 
-        Database::exec(
+        self::execSchema(
             "CREATE TABLE IF NOT EXISTS reward_counter_adjustments (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 client_id INT NOT NULL,
@@ -85,27 +87,32 @@ final class RewardsService
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
         );
 
-        if (!self::columnExists('attendance_logs', 'source')) {
-            Database::exec("ALTER TABLE attendance_logs ADD COLUMN source VARCHAR(40) NOT NULL DEFAULT 'qr' AFTER scanned_at");
-        }
-        if (!self::columnExists('attendance_logs', 'notes')) {
-            Database::exec('ALTER TABLE attendance_logs ADD COLUMN notes VARCHAR(255) NULL AFTER token_hash');
-        }
+        self::ensureRewardConfigColumns();
+        self::ensureAttendanceColumns();
+        self::ensureClientRewardColumns();
+        self::ensureCounterColumns();
 
-        $existing = Database::one('SELECT id FROM reward_configs LIMIT 1');
-        if (!$existing) {
-            Database::exec(
-                "INSERT INTO reward_configs
-                 (name, attendances_required, promotion_type, description, validity_days, auto_reset, active)
-                 VALUES ('Cliente frecuente', 10, 'cliente_frecuente', 'Promocion especial por asistencia constante registrada con QR.', 60, 1, 1)"
-            );
+        try {
+            $existing = self::tableExists('reward_configs') ? Database::one('SELECT id FROM reward_configs LIMIT 1') : null;
+            if (!$existing) {
+                Database::exec(
+                    "INSERT INTO reward_configs
+                     (name, attendances_required, promotion_type, description, validity_days, auto_reset, active)
+                     VALUES ('Cliente frecuente', 10, 'cliente_frecuente', 'Promocion especial por asistencia constante registrada con QR.', 60, 1, 1)"
+                );
+            }
+        } catch (Throwable $e) {
+            error_log('[rewards-schema-seed] ' . $e->getMessage());
         }
     }
 
     public static function activeConfig(): ?array
     {
         self::ensureSchema();
-        return Database::one('SELECT * FROM reward_configs WHERE active = 1 ORDER BY id DESC LIMIT 1');
+        if (!self::tableExists('reward_configs')) {
+            return self::defaultConfig();
+        }
+        return Database::one('SELECT * FROM reward_configs WHERE active = 1 ORDER BY id DESC LIMIT 1') ?: self::defaultConfig();
     }
 
     public static function qrPayloadForUser(array $user): array
@@ -202,6 +209,9 @@ final class RewardsService
     public static function registerAttendance(string $token, int $adminId, ?int $branchId = null): array
     {
         self::ensureSchema();
+        if (!self::schemaReady()) {
+            return ['ok' => false, 'error' => 'El modulo de recompensas no esta listo. Revisa la migracion de base de datos.'];
+        }
         $validation = self::validateToken($token);
         if (empty($validation['ok'])) {
             return $validation;
@@ -243,6 +253,9 @@ final class RewardsService
     public static function registerClientBranchAttendance(int $clientId, string $branchToken): array
     {
         self::ensureSchema();
+        if (!self::schemaReady()) {
+            return ['ok' => false, 'error' => 'El modulo de recompensas no esta listo. Revisa la migracion de base de datos.'];
+        }
         $validation = self::validateBranchToken($branchToken);
         if (empty($validation['ok'])) {
             return $validation;
@@ -253,6 +266,13 @@ final class RewardsService
         }
         $branch = $validation['branch'];
         $branchId = (int) $branch['id'];
+        $appointment = self::eligibleClientCheckinAppointment($clientId, $branchId);
+        if (!$appointment) {
+            return [
+                'ok' => false,
+                'error' => 'Solo puedes registrar tu visita el dia de tu cita, en la sucursal correcta y dentro del horario permitido.',
+            ];
+        }
 
         $recent = Database::one(
             "SELECT id, scanned_at FROM attendance_logs
@@ -269,17 +289,75 @@ final class RewardsService
             ];
         }
 
-        Database::exec(
-            "INSERT INTO attendance_logs (client_id, branch_id, scanned_by_id, source, token_hash, notes)
-             VALUES (?, ?, ?, 'cliente_qr_sucursal', ?, ?)",
-            [$clientId, $branchId, $clientId, hash('sha256', $branchToken), 'Registro hecho por el cliente al escanear el QR de sucursal']
-        );
+        if (self::columnExists('attendance_logs', 'appointment_id')) {
+            $alreadyCheckedIn = Database::one(
+                "SELECT id, scanned_at
+                 FROM attendance_logs
+                 WHERE appointment_id = ? AND client_id = ?
+                 ORDER BY scanned_at DESC
+                 LIMIT 1",
+                [(int) $appointment['id'], $clientId]
+            );
+            if ($alreadyCheckedIn) {
+                return [
+                    'ok' => false,
+                    'duplicate' => true,
+                    'error' => 'Esta cita ya tiene una visita registrada.',
+                    'last_scan' => $alreadyCheckedIn['scanned_at'],
+                ];
+            }
+
+            Database::exec(
+                "INSERT INTO attendance_logs (client_id, branch_id, scanned_by_id, appointment_id, source, token_hash, notes)
+                 VALUES (?, ?, ?, ?, 'cliente_qr_sucursal', ?, ?)",
+                [
+                    $clientId,
+                    $branchId,
+                    $clientId,
+                    (int) $appointment['id'],
+                    hash('sha256', $branchToken),
+                    'Registro hecho por el cliente al escanear el QR de sucursal',
+                ]
+            );
+        } else {
+            $alreadyCheckedIn = Database::one(
+                "SELECT id, scanned_at
+                 FROM attendance_logs
+                 WHERE client_id = ?
+                   AND branch_id = ?
+                   AND DATE(scanned_at) = CURDATE()
+                   AND source = 'cliente_qr_sucursal'
+                 ORDER BY scanned_at DESC
+                 LIMIT 1",
+                [$clientId, $branchId]
+            );
+            if ($alreadyCheckedIn) {
+                return [
+                    'ok' => false,
+                    'duplicate' => true,
+                    'error' => 'Ya registraste una visita en esta sucursal el dia de hoy.',
+                    'last_scan' => $alreadyCheckedIn['scanned_at'],
+                ];
+            }
+
+            Database::exec(
+                "INSERT INTO attendance_logs (client_id, branch_id, scanned_by_id, source, token_hash, notes)
+                 VALUES (?, ?, ?, 'cliente_qr_sucursal', ?, ?)",
+                [$clientId, $branchId, $clientId, hash('sha256', $branchToken), 'Registro hecho por el cliente al escanear el QR de sucursal']
+            );
+        }
 
         $reward = self::maybeGenerateReward($clientId, $clientId);
         return [
             'ok' => true,
             'client' => $client,
             'branch' => $branch,
+            'appointment' => [
+                'id' => (int) $appointment['id'],
+                'code' => (string) ($appointment['code'] ?? ''),
+                'start_at' => (string) ($appointment['start_at'] ?? ''),
+                'end_at' => (string) ($appointment['end_at'] ?? ''),
+            ],
             'progress' => self::progressForClient($clientId),
             'reward' => $reward,
             'attendance' => Database::lastId(),
@@ -292,6 +370,15 @@ final class RewardsService
         $config = self::activeConfig();
         if (!$config) {
             return ['config' => null, 'current' => 0, 'required' => 0, 'percent' => 0, 'remaining' => 0];
+        }
+        if (
+            !self::tableExists('attendance_logs')
+            || !self::tableExists('client_rewards')
+            || !self::tableExists('reward_counter_resets')
+            || !self::tableExists('reward_counter_adjustments')
+        ) {
+            $required = max(1, (int) ($config['attendances_required'] ?? 10));
+            return ['config' => $config, 'current' => 0, 'required' => $required, 'percent' => 0, 'remaining' => $required];
         }
         $baseline = self::baselineDate($clientId, (int) $config['id']);
         $params = [$clientId];
@@ -320,6 +407,7 @@ final class RewardsService
     public static function rewardsForClient(int $clientId, int $limit = 10): array
     {
         self::ensureSchema();
+        if (!self::tableExists('client_rewards') || !self::columnExists('client_rewards', 'generated_at')) return [];
         return Database::all(
             'SELECT * FROM client_rewards WHERE client_id = ? ORDER BY generated_at DESC LIMIT ' . max(1, $limit),
             [$clientId]
@@ -329,6 +417,7 @@ final class RewardsService
     public static function attendancesForClient(int $clientId, int $limit = 10): array
     {
         self::ensureSchema();
+        if (!self::tableExists('attendance_logs')) return [];
         return Database::all(
             "SELECT al.*, b.name AS branch_name, u.name AS admin_name
              FROM attendance_logs al
@@ -344,6 +433,7 @@ final class RewardsService
     public static function dashboardClients(string $q = '', int $limit = 80): array
     {
         self::ensureSchema();
+        if (!self::schemaReady()) return [];
         $params = [];
         $where = "r.slug = 'cliente'";
         if ($q !== '') {
@@ -376,6 +466,7 @@ final class RewardsService
     public static function recentAttendances(int $limit = 50): array
     {
         self::ensureSchema();
+        if (!self::tableExists('attendance_logs')) return [];
         return Database::all(
             "SELECT al.*, c.name AS client_name, c.phone AS client_phone, b.name AS branch_name, a.name AS admin_name
              FROM attendance_logs al
@@ -390,6 +481,9 @@ final class RewardsService
     public static function saveConfig(array $data): void
     {
         self::ensureSchema();
+        if (!self::tableExists('reward_configs')) {
+            throw new RuntimeException('La tabla de configuracion de recompensas no esta disponible.');
+        }
         Database::exec('UPDATE reward_configs SET active = 0 WHERE active = 1');
         Database::exec(
             "INSERT INTO reward_configs (name, attendances_required, promotion_type, description, validity_days, auto_reset, active)
@@ -448,6 +542,7 @@ final class RewardsService
     public static function recentRewards(int $limit = 40): array
     {
         self::ensureSchema();
+        if (!self::tableExists('client_rewards') || !self::columnExists('client_rewards', 'generated_at')) return [];
         return Database::all(
             "SELECT cr.*, u.name AS client_name, u.phone AS client_phone
              FROM client_rewards cr
@@ -492,6 +587,9 @@ final class RewardsService
 
     private static function baselineDate(int $clientId, int $configId): ?string
     {
+        if (!self::tableExists('client_rewards') || !self::tableExists('reward_counter_resets')) {
+            return null;
+        }
         $lastReward = Database::one(
             'SELECT generated_at AS dt FROM client_rewards WHERE client_id = ? AND (config_id = ? OR config_id IS NULL) ORDER BY generated_at DESC LIMIT 1',
             [$clientId, $configId]
@@ -517,6 +615,24 @@ final class RewardsService
         );
     }
 
+    private static function eligibleClientCheckinAppointment(int $clientId, int $branchId): ?array
+    {
+        return Database::one(
+            "SELECT a.id, a.code, a.start_at, a.end_at, st.slug AS status_slug
+             FROM appointments a
+             JOIN appointment_statuses st ON st.id = a.status_id
+             WHERE a.user_id = ?
+               AND a.branch_id = ?
+               AND st.slug IN ('programada', 'confirmada')
+               AND CURDATE() = DATE(a.start_at)
+               AND NOW() BETWEEN DATE_SUB(a.start_at, INTERVAL " . self::CLIENT_CHECKIN_BEFORE_MINUTES . " MINUTE)
+                             AND DATE_ADD(COALESCE(a.end_at, a.start_at), INTERVAL " . self::CLIENT_CHECKIN_AFTER_MINUTES . " MINUTE)
+             ORDER BY a.start_at ASC
+             LIMIT 1",
+            [$clientId, $branchId]
+        );
+    }
+
     private static function signPayload(array $payload): string
     {
         unset($payload['hash']);
@@ -534,10 +650,149 @@ final class RewardsService
         return hash('sha256', APP_BASE_URL . '|' . AGENDA_ROOT . '|bellanick-rewards');
     }
 
+    private static function defaultConfig(): array
+    {
+        return [
+            'id' => null,
+            'name' => 'Cliente frecuente',
+            'attendances_required' => 10,
+            'promotion_type' => 'cliente_frecuente',
+            'description' => 'Promocion especial por asistencia constante registrada con QR.',
+            'validity_days' => 60,
+            'auto_reset' => 1,
+            'active' => 1,
+        ];
+    }
+
+    private static function schemaReady(): bool
+    {
+        return self::tableExists('reward_configs')
+            && self::tableExists('attendance_logs')
+            && self::tableExists('client_rewards')
+            && self::tableExists('reward_counter_resets')
+            && self::tableExists('reward_counter_adjustments')
+            && self::columnExists('reward_configs', 'name')
+            && self::columnExists('reward_configs', 'attendances_required')
+            && self::columnExists('reward_configs', 'promotion_type')
+            && self::columnExists('reward_configs', 'description')
+            && self::columnExists('reward_configs', 'validity_days')
+            && self::columnExists('reward_configs', 'auto_reset')
+            && self::columnExists('reward_configs', 'active')
+            && self::columnExists('attendance_logs', 'client_id')
+            && self::columnExists('attendance_logs', 'branch_id')
+            && self::columnExists('attendance_logs', 'scanned_by_id')
+            && self::columnExists('attendance_logs', 'scanned_at')
+            && self::columnExists('attendance_logs', 'source')
+            && self::columnExists('attendance_logs', 'token_hash')
+            && self::columnExists('attendance_logs', 'notes')
+            && self::columnExists('client_rewards', 'client_id')
+            && self::columnExists('client_rewards', 'config_id')
+            && self::columnExists('client_rewards', 'type')
+            && self::columnExists('client_rewards', 'description')
+            && self::columnExists('client_rewards', 'generated_at')
+            && self::columnExists('client_rewards', 'expires_at')
+            && self::columnExists('client_rewards', 'status')
+            && self::columnExists('client_rewards', 'used_at')
+            && self::columnExists('client_rewards', 'created_by_id');
+    }
+
+    private static function ensureRewardConfigColumns(): void
+    {
+        if (!self::tableExists('reward_configs')) return;
+        self::addColumnIfMissing('reward_configs', 'name', "VARCHAR(120) NOT NULL DEFAULT 'Cliente frecuente'");
+        self::addColumnIfMissing('reward_configs', 'attendances_required', 'INT NOT NULL DEFAULT 10');
+        self::addColumnIfMissing('reward_configs', 'promotion_type', "VARCHAR(80) NOT NULL DEFAULT 'cliente_frecuente'");
+        self::addColumnIfMissing('reward_configs', 'description', 'TEXT NULL');
+        self::addColumnIfMissing('reward_configs', 'validity_days', 'INT NULL');
+        self::addColumnIfMissing('reward_configs', 'auto_reset', 'TINYINT(1) NOT NULL DEFAULT 1');
+        self::addColumnIfMissing('reward_configs', 'active', 'TINYINT(1) NOT NULL DEFAULT 1');
+        self::addColumnIfMissing('reward_configs', 'created_at', 'DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP');
+        self::addColumnIfMissing('reward_configs', 'updated_at', 'DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP');
+    }
+
+    private static function ensureAttendanceColumns(): void
+    {
+        if (!self::tableExists('attendance_logs')) return;
+        self::addColumnIfMissing('attendance_logs', 'client_id', 'INT NOT NULL');
+        self::addColumnIfMissing('attendance_logs', 'branch_id', 'INT NULL');
+        self::addColumnIfMissing('attendance_logs', 'scanned_by_id', 'INT NOT NULL');
+        self::addColumnIfMissing('attendance_logs', 'appointment_id', 'INT NULL');
+        self::addColumnIfMissing('attendance_logs', 'scanned_at', 'DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP');
+        self::addColumnIfMissing('attendance_logs', 'source', "VARCHAR(40) NOT NULL DEFAULT 'qr'");
+        self::addColumnIfMissing('attendance_logs', 'token_hash', 'CHAR(64) NULL');
+        self::addColumnIfMissing('attendance_logs', 'notes', 'VARCHAR(255) NULL');
+        self::addColumnIfMissing('attendance_logs', 'created_at', 'DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP');
+    }
+
+    private static function ensureClientRewardColumns(): void
+    {
+        if (!self::tableExists('client_rewards')) return;
+        self::addColumnIfMissing('client_rewards', 'client_id', 'INT NOT NULL');
+        self::addColumnIfMissing('client_rewards', 'config_id', 'INT NULL');
+        self::addColumnIfMissing('client_rewards', 'type', "VARCHAR(80) NOT NULL DEFAULT 'cliente_frecuente'");
+        self::addColumnIfMissing('client_rewards', 'description', 'TEXT NULL');
+        self::addColumnIfMissing('client_rewards', 'generated_at', 'DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP');
+        self::addColumnIfMissing('client_rewards', 'expires_at', 'DATETIME NULL');
+        self::addColumnIfMissing('client_rewards', 'status', "ENUM('pendiente','usado','cancelado') NOT NULL DEFAULT 'pendiente'");
+        self::addColumnIfMissing('client_rewards', 'used_at', 'DATETIME NULL');
+        self::addColumnIfMissing('client_rewards', 'created_by_id', 'INT NULL');
+        self::addColumnIfMissing('client_rewards', 'created_at', 'DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP');
+    }
+
+    private static function ensureCounterColumns(): void
+    {
+        if (self::tableExists('reward_counter_resets')) {
+            self::addColumnIfMissing('reward_counter_resets', 'client_id', 'INT NOT NULL');
+            self::addColumnIfMissing('reward_counter_resets', 'config_id', 'INT NULL');
+            self::addColumnIfMissing('reward_counter_resets', 'reset_at', 'DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP');
+            self::addColumnIfMissing('reward_counter_resets', 'admin_id', 'INT NOT NULL');
+            self::addColumnIfMissing('reward_counter_resets', 'reason', 'VARCHAR(255) NULL');
+            self::addColumnIfMissing('reward_counter_resets', 'created_at', 'DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP');
+        }
+        if (self::tableExists('reward_counter_adjustments')) {
+            self::addColumnIfMissing('reward_counter_adjustments', 'client_id', 'INT NOT NULL');
+            self::addColumnIfMissing('reward_counter_adjustments', 'config_id', 'INT NULL');
+            self::addColumnIfMissing('reward_counter_adjustments', 'delta', 'INT NOT NULL DEFAULT 0');
+            self::addColumnIfMissing('reward_counter_adjustments', 'reason', 'VARCHAR(255) NULL');
+            self::addColumnIfMissing('reward_counter_adjustments', 'admin_id', 'INT NOT NULL');
+            self::addColumnIfMissing('reward_counter_adjustments', 'created_at', 'DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP');
+        }
+    }
+
+    private static function addColumnIfMissing(string $table, string $column, string $definition): void
+    {
+        if (self::columnExists($table, $column)) return;
+        self::execSchema("ALTER TABLE {$table} ADD COLUMN {$column} {$definition}");
+    }
+
+    private static function execSchema(string $sql): void
+    {
+        try {
+            Database::exec($sql);
+        } catch (Throwable $e) {
+            error_log('[rewards-schema] ' . $e->getMessage());
+        }
+    }
+
+    private static function tableExists(string $table): bool
+    {
+        try {
+            return (bool) Database::one(
+                'SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? LIMIT 1',
+                [$table]
+            );
+        } catch (Throwable $e) {
+            return false;
+        }
+    }
+
     private static function columnExists(string $table, string $column): bool
     {
         try {
-            return (bool) Database::one("SHOW COLUMNS FROM {$table} LIKE ?", [$column]);
+            return (bool) Database::one(
+                'SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ? LIMIT 1',
+                [$table, $column]
+            );
         } catch (Throwable $e) {
             return false;
         }

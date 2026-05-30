@@ -12,12 +12,17 @@ if (!Auth::check() || !Auth::isClient()) {
 }
 
 $user = Auth::user();
-RewardsService::ensureSchema();
-
-echo json_encode([
-    'ok' => true,
-    'token' => RewardsService::qrTokenForUser($user),
-    'payload' => RewardsService::qrPayloadForUser($user),
-    'progress' => RewardsService::progressForClient((int) $user['id']),
-    'rewards' => RewardsService::rewardsForClient((int) $user['id'], 6),
-], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+try {
+    RewardsService::ensureSchema();
+    echo json_encode([
+        'ok' => true,
+        'token' => RewardsService::qrTokenForUser($user),
+        'payload' => RewardsService::qrPayloadForUser($user),
+        'progress' => RewardsService::progressForClient((int) $user['id']),
+        'rewards' => RewardsService::rewardsForClient((int) $user['id'], 6),
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+} catch (Throwable $e) {
+    error_log('[cliente-qr] ' . $e->getMessage());
+    http_response_code(500);
+    echo json_encode(['ok' => false, 'error' => 'No fue posible generar el QR del cliente.']);
+}

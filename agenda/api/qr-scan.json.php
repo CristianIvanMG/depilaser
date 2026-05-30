@@ -45,6 +45,12 @@ if ($token === '') {
     exit;
 }
 
-$result = RewardsService::registerAttendance($token, (int) Auth::user()['id'], $branchId);
-http_response_code(!empty($result['ok']) ? 200 : (!empty($result['duplicate']) ? 409 : 422));
-echo json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+try {
+    $result = RewardsService::registerAttendance($token, (int) Auth::user()['id'], $branchId);
+    http_response_code(!empty($result['ok']) ? 200 : (!empty($result['duplicate']) ? 409 : 422));
+    echo json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+} catch (Throwable $e) {
+    error_log('[qr-scan] ' . $e->getMessage());
+    http_response_code(500);
+    echo json_encode(['ok' => false, 'error' => 'No fue posible registrar la asistencia. Revisa la configuracion de recompensas.']);
+}

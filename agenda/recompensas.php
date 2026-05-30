@@ -289,6 +289,7 @@ require __DIR__ . '/includes/layouts/header_client.php';
 </section>
 
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script>window.Html5Qrcode || document.write('<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"><\/script>');</script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const startBtn = document.getElementById('startBranchScanBtn');

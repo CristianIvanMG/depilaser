@@ -37,6 +37,12 @@ if ($token === '') {
     exit;
 }
 
-$result = RewardsService::registerClientBranchAttendance((int) Auth::user()['id'], $token);
-http_response_code(!empty($result['ok']) ? 200 : (!empty($result['duplicate']) ? 409 : 422));
-echo json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+try {
+    $result = RewardsService::registerClientBranchAttendance((int) Auth::user()['id'], $token);
+    http_response_code(!empty($result['ok']) ? 200 : (!empty($result['duplicate']) ? 409 : 422));
+    echo json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+} catch (Throwable $e) {
+    error_log('[cliente-checkin-sucursal] ' . $e->getMessage());
+    http_response_code(500);
+    echo json_encode(['ok' => false, 'error' => 'No fue posible registrar tu visita. Pide apoyo en recepcion.']);
+}

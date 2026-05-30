@@ -46,9 +46,17 @@ $config = RewardsService::activeConfig();
 $clients = RewardsService::dashboardClients($q);
 $recent = RewardsService::recentAttendances(60);
 $recentRewards = RewardsService::recentRewards(40);
-$pendingRewards = (int) (Database::one("SELECT COUNT(*) AS n FROM client_rewards WHERE status = 'pendiente'")['n'] ?? 0);
-$todayScans = (int) (Database::one("SELECT COUNT(*) AS n FROM attendance_logs WHERE DATE(scanned_at) = CURDATE()")['n'] ?? 0);
-$totalScans = (int) (Database::one("SELECT COUNT(*) AS n FROM attendance_logs")['n'] ?? 0);
+$pendingRewards = 0;
+$todayScans = 0;
+$totalScans = 0;
+try {
+    $pendingRewards = (int) (Database::one("SELECT COUNT(*) AS n FROM client_rewards WHERE status = 'pendiente'")['n'] ?? 0);
+    $todayScans = (int) (Database::one("SELECT COUNT(*) AS n FROM attendance_logs WHERE DATE(scanned_at) = CURDATE()")['n'] ?? 0);
+    $totalScans = (int) (Database::one("SELECT COUNT(*) AS n FROM attendance_logs")['n'] ?? 0);
+} catch (Throwable $e) {
+    error_log('[admin-recompensas-counts] ' . $e->getMessage());
+    flash('warning', 'El modulo de recompensas esta cargando con datos parciales. Revisa que la migracion de recompensas este completa.');
+}
 $branchQrRows = [];
 $activeBranches = Database::all('SELECT id, name FROM branches WHERE active = 1 ORDER BY display_order, name');
 foreach ($activeBranches as $branch) {
@@ -393,6 +401,7 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>window.QRCode || document.write('<script src="https://unpkg.com/qrcodejs@1.0.0/qrcode.min.js"><\/script>');</script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     if (!window.QRCode) return;

@@ -123,11 +123,17 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
 </div>
 
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script>window.Html5Qrcode || document.write('<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"><\/script>');</script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const resultBox = document.getElementById('scanResult');
     const branchId = document.getElementById('branchId');
     const restartBtn = document.getElementById('restartScanBtn');
+    if (!window.Html5Qrcode) {
+      resultBox.className = 'bnc-scan-result error';
+      resultBox.innerHTML = '<strong>No se pudo cargar el escaner QR.</strong><div class="small mt-1">Actualiza la pagina o revisa la conexion del dispositivo.</div>';
+      return;
+    }
     const scanner = new Html5Qrcode('qrReader');
     let busy = false;
 
