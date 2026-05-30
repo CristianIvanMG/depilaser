@@ -49,6 +49,15 @@ $recentRewards = RewardsService::recentRewards(40);
 $pendingRewards = (int) (Database::one("SELECT COUNT(*) AS n FROM client_rewards WHERE status = 'pendiente'")['n'] ?? 0);
 $todayScans = (int) (Database::one("SELECT COUNT(*) AS n FROM attendance_logs WHERE DATE(scanned_at) = CURDATE()")['n'] ?? 0);
 $totalScans = (int) (Database::one("SELECT COUNT(*) AS n FROM attendance_logs")['n'] ?? 0);
+$branchQrRows = [];
+$activeBranches = Database::all('SELECT id, name FROM branches WHERE active = 1 ORDER BY display_order, name');
+foreach ($activeBranches as $branch) {
+    $branchQrRows[] = [
+        'id' => (int) $branch['id'],
+        'name' => (string) $branch['name'],
+        'token' => RewardsService::qrTokenForBranch($branch),
+    ];
+}
 
 $pageTitle = 'Recompensas';
 require __DIR__ . '/../includes/layouts/header_admin.php';
@@ -88,11 +97,79 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
   .bnc-action-grid {
     display: grid;
     gap: .4rem;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    min-width: min(100%, 280px);
+  }
+  .bnc-counter-adjust {
+    display: grid;
+    gap: .4rem;
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(76px, 92px) minmax(110px, 1fr);
+  }
+  .bnc-counter-adjust input {
+    min-width: 76px;
+    text-align: center;
+  }
+  .bnc-reward-status-form {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+    justify-content: flex-end;
+  }
+  .bnc-reward-status-form select {
+    min-width: 132px;
+    width: auto;
+  }
+  .bnc-branch-qr-card {
+    border: 1px solid #f2d6e5;
+    border-radius: 18px;
+    padding: 1rem;
+  }
+  .bnc-branch-qr-box {
+    align-items: center;
+    background: #fff;
+    border: 1px dashed #e8b6d2;
+    border-radius: 16px;
+    display: flex;
+    justify-content: center;
+    min-height: 170px;
+    padding: .75rem;
+  }
+  @media (max-width: 992px) {
+    .bnc-reward-status-form {
+      justify-content: stretch;
+    }
+    .bnc-reward-status-form select,
+    .bnc-reward-status-form .btn,
+    .bnc-reward-status-form .bnc-reward-appointment {
+      flex: 1 1 140px;
+    }
   }
   @media (max-width: 768px) {
     .bnc-action-grid {
       grid-template-columns: 1fr;
+    }
+    .bnc-counter-adjust {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media print {
+    body * {
+      visibility: hidden;
+    }
+    .bnc-print-qr-area,
+    .bnc-print-qr-area * {
+      visibility: visible;
+    }
+    .bnc-print-qr-area {
+      left: 0;
+      position: absolute;
+      top: 0;
+      width: 100%;
+    }
+    .bnc-no-print {
+      display: none !important;
     }
   }
 </style>
@@ -169,11 +246,11 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
                       <input type="hidden" name="client_id" value="<?= (int) $client['id'] ?>">
                       <button class="btn btn-outline-secondary btn-sm w-100" onclick="return confirm('Reiniciar contador de este cliente?')"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
                     </form>
-                    <form method="POST" class="d-flex gap-1" style="grid-column:1 / -1">
+                    <form method="POST" class="bnc-counter-adjust">
                       <?= Csrf::input() ?>
                       <input type="hidden" name="action" value="adjust_counter">
                       <input type="hidden" name="client_id" value="<?= (int) $client['id'] ?>">
-                      <input type="number" name="delta" class="form-control form-control-sm" value="1" style="max-width:80px">
+                      <input type="number" name="delta" class="form-control form-control-sm" value="1">
                       <button class="btn btn-bnc-outline btn-sm flex-grow-1">Ajustar</button>
                     </form>
                   </div>
@@ -200,11 +277,16 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
                 <td><?= $reward['expires_at'] ? e(fmt_dt_short($reward['expires_at'])) : '<span class="text-muted">Sin vencimiento</span>' ?></td>
                 <td><span class="badge <?= $reward['status'] === 'pendiente' ? 'bg-success' : ($reward['status'] === 'usado' ? 'bg-secondary' : 'bg-danger') ?>"><?= e($reward['status']) ?></span></td>
                 <td class="text-end">
-                  <form method="POST" class="d-flex gap-1 justify-content-end">
+                  <form method="POST" class="bnc-reward-status-form">
                     <?= Csrf::input() ?>
                     <input type="hidden" name="action" value="reward_status">
                     <input type="hidden" name="reward_id" value="<?= (int) $reward['id'] ?>">
-                    <select name="status" class="form-select form-select-sm" style="max-width:130px">
+                    <?php if ($reward['status'] === 'pendiente'): ?>
+                      <a class="btn btn-success btn-sm bnc-reward-appointment" href="<?= url('admin/cita-form.php?reward_id=' . (int) $reward['id']) ?>">
+                        <i class="bi bi-calendar-plus"></i> Agendar
+                      </a>
+                    <?php endif; ?>
+                    <select name="status" class="form-select form-select-sm">
                       <option value="pendiente" <?= $reward['status'] === 'pendiente' ? 'selected' : '' ?>>Pendiente</option>
                       <option value="usado" <?= $reward['status'] === 'usado' ? 'selected' : '' ?>>Usado</option>
                       <option value="cancelado" <?= $reward['status'] === 'cancelado' ? 'selected' : '' ?>>Cancelado</option>
@@ -282,7 +364,51 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         </form>
       </div>
     </div>
+
+    <div class="bnc-card mt-4 bnc-print-qr-area">
+      <div class="bnc-card-header d-flex flex-wrap gap-2 align-items-center">
+        <div class="me-auto">
+          <h3 class="h6 fw-bold mb-0">QR de sucursales</h3>
+          <div class="small text-muted">Imprime estos codigos y colocalos en recepcion.</div>
+        </div>
+        <button type="button" class="btn btn-bnc-outline btn-sm bnc-no-print" onclick="window.print()">
+          <i class="bi bi-printer"></i> Imprimir
+        </button>
+      </div>
+      <div class="bnc-card-body d-grid gap-3">
+        <?php if (!$branchQrRows): ?>
+          <p class="text-muted small mb-0">No hay sucursales activas para generar QR.</p>
+        <?php else: foreach ($branchQrRows as $branchQr): ?>
+          <div class="bnc-branch-qr-card">
+            <div class="bnc-branch-qr-box mb-2" data-branch-qr="<?= e($branchQr['token']) ?>">
+              <span class="text-muted small">Generando QR...</span>
+            </div>
+            <strong><?= e($branchQr['name']) ?></strong>
+            <div class="small text-muted">El cliente lo escanea desde su perfil para sumar una visita presencial.</div>
+          </div>
+        <?php endforeach; endif; ?>
+      </div>
+    </div>
   </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!window.QRCode) return;
+    document.querySelectorAll('[data-branch-qr]').forEach((box) => {
+      const token = box.dataset.branchQr || '';
+      box.innerHTML = '';
+      new QRCode(box, {
+        text: token,
+        width: 150,
+        height: 150,
+        colorDark: '#15051a',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    });
+  });
+</script>
 
 <?php require __DIR__ . '/../includes/layouts/footer.php'; ?>

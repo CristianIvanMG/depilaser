@@ -85,6 +85,13 @@ final class RewardsService
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
         );
 
+        if (!self::columnExists('attendance_logs', 'source')) {
+            Database::exec("ALTER TABLE attendance_logs ADD COLUMN source VARCHAR(40) NOT NULL DEFAULT 'qr' AFTER scanned_at");
+        }
+        if (!self::columnExists('attendance_logs', 'notes')) {
+            Database::exec('ALTER TABLE attendance_logs ADD COLUMN notes VARCHAR(255) NULL AFTER token_hash');
+        }
+
         $existing = Database::one('SELECT id FROM reward_configs LIMIT 1');
         if (!$existing) {
             Database::exec(
@@ -117,6 +124,47 @@ final class RewardsService
     public static function qrTokenForUser(array $user): string
     {
         return self::base64UrlEncode(json_encode(self::qrPayloadForUser($user), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    }
+
+    public static function qrPayloadForBranch(array $branch): array
+    {
+        $base = [
+            'tipo' => 'sucursal',
+            'sucursal_id' => (int) $branch['id'],
+            'nombre' => (string) ($branch['name'] ?? ''),
+            'version' => 1,
+        ];
+        $base['hash'] = self::signPayload($base);
+        return $base;
+    }
+
+    public static function qrTokenForBranch(array $branch): string
+    {
+        return self::base64UrlEncode(json_encode(self::qrPayloadForBranch($branch), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    }
+
+    public static function validateBranchToken(string $token): array
+    {
+        $json = self::base64UrlDecode(trim($token));
+        $payload = json_decode($json, true);
+        if (!is_array($payload)) {
+            return ['ok' => false, 'error' => 'QR de sucursal invalido.'];
+        }
+        $branchId = (int) ($payload['sucursal_id'] ?? 0);
+        $hash = (string) ($payload['hash'] ?? '');
+        if (($payload['tipo'] ?? '') !== 'sucursal' || $branchId <= 0 || $hash === '') {
+            return ['ok' => false, 'error' => 'Este QR no corresponde a una sucursal BellaNick.'];
+        }
+        $unsigned = $payload;
+        unset($unsigned['hash']);
+        if (!hash_equals(self::signPayload($unsigned), $hash)) {
+            return ['ok' => false, 'error' => 'La firma del QR de sucursal no es valida.'];
+        }
+        $branch = Database::one('SELECT id, name FROM branches WHERE id = ? AND active = 1 LIMIT 1', [$branchId]);
+        if (!$branch) {
+            return ['ok' => false, 'error' => 'Sucursal no encontrada o inactiva.'];
+        }
+        return ['ok' => true, 'payload' => $payload, 'branch' => $branch];
     }
 
     public static function validateToken(string $token): array
@@ -186,6 +234,52 @@ final class RewardsService
         return [
             'ok' => true,
             'client' => $client,
+            'progress' => self::progressForClient($clientId),
+            'reward' => $reward,
+            'attendance' => Database::lastId(),
+        ];
+    }
+
+    public static function registerClientBranchAttendance(int $clientId, string $branchToken): array
+    {
+        self::ensureSchema();
+        $validation = self::validateBranchToken($branchToken);
+        if (empty($validation['ok'])) {
+            return $validation;
+        }
+        $client = self::clientById($clientId);
+        if (!$client) {
+            return ['ok' => false, 'error' => 'Cliente no encontrado o inactivo.'];
+        }
+        $branch = $validation['branch'];
+        $branchId = (int) $branch['id'];
+
+        $recent = Database::one(
+            "SELECT id, scanned_at FROM attendance_logs
+             WHERE client_id = ? AND scanned_at >= DATE_SUB(NOW(), INTERVAL " . self::DUPLICATE_WINDOW_MINUTES . " MINUTE)
+             ORDER BY scanned_at DESC LIMIT 1",
+            [$clientId]
+        );
+        if ($recent) {
+            return [
+                'ok' => false,
+                'duplicate' => true,
+                'error' => 'Tu visita ya quedo registrada hace unos minutos.',
+                'last_scan' => $recent['scanned_at'],
+            ];
+        }
+
+        Database::exec(
+            "INSERT INTO attendance_logs (client_id, branch_id, scanned_by_id, source, token_hash, notes)
+             VALUES (?, ?, ?, 'cliente_qr_sucursal', ?, ?)",
+            [$clientId, $branchId, $clientId, hash('sha256', $branchToken), 'Registro hecho por el cliente al escanear el QR de sucursal']
+        );
+
+        $reward = self::maybeGenerateReward($clientId, $clientId);
+        return [
+            'ok' => true,
+            'client' => $client,
+            'branch' => $branch,
             'progress' => self::progressForClient($clientId),
             'reward' => $reward,
             'attendance' => Database::lastId(),
@@ -438,6 +532,15 @@ final class RewardsService
             return $secret;
         }
         return hash('sha256', APP_BASE_URL . '|' . AGENDA_ROOT . '|bellanick-rewards');
+    }
+
+    private static function columnExists(string $table, string $column): bool
+    {
+        try {
+            return (bool) Database::one("SHOW COLUMNS FROM {$table} LIKE ?", [$column]);
+        } catch (Throwable $e) {
+            return false;
+        }
     }
 
     private static function base64UrlEncode(string $value): string

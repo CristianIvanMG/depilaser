@@ -5,6 +5,7 @@ Auth::requireAdmin();
 $admin = Auth::user();
 $appointmentId = (int) ($_GET['id'] ?? $_POST['appointment_id'] ?? 0);
 $isEdit = $appointmentId > 0;
+$rewardId = !$isEdit ? (int) ($_GET['reward_id'] ?? $_POST['reward_id'] ?? 0) : 0;
 $errors = [];
 
 function admin_appointment_form_nonce(): string
@@ -18,10 +19,12 @@ function admin_appointment_form_nonce(): string
 // Asegura schema de Profesionales (auto-migracion suave)
 AppointmentService::ensureProfessionalSchema();
 AppointmentService::ensureAppointmentDurationSchema();
+AppointmentService::ensurePackageBillingSchema();
 AppointmentService::ensureMachinerySchema();
 EmailNotificationService::ensureSchema();
 PaymentService::ensureSchema();
 ServiceCatalogService::ensureSchema();
+RewardsService::ensureSchema();
 
 $statuses = Database::all('SELECT id, slug, name FROM appointment_statuses ORDER BY id');
 $statusBySlug = [];
@@ -71,6 +74,7 @@ $clients = Database::all(
      ORDER BY u.name"
 );
 $sourceOptions = AppointmentService::sourceOptions();
+$defaultRewardSource = isset($sourceOptions['presencial']) ? 'presencial' : 'phone';
 
 $appointment = null;
 if ($isEdit) {
@@ -90,9 +94,25 @@ if ($isEdit) {
     }
 }
 
+$rewardAppointment = null;
+if ($rewardId > 0) {
+    $rewardAppointment = Database::one(
+        "SELECT cr.*, u.name AS client_name, u.email AS client_email, u.phone AS client_phone
+         FROM client_rewards cr
+         JOIN users u ON u.id = cr.client_id
+         WHERE cr.id = ? AND cr.status = 'pendiente'
+         LIMIT 1",
+        [$rewardId]
+    );
+    if (!$rewardAppointment && $_SERVER['REQUEST_METHOD'] !== 'POST') {
+        flash('warning', 'La recompensa no esta pendiente o ya no existe.');
+        redirect('admin/recompensas.php');
+    }
+}
+
 $form = [
     'client_mode' => $_POST['client_mode'] ?? 'existing',
-    'user_id' => $_POST['user_id'] ?? ($appointment['user_id'] ?? ''),
+    'user_id' => $_POST['user_id'] ?? ($appointment['user_id'] ?? ($rewardAppointment['client_id'] ?? '')),
     'client_first_name' => $_POST['client_first_name'] ?? '',
     'client_last_name' => $_POST['client_last_name'] ?? '',
     'client_name' => $_POST['client_name'] ?? '',
@@ -102,9 +122,13 @@ $form = [
     'service_id' => $_POST['service_id'] ?? ($appointment['service_id'] ?? ''),
     'professional_id' => $_POST['professional_id'] ?? ($appointment['professional_id'] ?? ''),
     'status_id' => $_POST['status_id'] ?? ($appointment['status_id'] ?? ($statusBySlug['programada'] ?? '')),
-    'source' => $_POST['source'] ?? ($appointment['source'] ?? 'phone'),
+    'source' => $_POST['source'] ?? ($appointment['source'] ?? ($rewardAppointment ? $defaultRewardSource : 'phone')),
     'start_at' => $_POST['start_at'] ?? ($appointment ? date('Y-m-d\TH:i', strtotime($appointment['start_at'])) : ''),
-    'notes_admin' => $_POST['notes_admin'] ?? ($appointment['notes_admin'] ?? ''),
+    'notes_admin' => $_POST['notes_admin'] ?? ($appointment['notes_admin'] ?? ($rewardAppointment ? ('Cita generada desde recompensa #' . (int) $rewardAppointment['id'] . ': ' . (string) $rewardAppointment['description']) : '')),
+    'billing_type' => $_POST['billing_type'] ?? ($appointment['billing_type'] ?? 'standard'),
+    'package_session_number' => $_POST['package_session_number'] ?? ($appointment['package_session_number'] ?? ''),
+    'package_total_sessions' => $_POST['package_total_sessions'] ?? ($appointment['package_total_sessions'] ?? ''),
+    'package_parent_appointment_id' => $_POST['package_parent_appointment_id'] ?? ($appointment['package_parent_appointment_id'] ?? ''),
     'cancel_reason' => $_POST['cancel_reason'] ?? '',
 ];
 
@@ -175,6 +199,10 @@ if ($selectedService) {
         $selectedServiceLabel .= ' - ' . (int) $selectedService['sessions_count'] . ' sesion(es)';
     }
 }
+$selectedBillingType = (string) ($form['billing_type'] ?? 'standard');
+$selectedPackageSessionNumber = max(1, (int) ($form['package_session_number'] ?: 1));
+$selectedPackageTotalSessions = max(1, (int) ($form['package_total_sessions'] ?: ($selectedService['sessions_count'] ?? 1)));
+$selectedPackageParentId = (int) ($form['package_parent_appointment_id'] ?: 0);
 
 function admin_validate_client_input(array $data): array
 {
@@ -288,6 +316,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $clientMode = $_POST['client_mode'] ?? 'existing';
         $userId = (int) ($_POST['user_id'] ?? 0);
+        $rewardToUse = null;
 
         if ($clientMode === 'new') {
             $validatedClient = admin_validate_client_input($_POST);
@@ -307,12 +336,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
+        if (!$isEdit && $rewardId > 0) {
+            $rewardToUse = Database::one(
+                "SELECT * FROM client_rewards WHERE id = ? AND status = 'pendiente' LIMIT 1",
+                [$rewardId]
+            );
+            if (!$rewardToUse) {
+                $errors['_'] = 'La recompensa ya no esta disponible para agendar.';
+            } elseif ($clientMode !== 'existing' || (int) $rewardToUse['client_id'] !== $userId) {
+                $errors['user_id'] = 'La cita de recompensa debe conservar el cliente que gano el beneficio.';
+            }
+        }
+
         $branchId = (int) ($_POST['branch_id'] ?? 0);
         $serviceId = (int) ($_POST['service_id'] ?? 0);
         $statusId = (int) ($_POST['status_id'] ?? 0);
         $source = $_POST['source'] ?? 'phone';
         $startAt = trim($_POST['start_at'] ?? '');
         $notesAdmin = trim($_POST['notes_admin'] ?? '');
+        $selectedServiceForBilling = null;
+        foreach ($services as $svcRow) {
+            if ((int) $svcRow['id'] === $serviceId) {
+                $selectedServiceForBilling = $svcRow;
+                break;
+            }
+        }
+        $isPackageAppointment = $selectedServiceForBilling
+            && ServiceCatalogService::normalizeType($selectedServiceForBilling['item_type'] ?? 'service') === ServiceCatalogService::TYPE_PACKAGE;
+        $billingMode = (string) ($_POST['package_billing_mode'] ?? '');
+        $billingType = 'standard';
+        $packageSessionNumber = null;
+        $packageTotalSessions = null;
+        $packageParentAppointmentId = null;
+        if ($isPackageAppointment) {
+            $packageTotalSessions = max(1, (int) ($_POST['package_total_sessions'] ?? ($selectedServiceForBilling['sessions_count'] ?? 1)));
+            $packageSessionNumber = max(1, min($packageTotalSessions, (int) ($_POST['package_session_number'] ?? 1)));
+            $packageParentAppointmentId = (int) ($_POST['package_parent_appointment_id'] ?? 0) ?: null;
+            $billingType = $billingMode === 'included' ? 'package_session' : 'package_sale';
+            if ($billingType === 'package_session' && $packageSessionNumber === 1) {
+                $packageSessionNumber = min(2, $packageTotalSessions);
+            }
+        }
+        if (
+            $isEdit
+            && $billingType === 'package_session'
+            && (
+                (string) ($appointment['payment_status'] ?? '') === 'paid'
+                || !empty($appointment['receipt_folio'])
+            )
+        ) {
+            $errors['_'] = 'Esta cita ya tiene pago o recibo registrado; no puede convertirse en sesion incluida de paquete.';
+        }
         $startTs = $startAt ? strtotime(str_replace('T', ' ', $startAt)) : false;
 
         if (!isset($sourceOptions[$source])) {
@@ -422,15 +496,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $schedule['end_sql'],
                         $source,
                         $notesAdmin ?: null,
+                        $billingType,
+                        $packageParentAppointmentId,
+                        $packageSessionNumber,
+                        $packageTotalSessions,
                     ];
                     $updateParams = array_merge($updateParams, $cancelParams, [$appointmentId]);
                     Database::exec(
                         'UPDATE appointments
                          SET user_id = ?, professional_id = ?, branch_id = ?, service_id = ?, status_id = ?,
-                             start_at = ?, end_at = ?, source = ?, notes_admin = ?
+                             start_at = ?, end_at = ?, source = ?, notes_admin = ?,
+                             billing_type = ?, package_parent_appointment_id = ?,
+                             package_session_number = ?, package_total_sessions = ?,
+                             payment_required = CASE WHEN ? = \'package_session\' THEN 0 ELSE payment_required END,
+                             payment_status = CASE WHEN ? = \'package_session\' THEN \'not_required\' ELSE payment_status END,
+                             payment_amount_mxn = CASE WHEN ? = \'package_session\' THEN 0.00 ELSE payment_amount_mxn END
                              ' . $cancelSql . $reminderSql . '
                          WHERE id = ?',
-                        $updateParams
+                        array_merge(
+                            array_slice($updateParams, 0, 13),
+                            [$billingType, $billingType, $billingType],
+                            array_slice($updateParams, 13)
+                        )
                     );
                     $pdo->commit();
                     Auth::audit('appointment_update', 'appointment', $appointmentId, [
@@ -504,8 +591,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 Database::exec(
                     'INSERT INTO appointments
-                       (code, user_id, professional_id, branch_id, service_id, status_id, start_at, end_at, source, notes_admin, created_by_user_id)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                       (code, user_id, professional_id, branch_id, service_id, status_id, start_at, end_at, source, notes_admin, created_by_user_id,
+                        billing_type, package_parent_appointment_id, package_session_number, package_total_sessions,
+                        payment_required, payment_status, payment_amount_mxn)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                     [
                         $code,
                         $userId,
@@ -518,9 +607,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $source,
                         $notesAdmin ?: null,
                         $admin['id'],
+                        $billingType,
+                        $packageParentAppointmentId,
+                        $packageSessionNumber,
+                        $packageTotalSessions,
+                        0,
+                        'not_required',
+                        0.0,
                     ]
                 );
                 $newId = Database::lastId();
+                if ($rewardToUse) {
+                    RewardsService::updateRewardStatus((int) $rewardToUse['id'], 'usado');
+                    Auth::audit('reward_appointment_create', 'client_reward', (int) $rewardToUse['id'], [
+                        'appointment_id' => $newId,
+                        'client_id' => $userId,
+                    ]);
+                }
                 $pdo->commit();
                 Auth::audit('appointment_create_admin', 'appointment', $newId, ['code' => $code]);
                 $emailType = $statusSlug === 'confirmada' ? 'appointment_confirmed' : 'appointment_created';
@@ -629,6 +732,46 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
     color: #6b7280;
     padding: .75rem .85rem;
   }
+
+  .bnc-package-billing-card {
+    background: #f8fffb;
+    border: 1px solid #bbf7d0;
+    border-radius: 16px;
+    padding: 1rem;
+  }
+
+  .bnc-package-billing-card .btn-check:checked + .btn {
+    background: #16834a;
+    border-color: #16834a;
+    color: #fff;
+  }
+
+  .bnc-package-session-grid {
+    display: grid;
+    gap: .75rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .bnc-slot-grid {
+    display: grid;
+    gap: .5rem;
+    grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  }
+
+  .bnc-slot-grid .slot-btn {
+    min-height: 44px;
+    white-space: normal;
+  }
+
+  .bnc-slot-grid .slot-btn[disabled] {
+    opacity: .58;
+  }
+
+  @media (max-width: 768px) {
+    .bnc-package-session-grid {
+      grid-template-columns: 1fr;
+    }
+  }
 </style>
 
 <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
@@ -647,11 +790,21 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
       <input type="hidden" name="action" value="save">
       <?php if ($isEdit): ?><input type="hidden" name="appointment_id" value="<?= (int) $appointmentId ?>"><?php endif; ?>
       <?php if (!$isEdit): ?><input type="hidden" name="form_nonce" value="<?= e(admin_appointment_form_nonce()) ?>"><?php endif; ?>
+      <?php if ($rewardAppointment): ?><input type="hidden" name="reward_id" value="<?= (int) $rewardAppointment['id'] ?>"><?php endif; ?>
 
       <div class="bnc-card-header">
         <h2 class="h6 fw-bold mb-0"><?= $isEdit ? 'Datos de la cita' : 'Crear cita administrativa' ?></h2>
       </div>
       <div class="bnc-card-body">
+        <?php if ($rewardAppointment): ?>
+          <div class="alert alert-success d-flex flex-wrap gap-2 align-items-center mb-4">
+            <i class="bi bi-gift-fill"></i>
+            <div>
+              <strong>Cita por recompensa pendiente</strong>
+              <div class="small">Cliente: <?= e($rewardAppointment['client_name']) ?>. Esta cita se registra desde administracion, sin pago en linea, y la recompensa quedara marcada como usada al guardar.</div>
+            </div>
+          </div>
+        <?php endif; ?>
         <div class="row g-3">
           <div class="col-12">
             <div class="bnc-admin-form-section">
@@ -661,7 +814,7 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
           </div>
           <div class="col-12">
             <label class="bnc-label d-block">Cliente</label>
-            <?php if (!$isEdit): ?>
+            <?php if (!$isEdit && !$rewardAppointment): ?>
               <div class="btn-group mb-3" role="group">
                 <input type="radio" class="btn-check" name="client_mode" id="clientExisting" value="existing" <?= $form['client_mode'] !== 'new' ? 'checked' : '' ?>>
                 <label class="btn btn-bnc-outline" for="clientExisting"><i class="bi bi-person-check"></i> Existente</label>
@@ -752,6 +905,39 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
           </div>
 
           <input type="hidden" name="start_at" id="startAtInput" value="<?= e($form['start_at']) ?>">
+
+          <div class="col-12 d-none" id="packageBillingBox">
+            <div class="bnc-package-billing-card">
+              <input type="hidden" name="billing_type" id="billingTypeInput" value="<?= e($selectedBillingType) ?>">
+              <div class="d-flex flex-wrap gap-2 align-items-start mb-3">
+                <div class="me-auto">
+                  <strong>Control de paquete</strong>
+                  <div class="small text-muted">Usa "sesion incluida" para citas que ya fueron pagadas en la primera venta. No generan pago, recibo ni ingreso duplicado.</div>
+                </div>
+                <span class="badge bg-success">Anti doble cobro</span>
+              </div>
+              <div class="btn-group w-100 mb-3" role="group" aria-label="Tipo de cobro del paquete">
+                <input type="radio" class="btn-check" name="package_billing_mode" id="packageBillingSale" value="sale" <?= $selectedBillingType !== 'package_session' ? 'checked' : '' ?>>
+                <label class="btn btn-outline-success" for="packageBillingSale"><i class="bi bi-receipt"></i> Primera venta / cobrar</label>
+                <input type="radio" class="btn-check" name="package_billing_mode" id="packageBillingIncluded" value="included" <?= $selectedBillingType === 'package_session' ? 'checked' : '' ?>>
+                <label class="btn btn-outline-success" for="packageBillingIncluded"><i class="bi bi-check2-circle"></i> Sesion incluida ya pagada</label>
+              </div>
+              <div class="bnc-package-session-grid" id="packageIncludedFields">
+                <div>
+                  <label class="bnc-label">Sesion numero</label>
+                  <input type="number" min="1" name="package_session_number" id="packageSessionNumberInput" class="form-control" value="<?= e((string) $selectedPackageSessionNumber) ?>">
+                </div>
+                <div>
+                  <label class="bnc-label">Total vendidas</label>
+                  <input type="number" min="1" name="package_total_sessions" id="packageTotalSessionsInput" class="form-control" value="<?= e((string) $selectedPackageTotalSessions) ?>">
+                </div>
+                <div>
+                  <label class="bnc-label">Cita de venta <span class="text-muted fw-normal">(opcional)</span></label>
+                  <input type="number" min="1" name="package_parent_appointment_id" class="form-control" value="<?= $selectedPackageParentId ? e((string) $selectedPackageParentId) : '' ?>" placeholder="ID primera cita">
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div class="col-12">
             <label class="bnc-label">
@@ -984,6 +1170,12 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
     const saveAppointmentBtn = document.getElementById('saveAppointmentBtn');
     const slotsBox = document.getElementById('slotsBox');
     const selectedSlotSummary = document.getElementById('selectedSlotSummary');
+    const packageBillingBox = document.getElementById('packageBillingBox');
+    const billingTypeInput = document.getElementById('billingTypeInput');
+    const packageIncludedFields = document.getElementById('packageIncludedFields');
+    const packageSessionNumberInput = document.getElementById('packageSessionNumberInput');
+    const packageTotalSessionsInput = document.getElementById('packageTotalSessionsInput');
+    const packageBillingModeInputs = document.querySelectorAll('input[name="package_billing_mode"]');
     const clientSearchData = <?= json_encode($clientSearchOptions, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
     const serviceSearchData = <?= json_encode($serviceSearchOptions, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
     const currentStatusSlug = <?= json_encode((string) ($appointment['status_slug'] ?? 'programada')) ?>;
@@ -1189,7 +1381,35 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
       serviceSearchInput.classList.remove('is-invalid');
       if (serviceSelectedHint) serviceSelectedHint.textContent = `Seleccionado: ${service.typeLabel || 'Servicio'}`;
       closeServiceMenu();
+      if (service.type === 'package' && packageTotalSessionsInput) {
+        packageTotalSessionsInput.value = String(Math.max(1, Number(service.sessions || 1)));
+      }
+      syncPackageBilling(service);
       serviceIdInput.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    function currentPackageMode() {
+      return document.querySelector('input[name="package_billing_mode"]:checked')?.value || 'sale';
+    }
+
+    function syncPackageBilling(service = null) {
+      const selected = service || serviceSearchData.find(item => String(item.id) === String(serviceIdInput?.value || ''));
+      const isPackage = selected?.type === 'package';
+      if (packageBillingBox) packageBillingBox.classList.toggle('d-none', !isPackage);
+      if (!isPackage) {
+        if (billingTypeInput) billingTypeInput.value = 'standard';
+        return;
+      }
+      const total = Math.max(1, Number(selected.sessions || packageTotalSessionsInput?.value || 1));
+      if (packageTotalSessionsInput && (!packageTotalSessionsInput.value || Number(packageTotalSessionsInput.value) < 1)) {
+        packageTotalSessionsInput.value = String(total);
+      }
+      const included = currentPackageMode() === 'included';
+      if (billingTypeInput) billingTypeInput.value = included ? 'package_session' : 'package_sale';
+      if (packageIncludedFields) packageIncludedFields.classList.toggle('d-none', !included);
+      if (included && packageSessionNumberInput && Number(packageSessionNumberInput.value || 0) < 2 && total > 1) {
+        packageSessionNumberInput.value = '2';
+      }
     }
 
     function renderSlotMessage(type, message) {
@@ -1307,6 +1527,8 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         url.searchParams.set('branch', branchId);
         url.searchParams.set('service', serviceId);
         url.searchParams.set('date', date);
+        url.searchParams.set('include_unavailable', '1');
+        url.searchParams.set('allow_immediate', '1');
         if (professionalSelect?.value) url.searchParams.set('professional', professionalSelect.value);
         <?php if ($isEdit): ?>url.searchParams.set('ignore', '<?= (int) $appointmentId ?>');<?php endif; ?>
         const response = await fetch(url, {
@@ -1325,15 +1547,24 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         }
 
         const currentValue = startInput.value;
+        const availableCount = data.count || data.slots.filter(slot => slot.available !== false).length;
+        const totalCount = data.total_slots || data.slots.length;
         slotsBox.innerHTML = `
-          <div class="small text-muted mb-2">${data.count || data.slots.length} horario(s) disponible(s). Selecciona uno para llenar fecha y hora.</div>
-          <div class="d-flex flex-wrap gap-1">
+          <div class="small text-muted mb-2">${availableCount} disponible(s) de ${totalCount} horario(s). Los bloqueados muestran el motivo.</div>
+          <div class="bnc-slot-grid">
             ${data.slots.map(slot => {
               const value = slot.start.replace(' ', 'T').slice(0, 16);
               const active = value === currentValue ? ' btn-bnc-primary active' : '';
-              const cabins = slot.available_cabins ? ` · ${slot.available_cabins} cabina(s)` : '';
+              const available = slot.available !== false;
+              const cabins = available && slot.available_cabins ? ` · ${slot.available_cabins} cabina(s)` : '';
               const busyPros = Array.isArray(slot.busy_professional_ids) ? slot.busy_professional_ids.join(',') : '';
-              return `<button type="button" class="btn btn-bnc-outline btn-sm slot-btn${active}" data-start="${escapeHtml(value)}" data-busy-pros="${escapeHtml(busyPros)}" title="${escapeHtml((slot.label_long || slot.label) + cabins)}">${escapeHtml(slot.label)}${escapeHtml(cabins)}</button>`;
+              const reason = slot.reason || 'Horario no disponible.';
+              const cls = available ? `btn-bnc-outline${active}` : 'btn-outline-secondary';
+              const disabled = available ? '' : ' disabled aria-disabled="true"';
+              const body = available
+                ? `${escapeHtml(slot.label)}<small class="d-block">${escapeHtml(cabins.replace(' · ', ''))}</small>`
+                : `${escapeHtml(slot.label)}<small class="d-block text-muted">${escapeHtml(reason)}</small>`;
+              return `<button type="button" class="btn ${cls} btn-sm slot-btn" data-start="${escapeHtml(value)}" data-busy-pros="${escapeHtml(busyPros)}" title="${escapeHtml((slot.label_long || slot.label) + ' - ' + (available ? 'Disponible' : reason))}"${disabled}>${body}</button>`;
             }).join('')}
           </div>
         `;
@@ -1471,6 +1702,7 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         serviceIdInput.value = '';
         serviceSearchInput.classList.remove('is-invalid');
         if (serviceSelectedHint) serviceSelectedHint.textContent = 'Selecciona un servicio o paquete de la lista filtrada.';
+        syncPackageBilling(null);
         renderServiceOptions(serviceSearchInput.value);
         openServiceMenu();
         serviceIdInput.dispatchEvent(new Event('change', { bubbles: true }));
@@ -1517,6 +1749,15 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
       window.addEventListener('resize', positionServiceMenu);
       window.addEventListener('scroll', positionServiceMenu, true);
     }
+
+    packageBillingModeInputs.forEach(input => input.addEventListener('change', () => syncPackageBilling(null)));
+    packageTotalSessionsInput?.addEventListener('input', () => {
+      const total = Math.max(1, Number(packageTotalSessionsInput.value || 1));
+      const current = Math.max(1, Number(packageSessionNumberInput?.value || 1));
+      if (packageSessionNumberInput && current > total) packageSessionNumberInput.value = String(total);
+      syncPackageBilling(null);
+    });
+    syncPackageBilling(null);
 
     radios.forEach(radio => radio.addEventListener('change', syncClientMode));
     appointmentForm.addEventListener('submit', function (event) {

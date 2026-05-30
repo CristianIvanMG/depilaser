@@ -41,6 +41,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $br  = Database::one('SELECT id FROM branches WHERE id = ? AND active = 1', [$branchId]);
         if (!$svc || !$br) {
             $errors['_'] = 'Servicio o sucursal inválido.';
+        } elseif (!PaymentService::serviceAvailableForOnlineBooking($svc)) {
+            $errors['_'] = PaymentService::servicePaymentUnavailableReason($svc) . ' No se genero ninguna cita.';
         } elseif (!preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2})?$/', $startAt)) {
             $errors['_'] = 'Fecha/hora con formato inválido.';
         } else {
@@ -57,9 +59,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             if (!$errors) {
+                $payment = PaymentService::servicePaymentConfig($svc);
+                if ($payment['required'] && !PaymentService::mercadoPagoConfiguredForBranch($branchId)) {
+                    $errors['_'] = 'El pago en linea no esta disponible para esta sucursal en este momento. No se genero ninguna cita sin pago.';
+                }
+            }
+
+            if (!$errors) {
                 // Anti doble-reserva con transacción + verificación final
                 $pdo = Database::pdo();
                 $pdo->beginTransaction();
+                $apptId = 0;
                 try {
                     // Lock pesimista + capacidad real de cabinas por sucursal.
                     if (AppointmentService::hasConflict($branchId, $startSql, $endSql, null, true)) {
@@ -69,14 +79,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Estado inicial: programada
                     $statusId = (int) Database::one("SELECT id FROM appointment_statuses WHERE slug = 'programada'")['id'];
                     $code = generate_appointment_code();
-                    $payment = PaymentService::servicePaymentConfig($svc);
                     $paymentExpiresAt = date('Y-m-d H:i:s', time() + 20 * 60);
 
                     Database::exec(
                         'INSERT INTO appointments
                            (code, user_id, branch_id, service_id, status_id, start_at, end_at, notes_client, source, created_by_user_id,
+                            billing_type, package_session_number, package_total_sessions,
                             payment_required, payment_status, payment_amount_mxn, payment_due_at, payment_expires_at)
-                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, "web", ?, ?, ?, ?, NOW(), ?)',
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, "web", ?, ?, ?, ?, ?, ?, ?, NOW(), ?)',
                         [
                             $code,
                             $user['id'],
@@ -87,6 +97,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $endSql,
                             $notes ?: null,
                             $user['id'],
+                            ServiceCatalogService::normalizeType($svc['item_type'] ?? 'service') === ServiceCatalogService::TYPE_PACKAGE ? 'package_sale' : 'standard',
+                            ServiceCatalogService::normalizeType($svc['item_type'] ?? 'service') === ServiceCatalogService::TYPE_PACKAGE ? 1 : null,
+                            ServiceCatalogService::normalizeType($svc['item_type'] ?? 'service') === ServiceCatalogService::TYPE_PACKAGE ? max(1, (int) ($svc['sessions_count'] ?? 1)) : null,
                             $payment['required'] ? 1 : 0,
                             $payment['required'] ? 'pending' : 'not_required',
                             $payment['amount'],
@@ -103,14 +116,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         if ($checkout['ok'] && !empty($checkout['redirect_url'])) {
                             redirect($checkout['redirect_url']);
                         }
-                        flash('warning', 'No pudimos abrir Mercado Pago en este momento. Tu cita quedó pendiente mientras se habilita el pago.');
-                        redirect('pago-cita.php?appointment_id=' . $apptId);
+                        PaymentService::markReturnFailure($apptId);
+                        error_log('[agendar mercadopago] appointment ' . $apptId . ': ' . ($checkout['error'] ?? 'No fue posible crear preferencia.'));
+                        flash('danger', 'No pudimos iniciar Mercado Pago. No se genero la cita sin pago; intenta de nuevo en unos segundos.');
+                        redirect('agendar.php?branch=' . $branchId . '&service=' . $serviceId);
                     }
 
                     flash('success', "¡Cita confirmada! Tu código es <strong>{$code}</strong>");
                     redirect('mis-citas.php');
                 } catch (Throwable $e) {
-                    $pdo->rollBack();
+                    if ($pdo->inTransaction()) {
+                        $pdo->rollBack();
+                    } elseif (!empty($payment['required']) && $apptId > 0) {
+                        try {
+                            PaymentService::markReturnFailure($apptId);
+                        } catch (Throwable $paymentCleanupError) {
+                            error_log('[agendar mercadopago cleanup] ' . $paymentCleanupError->getMessage());
+                        }
+                    }
                     if ($e->getMessage() === 'SLOT_TAKEN') {
                         $errors['_'] = 'Ese horario acaba de ser tomado. Puedes elegir otro o agregarte a la lista de espera.';
                     } else {
@@ -140,9 +163,17 @@ if ($selectedBranch) {
          ORDER BY s.item_type, s.display_order, s.name',
         [$selectedBranch]
     );
+    $services = array_values(array_filter($services, static fn(array $service): bool => PaymentService::serviceAvailableForOnlineBooking($service)));
 }
 $serviceIds = array_column($services, 'id');
 $packageItemsByService = ServiceCatalogService::packageItemsForServices($serviceIds);
+
+if ($selectedBranch && $selectedService && !in_array($selectedService, array_map('intval', $serviceIds), true)) {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        flash('warning', 'Ese servicio no esta disponible para agendar en linea porque requiere activar pago en su configuracion.');
+    }
+    $selectedService = 0;
+}
 
 $step = 1;
 if ($selectedBranch)              $step = 2;
@@ -155,7 +186,7 @@ require __DIR__ . '/includes/layouts/header_client.php';
 <section class="container py-4 py-md-5">
 
   <h1 class="h3 fw-bold mb-1">Agendar nueva cita</h1>
-  <p class="text-muted mb-4">Sigue los 3 pasos. Tu cita queda confirmada al instante.</p>
+  <p class="text-muted mb-4">Sigue los 3 pasos. Si el servicio tiene costo, tu cita se confirma al completar el pago en Mercado Pago.</p>
 
   <!-- Stepper -->
   <div class="bnc-stepper">
@@ -193,6 +224,15 @@ require __DIR__ . '/includes/layouts/header_client.php';
   <?php elseif ($step === 2): ?>
     <!-- ════════ PASO 2: ELIGE SERVICIO ════════ -->
     <div class="mb-3"><a href="<?= url('agendar.php') ?>" class="small text-decoration-none text-muted">← Cambiar sucursal</a></div>
+    <?php if (!$services): ?>
+      <div class="bnc-card">
+        <div class="bnc-card-body text-center py-5">
+          <div class="bnc-stat-icon mx-auto mb-3"><i class="bi bi-credit-card"></i></div>
+          <h2 class="h6 fw-bold">No hay servicios disponibles para agendar en linea</h2>
+          <p class="text-muted small mb-0">Los servicios con costo aparecen aqui solo cuando tienen pago en linea activo desde la configuracion de administrador.</p>
+        </div>
+      </div>
+    <?php else: ?>
     <div class="row g-3">
       <?php foreach ($services as $s): ?>
         <?php $isPackage = ServiceCatalogService::normalizeType($s['item_type'] ?? 'service') === ServiceCatalogService::TYPE_PACKAGE; ?>
@@ -225,6 +265,7 @@ require __DIR__ . '/includes/layouts/header_client.php';
         </div>
       <?php endforeach; ?>
     </div>
+    <?php endif; ?>
 
   <?php else: ?>
     <!-- ════════ PASO 3: FECHA + HORA ════════ -->

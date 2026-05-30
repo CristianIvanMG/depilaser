@@ -37,6 +37,8 @@ $serviceId = (int) ($_GET['service'] ?? 0);
 $dateRaw   = (string) ($_GET['date'] ?? '');
 $ignoreId  = Auth::isAdmin() ? (int) ($_GET['ignore'] ?? 0) : 0;
 $professionalId = Auth::isAdmin() ? (int) ($_GET['professional'] ?? 0) : 0;
+$includeUnavailable = Auth::isAdmin() && !empty($_GET['include_unavailable']);
+$allowImmediate = Auth::isAdmin() && !empty($_GET['allow_immediate']);
 
 if (!$branchId || !$serviceId || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateRaw)) {
     http_response_code(400);
@@ -185,6 +187,22 @@ $busyProRanges = array_map(
     $busyPros
 );
 
+$branchProfessionals = [];
+if (Auth::isAdmin()) {
+    $branchProfessionals = Database::all(
+        "SELECT u.id, u.name
+         FROM users u
+         JOIN roles r ON r.id = u.role_id
+         JOIN user_branches ub ON ub.user_id = u.id
+         WHERE r.slug = 'professional'
+           AND u.active = 1
+           AND ub.branch_id = ?
+         ORDER BY u.name",
+        [$branchId]
+    );
+}
+$branchProfessionalIds = array_map('intval', array_column($branchProfessionals, 'id'));
+
 // 4) Generar slots
 $slots = [];
 $now = time();
@@ -198,7 +216,12 @@ foreach ($windows as $w) {
         $slotEnd = $t + $duration * 60;
 
         // Si es hoy, descartar slots que ya pasaron + buffer mínimo
-        if ($dateRaw === $today && $t < $now + $cfg['booking_min_hours'] * 3600) continue;
+        $reasons = [];
+        if ($dateRaw === $today && $t < $now) {
+            $reasons[] = 'La hora ya paso.';
+        } elseif (!$allowImmediate && $dateRaw === $today && $t < $now + $cfg['booking_min_hours'] * 3600) {
+            $reasons[] = 'Requiere ' . (int) $cfg['booking_min_hours'] . ' h de anticipacion.';
+        }
 
         // ¿Choca con alguna cita?
         $busyCount = 0;
@@ -216,14 +239,32 @@ foreach ($windows as $w) {
             }
         }
         $busyProfessionalIds = array_values(array_unique($busyProfessionalIds));
-        if ($professionalId > 0 && in_array($professionalId, $busyProfessionalIds, true)) continue;
-        if ($availableCabins <= 0 || $availableMachines <= 0) continue;
+        if ($professionalId > 0 && in_array($professionalId, $busyProfessionalIds, true)) {
+            $reasons[] = 'El profesional seleccionado ya tiene una cita.';
+        } elseif (Auth::isAdmin() && $professionalId <= 0 && $branchProfessionalIds) {
+            if (!array_values(array_diff($branchProfessionalIds, $busyProfessionalIds))) {
+                $reasons[] = 'No hay profesional libre en este horario.';
+            }
+        } elseif (Auth::isAdmin() && !$branchProfessionalIds) {
+            $reasons[] = 'No hay profesionales activos asignados a la sucursal.';
+        }
+        if ($availableCabins <= 0) {
+            $reasons[] = 'No hay cabinas disponibles.';
+        }
+        if ($availableMachines <= 0) {
+            $reasons[] = 'La maquinaria requerida esta ocupada.';
+        }
+        $isAvailable = !$reasons;
+        if (!$isAvailable && !$includeUnavailable) continue;
 
         $slots[] = [
             'start'      => $slotStartSql,
             'end'        => $slotEndSql,
             'label'      => date('H:i', $t),
             'label_long' => fmt_dt($slotStartSql),
+            'available'  => $isAvailable,
+            'reason'     => $isAvailable ? null : implode(' ', $reasons),
+            'reasons'    => $reasons,
             'available_cabins' => $availableCabins,
             'available_machines' => $availableMachines === PHP_INT_MAX ? null : $availableMachines,
             'busy_professional_ids' => $busyProfessionalIds,
@@ -234,7 +275,11 @@ foreach ($windows as $w) {
 echo json_encode([
     'ok' => true,
     'slots' => $slots,
-    'count' => count($slots),
+    'count' => count(array_filter($slots, fn($slot) => !empty($slot['available']))),
+    'total_slots' => count($slots),
+    'include_unavailable' => $includeUnavailable,
+    'allow_immediate' => $allowImmediate,
+    'booking_min_hours' => (int) $cfg['booking_min_hours'],
     'cabin_capacity' => AppointmentService::branchCabinCapacity($branchId),
     'machine_capacity' => AppointmentService::serviceResourceKey($serviceId)
         ? AppointmentService::resourceCapacity($branchId, AppointmentService::serviceResourceKey($serviceId))

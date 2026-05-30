@@ -104,6 +104,12 @@ if ($sendEmail && $to === 'atendida') {
     );
     $response['payment_registered'] = !empty($payment['paid']) || !empty($payment['already_paid']);
     $response['receipt_sent'] = !empty($payment['receipt_sent']);
+    if (!empty($payment['skipped_package_session'])) {
+        $response['package_session_no_charge'] = true;
+        $response['payment_registered'] = false;
+        $response['receipt_sent'] = false;
+        $response['receipt_warning'] = $payment['message'] ?? 'Sesion incluida en paquete ya pagado; no se genero recibo.';
+    }
     if (!empty($payment['receipt_warning'])) {
         $response['receipt_warning'] = $payment['receipt_warning'];
     } elseif (empty($payment['ok'])) {

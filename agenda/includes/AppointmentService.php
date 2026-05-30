@@ -532,6 +532,38 @@ final class AppointmentService
         }
     }
 
+    public static function ensurePackageBillingSchema(): void
+    {
+        $cols = [
+            'billing_type' => "ENUM('standard','package_sale','package_session') NOT NULL DEFAULT 'standard'",
+            'package_parent_appointment_id' => 'INT UNSIGNED NULL',
+            'package_session_number' => 'SMALLINT UNSIGNED NULL',
+            'package_total_sessions' => 'SMALLINT UNSIGNED NULL',
+        ];
+        foreach ($cols as $name => $def) {
+            if (!self::columnExists('appointments', $name)) {
+                Database::exec("ALTER TABLE appointments ADD COLUMN {$name} {$def}");
+            }
+        }
+        try {
+            $idx = Database::one(
+                "SELECT 1 FROM INFORMATION_SCHEMA.STATISTICS
+                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'appointments'
+                   AND INDEX_NAME = 'idx_appt_package_parent' LIMIT 1"
+            );
+            if (!$idx) {
+                Database::exec('ALTER TABLE appointments ADD INDEX idx_appt_package_parent (package_parent_appointment_id)');
+            }
+        } catch (Throwable $e) {
+            /* no-op: no bloquea la operacion principal */
+        }
+    }
+
+    public static function isPackageIncludedSession(array $appointment): bool
+    {
+        return (string) ($appointment['billing_type'] ?? 'standard') === 'package_session';
+    }
+
     /**
      * Devuelve los slugs de transiciones permitidas desde un estado dado.
      * Reglas clinicas:
@@ -590,6 +622,7 @@ final class AppointmentService
     public static function transitionStatus(int $appointmentId, string $toSlug, int $actorUserId, ?string $reason = null): array
     {
         self::ensureReceiptSchema();
+        self::ensurePackageBillingSchema();
 
         $appt = Database::one(
             "SELECT a.*, st.slug AS status_slug, st.name AS status_name
@@ -641,8 +674,8 @@ final class AppointmentService
         }
         if ($toSlug === 'atendida') {
             $sets[] = 'attended_at = NOW()';
-            // Asigna folio si no existe
-            if (empty($appt['receipt_folio'])) {
+            // Las sesiones ya pagadas de paquete no generan nuevo folio ni recibo.
+            if (!self::isPackageIncludedSession($appt) && empty($appt['receipt_folio'])) {
                 $folio = self::nextReceiptFolio();
                 $sets[] = 'receipt_folio = ?';
                 $params[] = $folio;

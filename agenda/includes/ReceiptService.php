@@ -25,6 +25,8 @@ final class ReceiptService
         $row = Database::one(
             "SELECT a.id, a.code, a.start_at, a.end_at, a.notes_admin, a.notes_client,
                     a.status_id, a.receipt_folio, a.receipt_sent, a.receipt_sent_at,
+                    COALESCE(a.billing_type, 'standard') AS billing_type,
+                    a.package_parent_appointment_id, a.package_session_number, a.package_total_sessions,
                     a.attended_at, a.confirmed_at, a.cancelled_at, a.cancel_reason,
                     a.empathy_email_sent, a.empathy_email_sent_at,
                     u.name AS client_name, u.email AS client_email, u.phone AS client_phone,
@@ -347,6 +349,9 @@ final class ReceiptService
         if (!$d) return ['ok' => false, 'error' => 'Cita no encontrada.'];
         if ($d['status_slug'] !== 'atendida') {
             return ['ok' => false, 'error' => 'El recibo solo se envía cuando la cita está atendida.'];
+        }
+        if (class_exists('AppointmentService') && AppointmentService::isPackageIncludedSession($d)) {
+            return ['ok' => false, 'error' => 'Esta cita es una sesion incluida en un paquete ya pagado. No genera recibo nuevo.'];
         }
         if (empty($d['client_email'])) {
             return ['ok' => false, 'error' => 'El cliente no tiene correo electrónico registrado.'];

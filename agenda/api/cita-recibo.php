@@ -15,6 +15,7 @@ if (!Auth::isAdmin()) {
 }
 
 AppointmentService::ensureReceiptSchema();
+AppointmentService::ensurePackageBillingSchema();
 
 $id = (int) ($_GET['id'] ?? 0);
 if (!$id) {
@@ -37,6 +38,12 @@ if ($d['status_slug'] !== 'atendida') {
 }
 
 // Si no hay folio aún (cita atendida desde antes de la fase 4), créalo on-the-fly
+if (AppointmentService::isPackageIncludedSession($d)) {
+    http_response_code(409);
+    echo 'Esta cita es una sesion incluida en un paquete ya pagado. No genera recibo nuevo.';
+    exit;
+}
+
 if (empty($d['receipt_folio'])) {
     $folio = AppointmentService::nextReceiptFolio();
     Database::exec('UPDATE appointments SET receipt_folio = ? WHERE id = ?', [$folio, $id]);

@@ -19,6 +19,9 @@ final class PaymentService
         self::ensureAppointmentColumn('payment_amount_mxn', 'DECIMAL(10,2) NOT NULL DEFAULT 0.00');
         self::ensureAppointmentColumn('payment_due_at', 'DATETIME NULL');
         self::ensureAppointmentColumn('payment_expires_at', 'DATETIME NULL');
+        if (class_exists('AppointmentService')) {
+            AppointmentService::ensurePackageBillingSchema();
+        }
 
         Database::exec(
             "CREATE TABLE IF NOT EXISTS appointment_payments (
@@ -68,8 +71,8 @@ final class PaymentService
 
     public static function servicePaymentConfig(array $service): array
     {
-        $required = !empty($service['payment_required']) && ($service['payment_mode'] ?? 'none') !== 'none';
         $price = (float) ($service['price_mxn'] ?? 0);
+        $required = !empty($service['payment_required']) && ($service['payment_mode'] ?? 'none') !== 'none';
         $mode = (string) ($service['payment_mode'] ?? 'none');
         $deposit = (float) ($service['deposit_amount_mxn'] ?? 0);
         $amount = 0.0;
@@ -86,6 +89,34 @@ final class PaymentService
             'amount' => round($amount, 2),
             'label' => $mode === 'full' ? 'Pago total' : 'Anticipo',
         ];
+    }
+
+    public static function serviceAvailableForOnlineBooking(array $service): bool
+    {
+        $price = (float) ($service['price_mxn'] ?? 0);
+        if ($price <= 0) {
+            return true;
+        }
+        $payment = self::servicePaymentConfig($service);
+        return !empty($payment['required']) && (float) ($payment['amount'] ?? 0) > 0;
+    }
+
+    public static function servicePaymentUnavailableReason(array $service): string
+    {
+        $price = (float) ($service['price_mxn'] ?? 0);
+        if ($price <= 0) {
+            return '';
+        }
+        if (empty($service['payment_required']) || ($service['payment_mode'] ?? 'none') === 'none') {
+            return 'Este servicio tiene costo y no tiene pago en linea activo.';
+        }
+        $mode = (string) ($service['payment_mode'] ?? 'none');
+        $deposit = (float) ($service['deposit_amount_mxn'] ?? 0);
+        $amount = $mode === 'full' ? $price : $deposit;
+        if ($amount <= 0) {
+            return 'Este servicio tiene pago en linea incompleto.';
+        }
+        return '';
     }
 
     public static function createMercadoPagoCheckout(int $appointmentId): array
@@ -429,6 +460,24 @@ final class PaymentService
             return ['ok' => false, 'error' => 'El pago solo puede registrarse cuando la cita está Atendida.'];
         }
 
+        if (class_exists('AppointmentService') && AppointmentService::isPackageIncludedSession($d)) {
+            Database::exec(
+                "UPDATE appointments
+                 SET payment_required = 0,
+                     payment_status = 'not_required',
+                     payment_amount_mxn = 0.00
+                 WHERE id = ?",
+                [$appointmentId]
+            );
+            return [
+                'ok' => true,
+                'paid' => false,
+                'skipped_package_session' => true,
+                'receipt_sent' => false,
+                'message' => 'Sesion incluida en paquete ya pagado; no se registro nuevo pago ni recibo.',
+            ];
+        }
+
         $existing = self::paymentForAppointment($appointmentId);
         if ($existing && ($existing['status'] ?? '') === 'approved') {
             return ['ok' => true, 'already_paid' => true, 'payment' => $existing];
@@ -527,6 +576,12 @@ final class PaymentService
             return $d ? self::mercadoPagoConfig($d)['access_token'] !== '' : false;
         }
         return self::mercadoPagoAnyConfigured();
+    }
+
+    public static function mercadoPagoConfiguredForBranch(int $branchId): bool
+    {
+        $branch = Database::one('SELECT id AS branch_id, slug AS branch_slug, name AS branch_name FROM branches WHERE id = ? LIMIT 1', [$branchId]);
+        return $branch ? self::mercadoPagoConfig($branch)['access_token'] !== '' : self::mercadoPagoAnyConfigured();
     }
 
     private static function cancelUnpaidAppointment(int $appointmentId, string $reason, string $paymentStatus = 'failed'): void
@@ -784,6 +839,27 @@ final class PaymentService
             if (isset($secrets['mercadopago']) && is_array($secrets['mercadopago'])) {
                 return $secrets['mercadopago'];
             }
+            $flatToken = $secrets['MP_ACCESS_TOKEN']
+                ?? $secrets['mp_access_token']
+                ?? $secrets['mercadopago_access_token']
+                ?? null;
+            if (is_string($flatToken) && trim($flatToken) !== '') {
+                return [
+                    'access_token' => trim($flatToken),
+                    'webhook_secret' => (string) (
+                        $secrets['MP_WEBHOOK_SECRET']
+                        ?? $secrets['mp_webhook_secret']
+                        ?? $secrets['mercadopago_webhook_secret']
+                        ?? ''
+                    ),
+                    'sandbox' => (bool) (
+                        $secrets['MP_SANDBOX']
+                        ?? $secrets['mp_sandbox']
+                        ?? $secrets['mercadopago_sandbox']
+                        ?? false
+                    ),
+                ];
+            }
         }
         return [];
     }
@@ -793,6 +869,9 @@ final class PaymentService
         $cfg ??= self::mercadoPagoConfig(null);
         if (empty($cfg['access_token'])) {
             return ['ok' => false, 'error' => 'Mercado Pago no configurado.'];
+        }
+        if (!function_exists('curl_init')) {
+            return ['ok' => false, 'error' => 'La extension cURL de PHP no esta disponible para conectar con Mercado Pago.'];
         }
         $ch = curl_init('https://api.mercadopago.com' . $path);
         $headers = [

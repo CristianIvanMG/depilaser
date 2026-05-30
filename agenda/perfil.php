@@ -148,22 +148,54 @@ require __DIR__ . '/includes/layouts/header_client.php';
 
 <style>
   .bnc-profile-qr {
-    background: linear-gradient(145deg, #fff 0%, #fff5fa 100%);
-    border: 1px solid #f2d6e5;
-    border-radius: 18px;
-    padding: 1rem;
+    background: linear-gradient(145deg, #16051d 0%, #4c123d 56%, #de3c94 100%);
+    border: 0;
+    border-radius: 22px;
+    box-shadow: 0 22px 55px rgba(58, 12, 43, .14);
+    color: #fff;
+    overflow: hidden;
+    padding: 1.1rem;
+    position: relative;
     text-align: center;
+  }
+  .bnc-profile-qr::after {
+    background: radial-gradient(circle, rgba(255,255,255,.22), transparent 62%);
+    content: "";
+    height: 150px;
+    position: absolute;
+    right: -60px;
+    top: -55px;
+    width: 150px;
   }
   .bnc-profile-qr-box {
     align-items: center;
     background: #fff;
-    border: 1px solid #f2d6e5;
-    border-radius: 16px;
+    border: 8px solid rgba(255,255,255,.28);
+    border-radius: 20px;
     display: flex;
     justify-content: center;
     margin: .75rem auto;
     min-height: 190px;
     width: 210px;
+  }
+  .bnc-profile-qr > * {
+    position: relative;
+    z-index: 1;
+  }
+  .bnc-profile-qr-copy {
+    color: rgba(255,255,255,.78);
+    font-size: .85rem;
+  }
+  @media (max-width: 575.98px) {
+    .bnc-profile-qr {
+      margin-left: -.15rem;
+      margin-right: -.15rem;
+      padding: 1rem;
+    }
+    .bnc-profile-qr-box {
+      min-height: 220px;
+      width: min(100%, 236px);
+    }
   }
 </style>
 
@@ -217,14 +249,16 @@ require __DIR__ . '/includes/layouts/header_client.php';
           </div>
 
           <div class="bnc-profile-qr mt-3">
-            <div class="small text-uppercase fw-bold text-muted">QR de asistencia</div>
+            <div class="small text-uppercase fw-bold opacity-75">Mi QR personal</div>
             <div id="profileRewardQr" class="bnc-profile-qr-box" data-token="<?= e($rewardQrToken) ?>">
               <span class="text-muted small">Generando QR...</span>
             </div>
-            <div class="small fw-bold mb-1"><?= (int) $rewardProgress['current'] ?>/<?= (int) $rewardProgress['required'] ?> visitas</div>
-            <a href="<?= url('recompensas.php') ?>" class="btn btn-bnc-outline btn-sm w-100">
-              <i class="bi bi-gift"></i> Ver recompensas
+            <div class="fw-bold mb-1">Identificacion BellaNick</div>
+            <div class="bnc-profile-qr-copy mb-3">Si recepcion o tu profesional te lo pide, muestra este codigo para registrar tu asistencia.</div>
+            <a href="<?= url('recompensas.php') ?>" class="btn btn-light btn-sm w-100 fw-bold">
+              <i class="bi bi-qr-code-scan"></i> Escanear QR de recepcion
             </a>
+            <div class="bnc-profile-qr-copy mt-2"><?= (int) $rewardProgress['current'] ?>/<?= (int) $rewardProgress['required'] ?> visitas para recompensa</div>
           </div>
         </div>
       </div>
@@ -301,8 +335,8 @@ require __DIR__ . '/includes/layouts/header_client.php';
     box.innerHTML = '';
     new QRCode(box, {
       text: box.dataset.token || '',
-      width: 170,
-      height: 170,
+      width: Math.min(190, Math.max(170, box.clientWidth - 28)),
+      height: Math.min(190, Math.max(170, box.clientWidth - 28)),
       colorDark: '#15051a',
       colorLight: '#ffffff',
       correctLevel: QRCode.CorrectLevel.M
