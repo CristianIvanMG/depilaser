@@ -34,30 +34,32 @@ $adminHome = Auth::isAdmin() ? url('admin/') : url('admin/calendario.php');
     <nav class="bnc-sidebar-nav">
       <?php if (Auth::isAdmin()): ?>
         <a href="<?= url('admin/') ?>" class="bnc-nav-item <?= basename($_SERVER['SCRIPT_NAME']) === 'index.php' && str_contains($_SERVER['REQUEST_URI'], '/admin') ? 'active' : '' ?>">
-          <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+          <i class="bi bi-house-door"></i><span>Inicio</span>
         </a>
       <?php endif; ?>
       <a href="<?= url('admin/calendario.php') ?>" class="bnc-nav-item <?= is_active('calendario') ?>">
         <i class="bi bi-calendar3"></i><span>Calendario</span>
       </a>
-      <a href="<?= url('admin/escanear-qr.php') ?>" class="bnc-nav-item <?= is_active('escanear-qr') ?>">
-        <i class="bi bi-qr-code-scan"></i><span>Escanear QR</span>
-      </a>
       <?php if (Auth::isAdmin()): ?>
       <a href="<?= url('admin/citas.php') ?>" class="bnc-nav-item <?= is_active('citas') ?>">
         <i class="bi bi-list-check"></i><span>Citas</span>
       </a>
+      <a href="<?= url('admin/progreso-tratamientos.php') ?>" class="bnc-nav-item <?= is_active('progreso-tratamientos') ?>">
+        <i class="bi bi-heart-pulse"></i><span>Seguimiento</span>
+      </a>
+      <a href="<?= url('admin/lista-espera.php') ?>" class="bnc-nav-item <?= is_active('lista-espera') ?>">
+        <i class="bi bi-hourglass-split"></i><span>Lista de espera</span>
+      </a>
+      <?php endif; ?>
+      <a href="<?= url('admin/escanear-qr.php') ?>" class="bnc-nav-item <?= is_active('escanear-qr') ?>">
+        <i class="bi bi-qr-code-scan"></i><span>Escanear QR</span>
+      </a>
+      <?php if (Auth::isAdmin()): ?>
       <a href="<?= url('admin/recompensas.php') ?>" class="bnc-nav-item <?= is_active('recompensas') ?>">
         <i class="bi bi-gift"></i><span>Recompensas</span>
       </a>
       <a href="<?= url('admin/reportes.php') ?>" class="bnc-nav-item <?= is_active('reportes') ?>">
         <i class="bi bi-graph-up-arrow"></i><span>Reportes</span>
-      </a>
-      <a href="<?= url('admin/lista-espera.php') ?>" class="bnc-nav-item <?= is_active('lista-espera') ?>">
-        <i class="bi bi-hourglass-split"></i><span>Lista de espera</span>
-      </a>
-      <a href="<?= url('admin/progreso-tratamientos.php') ?>" class="bnc-nav-item <?= is_active('progreso-tratamientos') ?>">
-        <i class="bi bi-heart-pulse"></i><span>Seguimiento</span>
       </a>
       <div class="bnc-nav-section">CONFIGURACIÓN</div>
        <a href="<?= url('admin/usuarios.php') ?>" class="bnc-nav-item <?= is_active('usuarios') ?>">
