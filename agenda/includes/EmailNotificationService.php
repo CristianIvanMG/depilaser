@@ -215,11 +215,11 @@ final class EmailNotificationService
         if (empty($d['client_email'])) {
             return ['ok' => false, 'error' => 'El cliente no tiene correo registrado.'];
         }
+        if (!filter_var((string) $d['client_email'], FILTER_VALIDATE_EMAIL)) {
+            return ['ok' => false, 'error' => 'El correo del cliente no tiene un formato valido.'];
+        }
         if ((int) ($d['client_active'] ?? 0) !== 1) {
             return ['ok' => false, 'error' => 'La cuenta del cliente no esta activa.'];
-        }
-        if ((int) ($d['email_verified'] ?? 0) !== 1) {
-            return ['ok' => false, 'error' => 'El correo del cliente no esta confirmado.'];
         }
         if (empty($d['start_at']) || strtotime((string) $d['start_at']) === false) {
             return ['ok' => false, 'error' => 'La cita no tiene fecha valida.'];
@@ -354,7 +354,7 @@ final class EmailNotificationService
     {
         $service = (string) ($d['service_name'] ?? 'tu cita');
         return match ($type) {
-            'appointment_created' => 'Tu cita fue registrada - BellaNick Clinic',
+            'appointment_created' => 'Confirmacion de cita - BellaNick Clinic',
             'appointment_confirmed' => 'Tu cita fue confirmada - BellaNick Clinic',
             'appointment_cancelled' => 'Tu cita fue cancelada - BellaNick Clinic',
             'appointment_no_show' => 'Te esperamos en BellaNick Clinic',
@@ -436,7 +436,7 @@ final class EmailNotificationService
     private static function title(string $type): string
     {
         return match ($type) {
-            'appointment_created' => 'Tu cita quedo registrada',
+            'appointment_created' => 'Confirmacion de tu cita',
             'appointment_confirmed' => 'Tu cita esta confirmada',
             'appointment_cancelled' => 'Tu cita fue cancelada',
             'appointment_no_show' => 'Te esperamos para reagendar',
@@ -450,7 +450,7 @@ final class EmailNotificationService
     {
         $service = (string) ($d['service_name'] ?? 'tu servicio');
         return match ($type) {
-            'appointment_created' => 'Tu cita para ' . $service . ' quedo registrada correctamente. Te compartimos los detalles para que los tengas a la mano.',
+            'appointment_created' => 'Tu cita para ' . $service . ' fue registrada correctamente. Te compartimos los detalles para que los tengas a la mano.',
             'appointment_confirmed' => 'Tu cita para ' . $service . ' ya quedo confirmada. Te esperamos con todo listo para atenderte.',
             'appointment_cancelled' => 'Registramos la cancelacion de tu cita. Si deseas retomarla, con gusto te ayudamos a encontrar un nuevo horario.',
             'appointment_no_show' => 'Notamos que no pudiste asistir a tu cita. Sabemos que pueden surgir imprevistos y podemos ayudarte a reagendar.',
@@ -496,6 +496,8 @@ final class EmailNotificationService
             'Content-Type: text/html; charset=UTF-8',
             'From: =?UTF-8?B?' . base64_encode($fromName) . '?= <' . $supportEmail . '>',
             'Reply-To: ' . $supportEmail,
+            'Auto-Submitted: auto-generated',
+            'X-Auto-Response-Suppress: All',
             'X-Mailer: BellaNickAgenda',
         ];
         $encodedSubject = '=?UTF-8?B?' . base64_encode($subject) . '?=';

@@ -22,11 +22,15 @@ final class ReceiptService
         if (class_exists('ServiceCatalogService')) {
             ServiceCatalogService::ensureSchema();
         }
+        $billingSelect = self::appointmentBillingColumnExists()
+            ? "COALESCE(a.billing_type, 'standard') AS billing_type,
+                    a.package_parent_appointment_id, a.package_session_number, a.package_total_sessions,"
+            : "'standard' AS billing_type,
+                    NULL AS package_parent_appointment_id, NULL AS package_session_number, NULL AS package_total_sessions,";
         $row = Database::one(
             "SELECT a.id, a.code, a.start_at, a.end_at, a.notes_admin, a.notes_client,
                     a.status_id, a.receipt_folio, a.receipt_sent, a.receipt_sent_at,
-                    COALESCE(a.billing_type, 'standard') AS billing_type,
-                    a.package_parent_appointment_id, a.package_session_number, a.package_total_sessions,
+                    {$billingSelect}
                     a.attended_at, a.confirmed_at, a.cancelled_at, a.cancel_reason,
                     a.empathy_email_sent, a.empathy_email_sent_at,
                     u.name AS client_name, u.email AS client_email, u.phone AS client_phone,
@@ -46,6 +50,26 @@ final class ReceiptService
             [$appointmentId]
         );
         return $row ?: null;
+    }
+
+    private static function appointmentBillingColumnExists(): bool
+    {
+        static $exists = null;
+        if ($exists !== null) {
+            return $exists;
+        }
+        try {
+            $exists = (bool) Database::one(
+                "SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE()
+                   AND TABLE_NAME = 'appointments'
+                   AND COLUMN_NAME = 'billing_type'
+                 LIMIT 1"
+            );
+        } catch (Throwable $e) {
+            $exists = false;
+        }
+        return $exists;
     }
 
     /** URL preferida para reseñas Google de la sucursal. */

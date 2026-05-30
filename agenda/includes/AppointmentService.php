@@ -515,8 +515,13 @@ final class AppointmentService
             'empathy_email_sent_at' => 'DATETIME NULL',
         ];
         foreach ($cols as $name => $def) {
-            if (!self::columnExists('appointments', $name)) {
-                Database::exec("ALTER TABLE appointments ADD COLUMN {$name} {$def}");
+            try {
+                if (!self::columnExists('appointments', $name)) {
+                    Database::exec("ALTER TABLE appointments ADD COLUMN {$name} {$def}");
+                }
+            } catch (Throwable $e) {
+                error_log('[appointments-package-billing] no pude agregar columna ' . $name . ': ' . $e->getMessage());
+                return;
             }
         }
         // UNIQUE en folio si la columna existe pero no tiene indice

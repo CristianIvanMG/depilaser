@@ -374,10 +374,33 @@ final class ReportService
 
     private static function appointmentRevenueSql(string $appointmentAlias, string $serviceAlias): string
     {
+        if (!self::appointmentBillingColumnExists()) {
+            return self::serviceRevenueSql($serviceAlias);
+        }
         return "CASE
             WHEN COALESCE({$appointmentAlias}.billing_type, 'standard') = 'package_session' THEN 0
             ELSE " . self::serviceRevenueSql($serviceAlias) . "
         END";
+    }
+
+    private static function appointmentBillingColumnExists(): bool
+    {
+        static $exists = null;
+        if ($exists !== null) {
+            return $exists;
+        }
+        try {
+            $exists = (bool) Database::one(
+                "SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE()
+                   AND TABLE_NAME = 'appointments'
+                   AND COLUMN_NAME = 'billing_type'
+                 LIMIT 1"
+            );
+        } catch (Throwable $e) {
+            $exists = false;
+        }
+        return $exists;
     }
 
     private static function validDate(string $date): ?string

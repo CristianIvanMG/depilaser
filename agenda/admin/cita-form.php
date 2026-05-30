@@ -19,12 +19,29 @@ function admin_appointment_form_nonce(): string
 // Asegura schema de Profesionales (auto-migracion suave)
 AppointmentService::ensureProfessionalSchema();
 AppointmentService::ensureAppointmentDurationSchema();
-AppointmentService::ensurePackageBillingSchema();
 AppointmentService::ensureMachinerySchema();
 EmailNotificationService::ensureSchema();
 PaymentService::ensureSchema();
 ServiceCatalogService::ensureSchema();
-RewardsService::ensureSchema();
+
+function admin_appointment_columns_exist(array $columns): bool
+{
+    try {
+        $placeholders = implode(',', array_fill(0, count($columns), '?'));
+        $params = array_merge(['appointments'], $columns);
+        $row = Database::one(
+            "SELECT COUNT(*) AS n
+             FROM INFORMATION_SCHEMA.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE()
+               AND TABLE_NAME = ?
+               AND COLUMN_NAME IN ({$placeholders})",
+            $params
+        );
+        return (int) ($row['n'] ?? 0) === count($columns);
+    } catch (Throwable $e) {
+        return false;
+    }
+}
 
 $statuses = Database::all('SELECT id, slug, name FROM appointment_statuses ORDER BY id');
 $statusBySlug = [];
@@ -75,6 +92,12 @@ $clients = Database::all(
 );
 $sourceOptions = AppointmentService::sourceOptions();
 $defaultRewardSource = isset($sourceOptions['presencial']) ? 'presencial' : 'phone';
+$hasPackageBillingColumns = admin_appointment_columns_exist([
+    'billing_type',
+    'package_parent_appointment_id',
+    'package_session_number',
+    'package_total_sessions',
+]);
 
 $appointment = null;
 if ($isEdit) {
@@ -125,10 +148,10 @@ $form = [
     'source' => $_POST['source'] ?? ($appointment['source'] ?? ($rewardAppointment ? $defaultRewardSource : 'phone')),
     'start_at' => $_POST['start_at'] ?? ($appointment ? date('Y-m-d\TH:i', strtotime($appointment['start_at'])) : ''),
     'notes_admin' => $_POST['notes_admin'] ?? ($appointment['notes_admin'] ?? ($rewardAppointment ? ('Cita generada desde recompensa #' . (int) $rewardAppointment['id'] . ': ' . (string) $rewardAppointment['description']) : '')),
-    'billing_type' => $_POST['billing_type'] ?? ($appointment['billing_type'] ?? 'standard'),
-    'package_session_number' => $_POST['package_session_number'] ?? ($appointment['package_session_number'] ?? ''),
-    'package_total_sessions' => $_POST['package_total_sessions'] ?? ($appointment['package_total_sessions'] ?? ''),
-    'package_parent_appointment_id' => $_POST['package_parent_appointment_id'] ?? ($appointment['package_parent_appointment_id'] ?? ''),
+    'billing_type' => $hasPackageBillingColumns ? ($_POST['billing_type'] ?? ($appointment['billing_type'] ?? 'standard')) : 'standard',
+    'package_session_number' => $hasPackageBillingColumns ? ($_POST['package_session_number'] ?? ($appointment['package_session_number'] ?? '')) : '',
+    'package_total_sessions' => $hasPackageBillingColumns ? ($_POST['package_total_sessions'] ?? ($appointment['package_total_sessions'] ?? '')) : '',
+    'package_parent_appointment_id' => $hasPackageBillingColumns ? ($_POST['package_parent_appointment_id'] ?? ($appointment['package_parent_appointment_id'] ?? '')) : '',
     'cancel_reason' => $_POST['cancel_reason'] ?? '',
 ];
 
@@ -368,7 +391,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $packageSessionNumber = null;
         $packageTotalSessions = null;
         $packageParentAppointmentId = null;
-        if ($isPackageAppointment) {
+        if ($hasPackageBillingColumns && $isPackageAppointment) {
             $packageTotalSessions = max(1, (int) ($_POST['package_total_sessions'] ?? ($selectedServiceForBilling['sessions_count'] ?? 1)));
             $packageSessionNumber = max(1, min($packageTotalSessions, (int) ($_POST['package_session_number'] ?? 1)));
             $packageParentAppointmentId = (int) ($_POST['package_parent_appointment_id'] ?? 0) ?: null;
@@ -378,7 +401,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         if (
-            $isEdit
+            $hasPackageBillingColumns
+            && $isEdit
             && $billingType === 'package_session'
             && (
                 (string) ($appointment['payment_status'] ?? '') === 'paid'
@@ -502,23 +526,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $packageTotalSessions,
                     ];
                     $updateParams = array_merge($updateParams, $cancelParams, [$appointmentId]);
-                    Database::exec(
-                        'UPDATE appointments
-                         SET user_id = ?, professional_id = ?, branch_id = ?, service_id = ?, status_id = ?,
-                             start_at = ?, end_at = ?, source = ?, notes_admin = ?,
-                             billing_type = ?, package_parent_appointment_id = ?,
-                             package_session_number = ?, package_total_sessions = ?,
-                             payment_required = CASE WHEN ? = \'package_session\' THEN 0 ELSE payment_required END,
-                             payment_status = CASE WHEN ? = \'package_session\' THEN \'not_required\' ELSE payment_status END,
-                             payment_amount_mxn = CASE WHEN ? = \'package_session\' THEN 0.00 ELSE payment_amount_mxn END
-                             ' . $cancelSql . $reminderSql . '
-                         WHERE id = ?',
-                        array_merge(
-                            array_slice($updateParams, 0, 13),
-                            [$billingType, $billingType, $billingType],
-                            array_slice($updateParams, 13)
-                        )
-                    );
+                    if ($hasPackageBillingColumns) {
+                        Database::exec(
+                            'UPDATE appointments
+                             SET user_id = ?, professional_id = ?, branch_id = ?, service_id = ?, status_id = ?,
+                                 start_at = ?, end_at = ?, source = ?, notes_admin = ?,
+                                 billing_type = ?, package_parent_appointment_id = ?,
+                                 package_session_number = ?, package_total_sessions = ?,
+                                 payment_required = CASE WHEN ? = \'package_session\' THEN 0 ELSE payment_required END,
+                                 payment_status = CASE WHEN ? = \'package_session\' THEN \'not_required\' ELSE payment_status END,
+                                 payment_amount_mxn = CASE WHEN ? = \'package_session\' THEN 0.00 ELSE payment_amount_mxn END
+                                 ' . $cancelSql . $reminderSql . '
+                             WHERE id = ?',
+                            array_merge(
+                                array_slice($updateParams, 0, 13),
+                                [$billingType, $billingType, $billingType],
+                                array_slice($updateParams, 13)
+                            )
+                        );
+                    } else {
+                        Database::exec(
+                            'UPDATE appointments
+                             SET user_id = ?, professional_id = ?, branch_id = ?, service_id = ?, status_id = ?,
+                                 start_at = ?, end_at = ?, source = ?, notes_admin = ?
+                                 ' . $cancelSql . $reminderSql . '
+                             WHERE id = ?',
+                            array_merge(array_slice($updateParams, 0, 9), $cancelParams, [$appointmentId])
+                        );
+                    }
                     $pdo->commit();
                     Auth::audit('appointment_update', 'appointment', $appointmentId, [
                         'before' => $before,
@@ -589,33 +624,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     throw new RuntimeException('DUPLICATE_APPOINTMENT');
                 }
 
-                Database::exec(
-                    'INSERT INTO appointments
-                       (code, user_id, professional_id, branch_id, service_id, status_id, start_at, end_at, source, notes_admin, created_by_user_id,
-                        billing_type, package_parent_appointment_id, package_session_number, package_total_sessions,
-                        payment_required, payment_status, payment_amount_mxn)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                    [
-                        $code,
-                        $userId,
-                        $professionalId ?: null,
-                        $branchId,
-                        $serviceId,
-                        $statusId,
-                        $schedule['start_sql'],
-                        $schedule['end_sql'],
-                        $source,
-                        $notesAdmin ?: null,
-                        $admin['id'],
-                        $billingType,
-                        $packageParentAppointmentId,
-                        $packageSessionNumber,
-                        $packageTotalSessions,
-                        0,
-                        'not_required',
-                        0.0,
-                    ]
-                );
+                $insertParams = [
+                    $code,
+                    $userId,
+                    $professionalId ?: null,
+                    $branchId,
+                    $serviceId,
+                    $statusId,
+                    $schedule['start_sql'],
+                    $schedule['end_sql'],
+                    $source,
+                    $notesAdmin ?: null,
+                    $admin['id'],
+                ];
+                if ($hasPackageBillingColumns) {
+                    Database::exec(
+                        'INSERT INTO appointments
+                           (code, user_id, professional_id, branch_id, service_id, status_id, start_at, end_at, source, notes_admin, created_by_user_id,
+                            billing_type, package_parent_appointment_id, package_session_number, package_total_sessions,
+                            payment_required, payment_status, payment_amount_mxn)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                        array_merge($insertParams, [
+                            $billingType,
+                            $packageParentAppointmentId,
+                            $packageSessionNumber,
+                            $packageTotalSessions,
+                            0,
+                            'not_required',
+                            0.0,
+                        ])
+                    );
+                } else {
+                    Database::exec(
+                        'INSERT INTO appointments
+                           (code, user_id, professional_id, branch_id, service_id, status_id, start_at, end_at, source, notes_admin, created_by_user_id)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                        $insertParams
+                    );
+                }
                 $newId = Database::lastId();
                 if ($rewardToUse) {
                     RewardsService::updateRewardStatus((int) $rewardToUse['id'], 'usado');
@@ -627,8 +673,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $pdo->commit();
                 Auth::audit('appointment_create_admin', 'appointment', $newId, ['code' => $code]);
                 $emailType = $statusSlug === 'confirmada' ? 'appointment_confirmed' : 'appointment_created';
-                EmailNotificationService::sendForAppointment($newId, $emailType);
-                flash('success', 'Cita registrada correctamente. Código: ' . $code);
+                $mailResult = EmailNotificationService::sendForAppointment($newId, $emailType);
+                if (!empty($mailResult['sent'])) {
+                    flash('success', 'Cita registrada correctamente. Se envio el correo de confirmacion al cliente. Codigo: ' . $code);
+                } elseif (!empty($mailResult['duplicate'])) {
+                    flash('success', 'Cita registrada correctamente. El correo de confirmacion ya habia sido enviado. Codigo: ' . $code);
+                } elseif (!empty($mailResult['skipped'])) {
+                    flash('warning', 'Cita registrada correctamente. No se envio correo: ' . ($mailResult['error'] ?? 'revisa el correo del cliente.') . ' Codigo: ' . $code);
+                } else {
+                    flash('warning', 'Cita registrada correctamente, pero no fue posible enviar el correo de confirmacion. Codigo: ' . $code);
+                }
                 redirect('admin/citas.php');
             } catch (Throwable $e) {
                 $pdo->rollBack();
@@ -906,6 +960,7 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
 
           <input type="hidden" name="start_at" id="startAtInput" value="<?= e($form['start_at']) ?>">
 
+          <?php if ($hasPackageBillingColumns): ?>
           <div class="col-12 d-none" id="packageBillingBox">
             <div class="bnc-package-billing-card">
               <input type="hidden" name="billing_type" id="billingTypeInput" value="<?= e($selectedBillingType) ?>">
@@ -938,6 +993,7 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
               </div>
             </div>
           </div>
+          <?php endif; ?>
 
           <div class="col-12">
             <label class="bnc-label">

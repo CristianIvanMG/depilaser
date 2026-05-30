@@ -19,9 +19,6 @@ final class PaymentService
         self::ensureAppointmentColumn('payment_amount_mxn', 'DECIMAL(10,2) NOT NULL DEFAULT 0.00');
         self::ensureAppointmentColumn('payment_due_at', 'DATETIME NULL');
         self::ensureAppointmentColumn('payment_expires_at', 'DATETIME NULL');
-        if (class_exists('AppointmentService')) {
-            AppointmentService::ensurePackageBillingSchema();
-        }
 
         Database::exec(
             "CREATE TABLE IF NOT EXISTS appointment_payments (
