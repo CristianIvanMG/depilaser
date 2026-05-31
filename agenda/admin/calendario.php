@@ -164,7 +164,8 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         u.searchParams.set('from', info.startStr.slice(0, 10));
         u.searchParams.set('to', info.endStr.slice(0, 10));
         if (branchFilter.value) u.searchParams.set('branch', branchFilter.value);
-        fetch(u)
+        u.searchParams.set('_ts', Date.now().toString());
+        fetch(u, { cache: 'no-store' })
           .then(r => r.json())
           .then(d => success(d.events || []))
           .catch(failure);
