@@ -339,8 +339,11 @@ final class SmsService
     private static function secretsCandidates(): array
     {
         return array_values(array_unique([
-            dirname(AGENDA_ROOT) . '/config/secrets.php',
-            dirname(AGENDA_ROOT, 2) . '/config/secrets.php',
+            AGENDA_ROOT . '/../secrets.php',
+            AGENDA_ROOT . '/../../secrets.php',
+            AGENDA_ROOT . '/../../../secrets.php',
+            AGENDA_ROOT . '/../../../../secrets.php',
+            AGENDA_ROOT . '/../config/secrets.php',
             AGENDA_ROOT . '/config/secrets.php',
         ]));
     }
