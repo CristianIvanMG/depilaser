@@ -32,12 +32,32 @@ final class MailService
         return self::sendPlainMail($to, $toName, $subject, $body, $config);
     }
 
+    public static function configStatus(): array
+    {
+        $config = self::config();
+        $password = (string) ($config['password'] ?? '');
+        return [
+            'driver' => (string) ($config['driver'] ?? 'mail'),
+            'host' => (string) ($config['host'] ?? ''),
+            'port' => (int) ($config['port'] ?? 0),
+            'encryption' => (string) ($config['encryption'] ?? ''),
+            'username' => (string) ($config['username'] ?? ''),
+            'from_email' => (string) ($config['from_email'] ?? ''),
+            'from_name' => (string) ($config['from_name'] ?? ''),
+            'reply_to' => (string) ($config['reply_to'] ?? ''),
+            'format' => (string) ($config['format'] ?? ''),
+            'has_password' => $password !== '' && $password !== 'CONTRASEÑA_DEL_CORREO_HOSTINGER',
+            'config_path' => self::secretsPath(),
+            'config_paths_checked' => self::secretsCandidates(),
+        ];
+    }
+
     private static function config(): array
     {
         global $CONFIG;
 
         $mail = $CONFIG['mail'] ?? [];
-        $secretsPath = dirname(AGENDA_ROOT) . '/config/secrets.php';
+        $secretsPath = self::secretsPath();
         if (is_file($secretsPath)) {
             $secrets = require $secretsPath;
             if (is_array($secrets) && isset($secrets['mail']) && is_array($secrets['mail'])) {
@@ -59,6 +79,28 @@ final class MailService
             'timeout' => 20,
             'format' => 'html',
         ], $mail);
+    }
+
+    private static function secretsPath(): string
+    {
+        foreach (self::secretsCandidates() as $path) {
+            if (is_file($path)) {
+                return $path;
+            }
+        }
+        return '';
+    }
+
+    private static function secretsCandidates(): array
+    {
+        return array_values(array_unique([
+            AGENDA_ROOT . '/../secrets.php',
+            AGENDA_ROOT . '/../../secrets.php',
+            AGENDA_ROOT . '/../../../secrets.php',
+            AGENDA_ROOT . '/../../../../secrets.php',
+            AGENDA_ROOT . '/../config/secrets.php',
+            AGENDA_ROOT . '/config/secrets.php',
+        ]));
     }
 
     private static function sendMail(string $to, string $toName, string $subject, string $html, array $config): bool

@@ -18,6 +18,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($action === 'add_sms_purchase') {
             AppSettingsService::addSmsPurchase((int) ($_POST['purchase_quantity'] ?? 0), (int) $admin['id'], (string) ($_POST['purchase_note'] ?? ''));
             flash('success', 'Compra de SMS registrada y saldo actualizado.');
+        } elseif ($action === 'send_sms_test') {
+            $phone = trim((string) ($_POST['test_sms_phone'] ?? ''));
+            $message = trim((string) ($_POST['test_sms_message'] ?? 'BellaNick: prueba de SMS de la agenda.'));
+            $sendReal = !empty($_POST['test_sms_real']);
+            $message = $message !== '' ? $message : 'BellaNick: prueba de SMS de la agenda.';
+            $result = SmsService::sendTest($phone, $message, $sendReal ? false : null);
+            if (!empty($result['ok'])) {
+                $reference = !empty($result['reference']) ? ' Referencia: ' . (string) $result['reference'] . '.' : '';
+                flash('success', 'SMS de prueba aceptado por SMS Masivos.' . $reference);
+            } else {
+                $error = (string) ($result['error'] ?? 'No fue posible enviar el SMS de prueba.');
+                $code = !empty($result['code']) ? ' Codigo API: ' . (string) $result['code'] . '.' : '';
+                flash('danger', $error . $code);
+            }
+        } elseif ($action === 'send_mail_test') {
+            $to = trim((string) ($_POST['test_email_to'] ?? ''));
+            if (!filter_var($to, FILTER_VALIDATE_EMAIL)) {
+                flash('danger', 'Ingresa un correo valido para realizar la prueba.');
+            } else {
+                $body = "Hola,\n\nEste es un correo de prueba enviado desde Configuraciones de BellaNick Clinic.\n\nSi recibes este mensaje, el envio transaccional esta funcionando correctamente.\n\nBellaNick Clinic";
+                $sent = MailService::sendPlain($to, '', 'Prueba de correo BellaNick', $body);
+                flash($sent ? 'success' : 'danger', $sent ? 'Correo de prueba enviado. Revisa la bandeja de entrada, spam o promociones.' : 'No fue posible enviar el correo de prueba: ' . (MailService::lastError() ?? 'sin detalle del proveedor.'));
+            }
         }
     } catch (Throwable $e) {
         flash('danger', 'No fue posible guardar la configuracion: ' . $e->getMessage());
@@ -29,6 +52,7 @@ $sms = AppSettingsService::smsSettings();
 $smsStats = AppSettingsService::smsStats();
 $smsLogs = AppSettingsService::recentSmsInventoryLogs(18);
 $smsApi = SmsService::configStatus();
+$mailStatus = MailService::configStatus();
 $rewardConfig = RewardsService::activeConfig();
 
 $totalPurchased = max(0, (int) $sms['total_purchased']);
@@ -288,9 +312,6 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
           <h3 class="h6 fw-bold mb-0">Configuracion de SMS</h3>
           <small class="text-muted">Inventario, automatizacion y mensaje de recordatorio.</small>
         </div>
-        <a class="btn btn-sm btn-outline-secondary" href="<?= url('admin/sms-prueba.php') ?>">
-          <i class="bi bi-chat-dots"></i> Probar SMS
-        </a>
       </div>
       <div class="bnc-config-card-body">
         <form method="POST" class="row g-3">
@@ -372,28 +393,130 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
   </div>
 </div>
 
+<div class="row g-4 mt-1" data-config-section="sms">
+  <div class="col-xl-6">
+    <div class="bnc-config-card h-100">
+      <div class="bnc-config-card-header">
+        <div>
+          <h3 class="h6 fw-bold mb-0">Prueba de SMS</h3>
+          <small class="text-muted">Envia una prueba usando la misma conexion del cron.</small>
+        </div>
+        <a class="btn btn-sm btn-outline-secondary" href="<?= url('admin/sms-prueba.php') ?>">
+          <i class="bi bi-box-arrow-up-right"></i> Abrir vista clasica
+        </a>
+      </div>
+      <div class="bnc-config-card-body">
+        <form method="POST" class="row g-3">
+          <?= Csrf::input() ?>
+          <input type="hidden" name="action" value="send_sms_test">
+          <div class="col-md-5">
+            <label class="bnc-label">Telefono destino</label>
+            <input type="tel" name="test_sms_phone" class="form-control" placeholder="5512345678" required>
+            <div class="form-text">10 digitos de Mexico. Tambien acepta +52.</div>
+          </div>
+          <div class="col-md-7">
+            <label class="bnc-label">Mensaje</label>
+            <textarea name="test_sms_message" rows="3" maxlength="155" class="form-control" required>BellaNick: prueba de SMS de la agenda.</textarea>
+            <div class="form-text">El sistema limpia acentos antes de enviar.</div>
+          </div>
+          <div class="col-12">
+            <label class="bnc-config-switch">
+              <input type="checkbox" class="form-check-input m-0" name="test_sms_real" value="1">
+              <span>
+                <strong>Enviar como SMS real</strong>
+                <span class="d-block small text-muted">Usa saldo real de SMS Masivos. Si no se marca, respeta sandbox/configuracion actual.</span>
+              </span>
+            </label>
+          </div>
+          <div class="col-12 d-grid d-md-flex justify-content-md-end">
+            <button class="btn btn-bnc-primary">
+              <i class="bi bi-chat-dots"></i> Enviar prueba SMS
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-6">
+    <div class="bnc-config-card h-100">
+      <div class="bnc-config-card-header">
+        <div>
+          <h3 class="h6 fw-bold mb-0">Prueba de correo</h3>
+          <small class="text-muted">Valida el envio transaccional sin tocar el flujo de clientes.</small>
+        </div>
+        <?php if (is_file(__DIR__ . '/correo-prueba.php')): ?>
+          <a class="btn btn-sm btn-outline-secondary" href="<?= url('admin/correo-prueba.php') ?>">
+            <i class="bi bi-box-arrow-up-right"></i> Abrir vista clasica
+          </a>
+        <?php endif; ?>
+      </div>
+      <div class="bnc-config-card-body">
+        <form method="POST" class="row g-3">
+          <?= Csrf::input() ?>
+          <input type="hidden" name="action" value="send_mail_test">
+          <div class="col-12">
+            <label class="bnc-label">Correo destino</label>
+            <input type="email" name="test_email_to" class="form-control" placeholder="cliente@correo.com" required>
+            <div class="form-text">Envia texto plano, igual que los correos criticos de la agenda.</div>
+          </div>
+          <div class="col-12">
+            <div class="alert alert-light border small mb-0">
+              Esta prueba usa <strong><?= e((string) ($mailStatus['from_email'] ?: 'correo no configurado')) ?></strong> como remitente y no modifica citas ni clientes.
+            </div>
+          </div>
+          <div class="col-12 d-grid d-md-flex justify-content-md-end">
+            <button class="btn btn-bnc-primary">
+              <i class="bi bi-envelope-check"></i> Enviar prueba correo
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="row g-4 mt-1" data-config-mixed-row>
   <div class="col-xl-6" data-config-section="sms">
     <div class="bnc-config-card h-100">
       <div class="bnc-config-card-header">
         <div>
-          <h3 class="h6 fw-bold mb-0">Estado tecnico SMS</h3>
-          <small class="text-muted">Lectura segura de secrets y API.</small>
+          <h3 class="h6 fw-bold mb-0">Estado tecnico de mensajes</h3>
+          <small class="text-muted">Lectura segura de secrets, SMS y correo.</small>
         </div>
       </div>
       <div class="bnc-config-card-body">
         <div class="row g-3">
+          <div class="col-12">
+            <div class="fw-bold">SMS Masivos</div>
+          </div>
           <div class="col-sm-6"><span class="text-muted small">API habilitada</span><div class="fw-bold"><?= !empty($smsApi['enabled']) ? 'Si' : 'No' ?></div></div>
           <div class="col-sm-6"><span class="text-muted small">API key</span><div class="fw-bold"><?= !empty($smsApi['has_apikey']) ? e((string) $smsApi['apikey_preview']) : 'No detectada' ?></div></div>
           <div class="col-sm-6"><span class="text-muted small">Sandbox</span><div class="fw-bold"><?= !empty($smsApi['sandbox']) ? 'Si' : 'No, envia real' ?></div></div>
           <div class="col-sm-6"><span class="text-muted small">SMS enviados total</span><div class="fw-bold"><?= number_format((int) $smsStats['sent_total']) ?></div></div>
           <div class="col-sm-6"><span class="text-muted small">Correos de respaldo</span><div class="fw-bold"><?= number_format((int) $smsStats['fallback_total']) ?></div></div>
+          <div class="col-12"><span class="text-muted small">Archivo SMS cargado</span><div class="small text-break"><?= e((string) $smsApi['config_path']) ?></div></div>
+          <div class="col-12"><hr class="my-1"></div>
+          <div class="col-12">
+            <div class="fw-bold">Correo transaccional</div>
+          </div>
+          <div class="col-sm-6"><span class="text-muted small">Driver</span><div class="fw-bold"><?= e((string) $mailStatus['driver']) ?></div></div>
+          <div class="col-sm-6"><span class="text-muted small">Servidor</span><div class="fw-bold text-break"><?= e((string) ($mailStatus['host'] ?: 'mail() del servidor')) ?></div></div>
+          <div class="col-sm-6"><span class="text-muted small">Puerto / cifrado</span><div class="fw-bold"><?= (int) $mailStatus['port'] ?> <?= e((string) $mailStatus['encryption']) ?></div></div>
+          <div class="col-sm-6"><span class="text-muted small">Usuario</span><div class="fw-bold text-break"><?= e((string) ($mailStatus['username'] ?: 'No definido')) ?></div></div>
+          <div class="col-sm-6"><span class="text-muted small">Remitente</span><div class="fw-bold text-break"><?= e((string) ($mailStatus['from_email'] ?: 'No definido')) ?></div></div>
+          <div class="col-sm-6"><span class="text-muted small">Password</span><div class="fw-bold"><?= !empty($mailStatus['has_password']) ? 'Configurado' : 'No detectado' ?></div></div>
+          <div class="col-12"><span class="text-muted small">Archivo correo cargado</span><div class="small text-break"><?= e((string) $mailStatus['config_path']) ?></div></div>
           <div class="col-12">
             <div class="alert alert-info mb-0 small">
               Si no hay saldo SMS, el telefono no tiene formato valido de Mexico o SMS Masivos rechaza el envio, el sistema manda el recordatorio por correo de respaldo.
             </div>
           </div>
-          <div class="col-12"><span class="text-muted small">Archivo cargado</span><div class="small text-break"><?= e((string) $smsApi['config_path']) ?></div></div>
+          <div class="col-12">
+            <div class="alert alert-light border mb-0 small">
+              Variables de correo en secrets.php: <code>mail.driver</code>, <code>mail.host</code>, <code>mail.port</code>, <code>mail.encryption</code>, <code>mail.username</code>, <code>mail.password</code>, <code>mail.from_email</code>, <code>mail.from_name</code>, <code>mail.reply_to</code>, <code>mail.format</code>. Por seguridad la contrasena no se edita desde esta pantalla.
+            </div>
+          </div>
         </div>
       </div>
     </div>
