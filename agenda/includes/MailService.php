@@ -58,7 +58,10 @@ final class MailService
         $body = $plain ? self::htmlToText($html) : self::multipartBody($html, $boundary);
 
         try {
-            return @mail($toLine, $encodedSubject, $body, implode("\r\n", $headers));
+            $params = self::mailParams($fromEmail);
+            return $params !== ''
+                ? @mail($toLine, $encodedSubject, $body, implode("\r\n", $headers), $params)
+                : @mail($toLine, $encodedSubject, $body, implode("\r\n", $headers));
         } catch (Throwable $e) {
             error_log('[mail-send] ' . $e->getMessage());
             return false;
@@ -73,12 +76,16 @@ final class MailService
         $headers = [
             'From: ' . $fromName . ' <' . $fromEmail . '>',
             'Reply-To: ' . $replyTo,
+            'Return-Path: ' . $fromEmail,
             'Content-Type: text/plain; charset=UTF-8',
             'X-Mailer: PHP/' . PHP_VERSION,
         ];
 
         try {
-            return @mail($to, $subject, $body, implode("\r\n", $headers));
+            $params = self::mailParams($fromEmail);
+            return $params !== ''
+                ? @mail($to, $subject, $body, implode("\r\n", $headers), $params)
+                : @mail($to, $subject, $body, implode("\r\n", $headers));
         } catch (Throwable $e) {
             error_log('[plain-mail-send] ' . $e->getMessage());
             return false;
@@ -197,6 +204,14 @@ final class MailService
     private static function wantsPlainText(array $config): bool
     {
         return strtolower((string) ($config['format'] ?? 'html')) === 'plain';
+    }
+
+    private static function mailParams(string $fromEmail): string
+    {
+        if (!filter_var($fromEmail, FILTER_VALIDATE_EMAIL)) {
+            return '';
+        }
+        return '-f' . $fromEmail;
     }
 
     private static function address(string $email, string $name = ''): string
