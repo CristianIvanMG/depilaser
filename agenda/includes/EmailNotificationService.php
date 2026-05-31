@@ -79,8 +79,8 @@ final class EmailNotificationService
             return $log;
         }
 
-        $html = self::render($d, $type);
-        $sent = self::sendHtml((string) $d['client_email'], (string) $d['client_name'], $subject, $html);
+        $body = self::renderPlain($d, $type);
+        $sent = MailService::sendPlain((string) $d['client_email'], (string) $d['client_name'], $subject, $body);
 
         if ($sent) {
             Database::exec(
@@ -431,6 +431,42 @@ final class EmailNotificationService
         $html .= '</div></div></body></html>';
 
         return $html;
+    }
+
+    private static function renderPlain(array $d, string $type): string
+    {
+        $lines = [
+            'Hola ' . (string) ($d['client_name'] ?? 'Cliente') . ',',
+            '',
+            self::intro($d, $type),
+            '',
+            'Detalles de la cita:',
+            'Servicio: ' . (string) ($d['service_name'] ?? ''),
+            'Fecha y hora: ' . fmt_dt((string) ($d['start_at'] ?? '')),
+            'Sucursal: ' . (string) ($d['branch_name'] ?? ''),
+            'Profesional: ' . ((string) ($d['professional_name'] ?? '') ?: 'Equipo BellaNick'),
+            'Codigo de cita: ' . (string) ($d['code'] ?? ''),
+        ];
+
+        $branchAddr = trim(($d['branch_address'] ?? '') . ', ' . ($d['branch_city'] ?? '') . ', ' . ($d['branch_state'] ?? ''), ', ');
+        if ($branchAddr !== '') {
+            $lines[] = 'Direccion: ' . $branchAddr;
+        }
+        if (!empty($d['gmaps_url']) && !in_array($type, ['appointment_cancelled', 'appointment_no_show'], true)) {
+            $lines[] = 'Google Maps: ' . (string) $d['gmaps_url'];
+        }
+        if (!empty($d['payment_required']) && ($d['payment_status'] ?? '') === 'pending') {
+            $lines[] = '';
+            $lines[] = 'Pago anticipado pendiente.';
+            $lines[] = 'Para confirmar tu cita, completa tu pago seguro en Mercado Pago desde tu perfil.';
+        }
+
+        $lines[] = '';
+        $lines[] = 'Si necesitas hacer algun cambio, contacta directamente a BellaNick Clinic.';
+        $lines[] = '';
+        $lines[] = 'BellaNick Clinic';
+
+        return implode("\n", $lines);
     }
 
     private static function title(string $type): string
