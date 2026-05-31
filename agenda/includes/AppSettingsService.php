@@ -131,13 +131,17 @@ final class AppSettingsService
     public static function smsStats(): array
     {
         self::ensureSchema();
-        $sentRows = self::safeCount("SELECT COUNT(*) AS n FROM appointments WHERE sms_reminder_sent = 1");
+        $sentRows = self::safeCount("SELECT COUNT(*) AS n FROM appointments WHERE sms_reminder_sent = 1 AND sms_reminder_provider = 'smsmasivos'");
+        $fallbackRows = self::safeCount("SELECT COUNT(*) AS n FROM appointments WHERE sms_reminder_sent = 1 AND sms_reminder_provider = 'email_fallback'");
         $failedRows = self::safeCount("SELECT COUNT(*) AS n FROM appointments WHERE COALESCE(sms_reminder_attempts, 0) > 0 AND sms_reminder_sent = 0");
-        $todayRows = self::safeCount("SELECT COUNT(*) AS n FROM appointments WHERE sms_reminder_sent = 1 AND DATE(sms_reminder_sent_at) = CURDATE()");
+        $todayRows = self::safeCount("SELECT COUNT(*) AS n FROM appointments WHERE sms_reminder_sent = 1 AND sms_reminder_provider = 'smsmasivos' AND DATE(sms_reminder_sent_at) = CURDATE()");
+        $fallbackTodayRows = self::safeCount("SELECT COUNT(*) AS n FROM appointments WHERE sms_reminder_sent = 1 AND sms_reminder_provider = 'email_fallback' AND DATE(sms_reminder_sent_at) = CURDATE()");
         return [
             'sent_total' => $sentRows,
+            'fallback_total' => $fallbackRows,
             'failed_pending' => $failedRows,
             'sent_today' => $todayRows,
+            'fallback_today' => $fallbackTodayRows,
         ];
     }
 

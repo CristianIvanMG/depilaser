@@ -39,12 +39,6 @@ final class SmsService
             return $summary;
         }
 
-        if (!self::enabled($config)) {
-            $summary['ok'] = false;
-            $summary['error'] = 'SMS no esta habilitado o falta apikey.';
-            return $summary;
-        }
-
         $leadMinutes = (int) ($settings['reminder_lead_minutes'] ?? self::REMINDER_LEAD_MINUTES);
         $windowMinutes = (int) ($settings['reminder_window_minutes'] ?? self::REMINDER_WINDOW_MINUTES);
         $to = date('Y-m-d H:i:s', time() + (($leadMinutes + $windowMinutes) * 60));
@@ -52,7 +46,7 @@ final class SmsService
 
         $rows = Database::all(
             "SELECT a.id, a.code, a.start_at, a.end_at, a.sms_reminder_attempts,
-                    u.name AS client_name, u.phone AS client_phone,
+                    u.name AS client_name, u.phone AS client_phone, u.email AS client_email,
                     b.name AS branch_name,
                     st.slug AS status_slug
              FROM appointments a
@@ -74,7 +68,7 @@ final class SmsService
         foreach ($rows as $row) {
             $result = self::sendAppointmentReminderRow($row, $config);
             $summary['items'][] = ['appointment_id' => (int) $row['id'], 'result' => $result];
-            if (!empty($result['sent'])) {
+            if (!empty($result['sent']) || !empty($result['fallback_sent'])) {
                 $summary['sent']++;
             } elseif (!empty($result['skipped'])) {
                 $summary['skipped']++;
@@ -90,13 +84,10 @@ final class SmsService
     {
         self::ensureSchema();
         $config = self::config();
-        if (!self::enabled($config)) {
-            return ['ok' => false, 'error' => 'SMS no esta habilitado o falta apikey.'];
-        }
 
         $row = Database::one(
             "SELECT a.id, a.code, a.start_at, a.end_at, a.sms_reminder_sent, a.sms_reminder_attempts,
-                    u.name AS client_name, u.phone AS client_phone,
+                    u.name AS client_name, u.phone AS client_phone, u.email AS client_email,
                     b.name AS branch_name,
                     st.slug AS status_slug
              FROM appointments a
@@ -121,14 +112,17 @@ final class SmsService
 
     private static function sendAppointmentReminderRow(array $row, array $config, bool $force = false): array
     {
+        $message = self::appointmentMessage($row);
+        if (!self::enabled($config)) {
+            return self::sendEmailFallback($row, $message, 'SMS no esta habilitado o falta apikey.');
+        }
+
         $phone = self::normalizeMxPhone((string) ($row['client_phone'] ?? ''));
         if ($phone === '') {
             $error = 'Telefono de cliente invalido o vacio.';
-            self::markFailed((int) $row['id'], $error);
-            return ['ok' => false, 'skipped' => true, 'error' => $error];
+            return self::sendEmailFallback($row, $message, $error);
         }
 
-        $message = self::appointmentMessage($row);
         $response = self::send($phone, $message, $config);
         if (!empty($response['ok'])) {
             $reference = (string) ($response['reference'] ?? '');
@@ -155,8 +149,7 @@ final class SmsService
         }
 
         $error = (string) ($response['error'] ?? 'No fue posible enviar SMS.');
-        self::markFailed((int) $row['id'], $error);
-        return ['ok' => false, 'error' => $error, 'phone' => $phone];
+        return self::sendEmailFallback($row, $message, $error, $phone);
     }
 
     public static function sendTest(string $phone, string $message = 'BellaNick: prueba de SMS de la agenda.', ?bool $sandboxOverride = null): array
@@ -309,6 +302,85 @@ final class SmsService
         return self::cleanMessage($message);
     }
 
+    private static function sendEmailFallback(array $row, string $smsMessage, string $reason, string $phone = ''): array
+    {
+        $appointmentId = (int) ($row['id'] ?? 0);
+        $email = trim((string) ($row['client_email'] ?? ''));
+        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            self::markFailed($appointmentId, $reason . ' Sin correo valido para respaldo.');
+            return [
+                'ok' => false,
+                'error' => $reason . ' Tampoco hay correo valido para respaldo.',
+                'phone' => $phone,
+            ];
+        }
+
+        $body = self::emailFallbackBody($row, $smsMessage, $reason);
+        $subject = 'Recordatorio de tu cita de hoy - BellaNick Clinic';
+        $sent = MailService::sendPlain($email, (string) ($row['client_name'] ?? ''), $subject, $body);
+        if ($sent) {
+            Database::exec(
+                "UPDATE appointments
+                 SET sms_reminder_sent = 1,
+                     sms_reminder_sent_at = NOW(),
+                     sms_reminder_last_error = ?,
+                     sms_reminder_provider = ?,
+                     sms_reminder_reference = NULL
+                 WHERE id = ?",
+                [substr('Respaldo por correo: ' . $reason, 0, 255), 'email_fallback', $appointmentId]
+            );
+            try {
+                Auth::audit('appointment_sms_fallback_email_sent', 'appointment', $appointmentId, [
+                    'email' => $email,
+                    'phone' => $phone,
+                    'reason' => $reason,
+                ]);
+            } catch (Throwable $e) {
+                error_log('[sms-fallback-audit] ' . $e->getMessage());
+            }
+            return [
+                'ok' => true,
+                'fallback_sent' => true,
+                'provider' => 'email_fallback',
+                'email' => $email,
+                'phone' => $phone,
+                'reason' => $reason,
+            ];
+        }
+
+        $mailError = MailService::lastError() ?: 'No fue posible enviar correo de respaldo.';
+        self::markFailed($appointmentId, $reason . ' Respaldo fallido: ' . $mailError);
+        return [
+            'ok' => false,
+            'error' => $reason . ' Respaldo por correo fallido: ' . $mailError,
+            'phone' => $phone,
+            'email' => $email,
+        ];
+    }
+
+    private static function emailFallbackBody(array $row, string $smsMessage, string $reason): string
+    {
+        $lines = [
+            'Hola ' . (string) ($row['client_name'] ?? 'Cliente') . ',',
+            '',
+            'Te recordamos tu cita de hoy en BellaNick Clinic.',
+            '',
+            'Detalles:',
+            'Fecha y hora: ' . fmt_dt((string) ($row['start_at'] ?? '')),
+            'Sucursal: ' . (string) ($row['branch_name'] ?? ''),
+            'Codigo de cita: ' . (string) ($row['code'] ?? ''),
+            '',
+            'Mensaje:',
+            $smsMessage,
+            '',
+            'Nota interna del sistema: intentamos enviarte SMS, pero usamos correo como respaldo.',
+            'Motivo: ' . $reason,
+            '',
+            'BellaNick Clinic',
+        ];
+        return implode("\n", $lines);
+    }
+
     private static function cleanMessage(string $message): string
     {
         if (function_exists('iconv')) {
@@ -336,7 +408,10 @@ final class SmsService
         if (strlen($digits) === 11 && str_starts_with($digits, '1')) {
             $digits = substr($digits, 1);
         }
-        return strlen($digits) === 10 ? $digits : '';
+        if (strlen($digits) !== 10) {
+            return '';
+        }
+        return preg_match('/^[2-9]\d{9}$/', $digits) ? $digits : '';
     }
 
     private static function markFailed(int $appointmentId, string $error): void

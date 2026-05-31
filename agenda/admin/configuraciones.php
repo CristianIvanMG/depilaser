@@ -137,12 +137,66 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
   .bnc-config-table td {
     vertical-align: middle;
   }
+  .bnc-config-tabs {
+    background: #fff;
+    border: 1px solid #f0d7e4;
+    border-radius: 18px;
+    box-shadow: 0 16px 42px rgba(58, 12, 43, .06);
+    display: grid;
+    gap: .55rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-bottom: 1rem;
+    padding: .55rem;
+  }
+  .bnc-config-tab {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-radius: 14px;
+    color: #6b6071;
+    display: flex;
+    gap: .65rem;
+    justify-content: center;
+    min-height: 52px;
+    padding: .7rem .9rem;
+    text-align: left;
+  }
+  .bnc-config-tab i {
+    font-size: 1.15rem;
+  }
+  .bnc-config-tab strong {
+    color: inherit;
+    display: block;
+    font-size: .92rem;
+    line-height: 1.1;
+  }
+  .bnc-config-tab small {
+    display: block;
+    font-size: .72rem;
+    opacity: .76;
+  }
+  .bnc-config-tab.active {
+    background: linear-gradient(135deg, #de3c94, #94246e);
+    box-shadow: 0 12px 28px rgba(198, 61, 138, .26);
+    color: #fff;
+  }
+  .bnc-config-empty {
+    background: linear-gradient(135deg, #fff 0%, #fff8fc 100%);
+    border: 1px dashed #e8b6d2;
+    border-radius: 18px;
+    padding: 1.25rem;
+  }
+  [data-config-section][hidden] {
+    display: none !important;
+  }
   @media (max-width: 1100px) {
     .bnc-config-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
   @media (max-width: 640px) {
     .bnc-config-grid { grid-template-columns: 1fr; }
     .bnc-config-card-header { align-items: flex-start; flex-direction: column; }
+    .bnc-config-tabs { grid-template-columns: 1fr; }
+    .bnc-config-tab { justify-content: flex-start; }
   }
 </style>
 
@@ -169,14 +223,29 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         <strong><?= number_format((int) $smsStats['sent_today']) ?></strong>
       </div>
       <div class="bnc-config-metric">
-        <span>Fallidos pendientes</span>
-        <strong><?= number_format((int) $smsStats['failed_pending']) ?></strong>
+        <span>Correos respaldo hoy</span>
+        <strong><?= number_format((int) $smsStats['fallback_today']) ?></strong>
       </div>
     </div>
   </div>
 </div>
 
-<div class="row g-4">
+<div class="bnc-config-tabs" role="tablist" aria-label="Secciones de configuracion">
+  <button type="button" class="bnc-config-tab active" data-config-tab="sms">
+    <i class="bi bi-chat-dots"></i>
+    <span><strong>Mensajes</strong><small>SMS, correo y recordatorios</small></span>
+  </button>
+  <button type="button" class="bnc-config-tab" data-config-tab="rewards">
+    <i class="bi bi-gift"></i>
+    <span><strong>Recompensas</strong><small>Regla activa y accesos</small></span>
+  </button>
+  <button type="button" class="bnc-config-tab" data-config-tab="system">
+    <i class="bi bi-sliders"></i>
+    <span><strong>Sistema</strong><small>Base para nuevas opciones</small></span>
+  </button>
+</div>
+
+<div class="row g-4" data-config-section="sms">
   <div class="col-xl-4">
     <div class="bnc-config-card h-100">
       <div class="bnc-config-card-header">
@@ -303,8 +372,8 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
   </div>
 </div>
 
-<div class="row g-4 mt-1">
-  <div class="col-xl-6">
+<div class="row g-4 mt-1" data-config-mixed-row>
+  <div class="col-xl-6" data-config-section="sms">
     <div class="bnc-config-card h-100">
       <div class="bnc-config-card-header">
         <div>
@@ -318,13 +387,19 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
           <div class="col-sm-6"><span class="text-muted small">API key</span><div class="fw-bold"><?= !empty($smsApi['has_apikey']) ? e((string) $smsApi['apikey_preview']) : 'No detectada' ?></div></div>
           <div class="col-sm-6"><span class="text-muted small">Sandbox</span><div class="fw-bold"><?= !empty($smsApi['sandbox']) ? 'Si' : 'No, envia real' ?></div></div>
           <div class="col-sm-6"><span class="text-muted small">SMS enviados total</span><div class="fw-bold"><?= number_format((int) $smsStats['sent_total']) ?></div></div>
+          <div class="col-sm-6"><span class="text-muted small">Correos de respaldo</span><div class="fw-bold"><?= number_format((int) $smsStats['fallback_total']) ?></div></div>
+          <div class="col-12">
+            <div class="alert alert-info mb-0 small">
+              Si no hay saldo SMS, el telefono no tiene formato valido de Mexico o SMS Masivos rechaza el envio, el sistema manda el recordatorio por correo de respaldo.
+            </div>
+          </div>
           <div class="col-12"><span class="text-muted small">Archivo cargado</span><div class="small text-break"><?= e((string) $smsApi['config_path']) ?></div></div>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="col-xl-6">
+  <div class="col-xl-6" data-config-section="rewards" hidden>
     <div class="bnc-config-card h-100">
       <div class="bnc-config-card-header">
         <div>
@@ -350,7 +425,7 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
   </div>
 </div>
 
-<div class="bnc-config-card mt-4">
+<div class="bnc-config-card mt-4" data-config-section="sms">
   <div class="bnc-config-card-header">
     <div>
       <h3 class="h6 fw-bold mb-0">Movimientos de saldo SMS</h3>
@@ -387,5 +462,52 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
     </table>
   </div>
 </div>
+
+<div class="row g-4 mt-1" data-config-section="system" hidden>
+  <div class="col-xl-4">
+    <div class="bnc-config-empty h-100">
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <i class="bi bi-envelope-check text-success"></i>
+        <h3 class="h6 fw-bold mb-0">Correos</h3>
+      </div>
+      <p class="text-muted small mb-0">Los correos transaccionales ya usan texto plano y la configuracion SMTP central del sistema.</p>
+    </div>
+  </div>
+  <div class="col-xl-4">
+    <div class="bnc-config-empty h-100">
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <i class="bi bi-credit-card text-primary"></i>
+        <h3 class="h6 fw-bold mb-0">Pagos</h3>
+      </div>
+      <p class="text-muted small mb-0">La configuracion de servicios con pago en linea se mantiene en el modulo Pagos para evitar duplicar controles.</p>
+    </div>
+  </div>
+  <div class="col-xl-4">
+    <div class="bnc-config-empty h-100">
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <i class="bi bi-shield-check text-warning"></i>
+        <h3 class="h6 fw-bold mb-0">Seguridad</h3>
+      </div>
+      <p class="text-muted small mb-0">Este espacio queda preparado para futuras reglas globales, permisos y controles operativos.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('[data-config-tab]').forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.configTab;
+      document.querySelectorAll('[data-config-tab]').forEach((btn) => {
+        btn.classList.toggle('active', btn === tab);
+      });
+      document.querySelectorAll('[data-config-section]').forEach((section) => {
+        section.hidden = section.dataset.configSection !== target;
+      });
+      document.querySelectorAll('[data-config-mixed-row]').forEach((row) => {
+        row.hidden = !Array.from(row.children).some((child) => !child.hidden);
+      });
+    });
+  });
+</script>
 
 <?php require __DIR__ . '/../includes/layouts/footer.php'; ?>
