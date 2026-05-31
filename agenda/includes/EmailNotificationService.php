@@ -487,28 +487,7 @@ final class EmailNotificationService
 
     private static function sendHtml(string $to, string $toName, string $subject, string $html): bool
     {
-        global $CONFIG;
-
-        $supportEmail = $CONFIG['app']['support_email'] ?? 'contacto@bellanickclinic.com';
-        $fromName = 'BellaNick Clinic';
-        $headers = [
-            'MIME-Version: 1.0',
-            'Content-Type: text/html; charset=UTF-8',
-            'From: =?UTF-8?B?' . base64_encode($fromName) . '?= <' . $supportEmail . '>',
-            'Reply-To: ' . $supportEmail,
-            'Auto-Submitted: auto-generated',
-            'X-Auto-Response-Suppress: All',
-            'X-Mailer: BellaNickAgenda',
-        ];
-        $encodedSubject = '=?UTF-8?B?' . base64_encode($subject) . '?=';
-        $toLine = $toName ? ('=?UTF-8?B?' . base64_encode($toName) . '?= <' . $to . '>') : $to;
-
-        try {
-            return @mail($toLine, $encodedSubject, $html, implode("\r\n", $headers));
-        } catch (Throwable $e) {
-            error_log('[appointment-email-send] ' . $e->getMessage());
-            return false;
-        }
+        return MailService::sendHtml($to, $toName, $subject, $html);
     }
 
     private static function ensureAppointmentColumn(string $name, string $definition): void
