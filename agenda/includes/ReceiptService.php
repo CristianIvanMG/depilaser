@@ -156,8 +156,8 @@ final class ReceiptService
 </style>
 </head>
 <body>
-  <div class="no-print" style="max-width:780px;margin:0 auto 12px;text-align:right">
-    <button onclick="window.print()" style="background:#d63b93;color:#fff;border:0;padding:10px 18px;border-radius:999px;font-weight:700;cursor:pointer">Imprimir / Guardar PDF</button>
+  <div class="no-print" style="max-width:780px;margin:0 auto 12px;text-align:left">
+    <button onclick="window.print()" style="background:#d63b93;color:#fff;border:0;padding:10px 18px;border-radius:999px;font-weight:700;cursor:pointer">PDF</button>
   </div>
   <div class="receipt">
     <header class="receipt-header">
@@ -306,6 +306,71 @@ final class ReceiptService
         return $html;
     }
 
+    public static function publicUrl(int $appointmentId): string
+    {
+        $d = self::hydrate($appointmentId);
+        if (!$d) {
+            return url('recibo.php');
+        }
+        return url('recibo.php?t=' . self::publicToken($d));
+    }
+
+    public static function appointmentIdFromPublicToken(string $token): ?int
+    {
+        $token .= str_repeat('=', (4 - strlen($token) % 4) % 4);
+        $decoded = base64_decode(strtr($token, '-_', '+/'), true);
+        if (!is_string($decoded) || !str_contains($decoded, '.')) {
+            return null;
+        }
+        [$payload, $signature] = explode('.', $decoded, 2);
+        $parts = explode('|', $payload);
+        if (count($parts) !== 2) {
+            return null;
+        }
+        $appointmentId = (int) $parts[0];
+        $code = (string) $parts[1];
+        if ($appointmentId <= 0 || $code === '') {
+            return null;
+        }
+        $expected = hash_hmac('sha256', $payload, self::receiptSecret());
+        if (!hash_equals($expected, $signature)) {
+            return null;
+        }
+
+        $row = Database::one('SELECT id FROM appointments WHERE id = ? AND code = ? LIMIT 1', [$appointmentId, $code]);
+        return $row ? $appointmentId : null;
+    }
+
+    private static function publicToken(array $d): string
+    {
+        $payload = (int) $d['id'] . '|' . (string) $d['code'];
+        $signature = hash_hmac('sha256', $payload, self::receiptSecret());
+        return rtrim(strtr(base64_encode($payload . '.' . $signature), '+/', '-_'), '=');
+    }
+
+    private static function receiptSecret(): string
+    {
+        foreach ([
+            AGENDA_ROOT . '/../secrets.php',
+            AGENDA_ROOT . '/../../secrets.php',
+            AGENDA_ROOT . '/../../../secrets.php',
+            AGENDA_ROOT . '/../../../../secrets.php',
+            AGENDA_ROOT . '/../config/secrets.php',
+            AGENDA_ROOT . '/config/secrets.php',
+        ] as $path) {
+            if (is_file($path)) {
+                $secrets = require $path;
+                if (is_array($secrets)) {
+                    $secret = (string) ($secrets['receipt_secret'] ?? $secrets['db_pass'] ?? $secrets['openai_api_key'] ?? '');
+                    if ($secret !== '') {
+                        return $secret;
+                    }
+                }
+            }
+        }
+        return APP_BASE_URL . '|bellanick-receipt';
+    }
+
     /**
      * HTML del correo empático (cancelada / no asistió).
      *
@@ -383,9 +448,9 @@ final class ReceiptService
         if ((int) $d['receipt_sent'] === 1 && !$force) {
             return ['ok' => false, 'error' => 'El recibo ya fue enviado anteriormente.'];
         }
-        $subject = 'Tu recibo BellaNick · ' . ($d['receipt_folio'] ?: $d['code']);
-        $html = self::renderEmail($appointmentId);
-        $sent = self::send($d['client_email'], (string) $d['client_name'], $subject, $html);
+        $subject = 'Tu ticket BellaNick - ' . ($d['receipt_folio'] ?: $d['code']);
+        $body = self::renderPlainReceipt($appointmentId);
+        $sent = MailService::sendPlain((string) $d['client_email'], (string) $d['client_name'], $subject, $body);
         if ($sent) {
             Database::exec(
                 'UPDATE appointments SET receipt_sent = 1, receipt_sent_at = NOW() WHERE id = ?',
@@ -398,6 +463,44 @@ final class ReceiptService
             return ['ok' => true];
         }
         return ['ok' => false, 'error' => 'No fue posible enviar el correo en este momento.'];
+    }
+
+    /** Correo texto plano del ticket; el HTML vive en el enlace seguro. */
+    private static function renderPlainReceipt(int $appointmentId): string
+    {
+        $d = self::hydrate($appointmentId);
+        if (!$d) {
+            return 'Ticket no disponible.';
+        }
+
+        $folio = (string) ($d['receipt_folio'] ?: $d['code']);
+        $price = isset($d['price_mxn']) ? '$' . number_format((float) $d['price_mxn'], 2, '.', ',') . ' MXN' : 'Pendiente';
+        $professional = (string) ($d['professional_name'] ?: 'Equipo BellaNick');
+        $ticketUrl = self::publicUrl($appointmentId);
+
+        $lines = [
+            'Hola ' . (string) ($d['client_name'] ?? 'Cliente') . ',',
+            '',
+            'Gracias por tu visita a BellaNick Clinic.',
+            'Tu servicio fue marcado como Atendido y tu ticket esta listo.',
+            '',
+            'Resumen:',
+            'Folio: ' . $folio,
+            'Servicio: ' . (string) ($d['service_name'] ?? ''),
+            'Fecha y hora: ' . fmt_dt((string) ($d['start_at'] ?? '')),
+            'Sucursal: ' . (string) ($d['branch_name'] ?? ''),
+            'Profesional: ' . $professional,
+            'Total: ' . $price,
+            '',
+            'Ver, descargar o imprimir tu ticket:',
+            $ticketUrl,
+            '',
+            'Dentro del enlace encontraras el boton PDF en la parte superior izquierda.',
+            '',
+            'BellaNick Clinic',
+        ];
+
+        return implode("\n", $lines);
     }
 
     /** Envía correo empático (cancelada / no_asistio). Marca empathy_email_sent. */

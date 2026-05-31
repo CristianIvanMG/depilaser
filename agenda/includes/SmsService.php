@@ -20,6 +20,7 @@ final class SmsService
     public static function runAppointmentReminderCron(int $limit = 50): array
     {
         self::ensureSchema();
+        $settings = AppSettingsService::smsSettings();
         $config = self::config();
         $summary = [
             'ok' => true,
@@ -31,13 +32,22 @@ final class SmsService
             'items' => [],
         ];
 
+        if (empty($settings['reminders_enabled'])) {
+            $summary['ok'] = false;
+            $summary['enabled'] = false;
+            $summary['error'] = 'Recordatorios SMS desactivados desde Configuraciones.';
+            return $summary;
+        }
+
         if (!self::enabled($config)) {
             $summary['ok'] = false;
             $summary['error'] = 'SMS no esta habilitado o falta apikey.';
             return $summary;
         }
 
-        $to = date('Y-m-d H:i:s', time() + ((self::REMINDER_LEAD_MINUTES + self::REMINDER_WINDOW_MINUTES) * 60));
+        $leadMinutes = (int) ($settings['reminder_lead_minutes'] ?? self::REMINDER_LEAD_MINUTES);
+        $windowMinutes = (int) ($settings['reminder_window_minutes'] ?? self::REMINDER_WINDOW_MINUTES);
+        $to = date('Y-m-d H:i:s', time() + (($leadMinutes + $windowMinutes) * 60));
         $now = date('Y-m-d H:i:s');
 
         $rows = Database::all(
@@ -196,6 +206,11 @@ final class SmsService
             $payload['sender'] = (string) $config['sender'];
         }
 
+        $isSandbox = !empty($config['sandbox']);
+        if (!$isSandbox && !AppSettingsService::canSendRealSms()) {
+            return ['ok' => false, 'error' => 'Saldo local de SMS agotado. Registra una compra o aumenta el saldo en Configuraciones.'];
+        }
+
         $transport = self::httpPostForm($url, $payload, ['apikey: ' . (string) $config['apikey']]);
         if (empty($transport['ok'])) {
             return $transport;
@@ -210,6 +225,13 @@ final class SmsService
             $reference = '';
             if (!empty($body['references'][0]['reference'])) {
                 $reference = (string) $body['references'][0]['reference'];
+            }
+            if (!$isSandbox) {
+                try {
+                    AppSettingsService::debitSms($reference, 'SMS real enviado a ' . $phone);
+                } catch (Throwable $e) {
+                    error_log('[sms-inventory] ' . $e->getMessage());
+                }
             }
             return ['ok' => true, 'reference' => $reference, 'response' => $body];
         }
@@ -273,12 +295,28 @@ final class SmsService
     {
         $firstName = trim(strtok((string) ($row['client_name'] ?? ''), ' ') ?: 'cliente');
         $time = date('H:i', strtotime((string) $row['start_at']));
-        $message = "BellaNick: Hola {$firstName}, te recordamos tu cita hoy a las {$time} en {$row['branch_name']}. Codigo {$row['code']}. Te esperamos.";
+        $settings = AppSettingsService::smsSettings();
+        $template = (string) ($settings['message_template'] ?? '');
+        $message = $template !== ''
+            ? $template
+            : "BellaNick: Hola {nombre}, te recordamos tu cita hoy a las {hora} en {sucursal}. Codigo {codigo}. Te esperamos.";
+        $message = strtr($message, [
+            '{nombre}' => $firstName,
+            '{hora}' => $time,
+            '{sucursal}' => (string) ($row['branch_name'] ?? ''),
+            '{codigo}' => (string) ($row['code'] ?? ''),
+        ]);
         return self::cleanMessage($message);
     }
 
     private static function cleanMessage(string $message): string
     {
+        if (function_exists('iconv')) {
+            $converted = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $message);
+            if (is_string($converted) && $converted !== '') {
+                $message = $converted;
+            }
+        }
         $map = [
             'á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u', 'ñ' => 'n',
             'Á' => 'A', 'É' => 'E', 'Í' => 'I', 'Ó' => 'O', 'Ú' => 'U', 'Ñ' => 'N',

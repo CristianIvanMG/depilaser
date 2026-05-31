@@ -124,11 +124,7 @@ final class EmailVerification
 
     private static function sendMail(array $user, string $token, string $expiresAt): bool
     {
-        global $CONFIG;
-
         $confirmUrl = url('confirmar-email.php?token=' . urlencode($token));
-        $supportEmail = $CONFIG['app']['support_email'] ?? 'contacto@bellanickclinic.com';
-        $appName = $CONFIG['app']['name'] ?? 'BellaNick Clinic';
         $subject = 'Confirma tu cuenta BellaNick';
 
         $body = "Hola {$user['name']},\n\n"
@@ -138,19 +134,11 @@ final class EmailVerification
             . "Si no creaste esta cuenta, puedes ignorar este mensaje.\n\n"
             . "BellaNick Clinic";
 
-        $headers = [
-            'From: ' . $appName . ' <' . $supportEmail . '>',
-            'Reply-To: ' . $supportEmail,
-            'Content-Type: text/plain; charset=UTF-8',
-            'X-Mailer: PHP/' . PHP_VERSION,
-        ];
-
-        try {
-            return mail($user['email'], $subject, $body, implode("\r\n", $headers));
-        } catch (Throwable $e) {
-            error_log('[email verification] ' . $e->getMessage());
-            return false;
+        $sent = MailService::sendPlain((string) $user['email'], (string) $user['name'], $subject, $body);
+        if (!$sent) {
+            error_log('[email verification] ' . (MailService::lastError() ?: 'No fue posible enviar el correo.'));
         }
+        return $sent;
     }
 
     private static function columnExists(string $table, string $column): bool

@@ -61,6 +61,9 @@ $adminHome = Auth::isAdmin() ? url('admin/') : url('admin/calendario.php');
       <a href="<?= url('admin/reportes.php') ?>" class="bnc-nav-item <?= is_active('reportes') ?>">
         <i class="bi bi-graph-up-arrow"></i><span>Reportes</span>
       </a>
+      <a href="<?= url('admin/configuraciones.php') ?>" class="bnc-nav-item <?= is_active('configuraciones') ?>">
+        <i class="bi bi-sliders"></i><span>Configuraciones</span>
+      </a>
       <div class="bnc-nav-section">CONFIGURACIÓN</div>
        <a href="<?= url('admin/usuarios.php') ?>" class="bnc-nav-item <?= is_active('usuarios') ?>">
         <i class="bi bi-people"></i><span>Clientes</span>

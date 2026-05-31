@@ -477,7 +477,17 @@ final class PaymentService
 
         $existing = self::paymentForAppointment($appointmentId);
         if ($existing && ($existing['status'] ?? '') === 'approved') {
-            return ['ok' => true, 'already_paid' => true, 'payment' => $existing];
+            $receipt = null;
+            if ($sendReceipt) {
+                $receipt = ReceiptService::emailReceipt($appointmentId, false);
+            }
+            return [
+                'ok' => true,
+                'already_paid' => true,
+                'payment' => $existing,
+                'receipt_sent' => (bool) ($receipt['ok'] ?? false),
+                'receipt_warning' => $receipt && empty($receipt['ok']) ? ($receipt['error'] ?? 'No fue posible enviar el recibo.') : null,
+            ];
         }
 
         $amount = $amount ?? (float) ($d['payment_amount_mxn'] ?? 0);
