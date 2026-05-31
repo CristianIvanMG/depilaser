@@ -149,7 +149,7 @@ final class SmsService
         return ['ok' => false, 'error' => $error, 'phone' => $phone];
     }
 
-    public static function sendTest(string $phone, string $message = 'BellaNick: prueba de SMS de la agenda.'): array
+    public static function sendTest(string $phone, string $message = 'BellaNick: prueba de SMS de la agenda.', ?bool $sandboxOverride = null): array
     {
         self::ensureSchema();
         $config = self::config();
@@ -159,6 +159,9 @@ final class SmsService
         $phone = self::normalizeMxPhone($phone);
         if ($phone === '') {
             return ['ok' => false, 'error' => 'Telefono invalido.'];
+        }
+        if ($sandboxOverride !== null) {
+            $config['sandbox'] = $sandboxOverride;
         }
         return self::send($phone, self::cleanMessage($message), $config);
     }

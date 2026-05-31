@@ -6,12 +6,13 @@ Auth::requireAdmin();
 $result = null;
 $phone = trim((string) ($_POST['phone'] ?? ''));
 $message = trim((string) ($_POST['message'] ?? 'BellaNick: prueba de SMS de la agenda.'));
+$sendReal = isset($_POST['send_real']);
 $configStatus = SmsService::configStatus();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::check($_POST[Csrf::FIELD] ?? '');
     $message = $message !== '' ? $message : 'BellaNick: prueba de SMS de la agenda.';
-    $result = SmsService::sendTest($phone, $message);
+    $result = SmsService::sendTest($phone, $message, $sendReal ? false : null);
 }
 
 $pageTitle = 'Prueba SMS';
@@ -48,6 +49,13 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
         <textarea name="message" class="form-control" rows="3" maxlength="155" required><?= e($message) ?></textarea>
         <div class="form-text">SMS Masivos V2 no acepta acentos; el sistema limpia el texto antes de enviarlo.</div>
       </div>
+      <label class="d-flex align-items-start gap-2 rounded-3 border p-3 bg-light">
+        <input type="checkbox" name="send_real" value="1" class="form-check-input mt-1" <?= $sendReal ? 'checked' : '' ?>>
+        <span>
+          <strong>Enviar SMS real de prueba</strong>
+          <span class="d-block small text-muted">Usa saldo real de SMS Masivos. Activalo solo cuando quieras comprobar entrega en telefono.</span>
+        </span>
+      </label>
       <button class="btn btn-bnc-primary" type="submit">
         <i class="bi bi-chat-dots"></i> Enviar SMS de prueba
       </button>
