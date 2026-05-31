@@ -48,6 +48,9 @@ final class MailService
         $fromName = (string) ($config['from_name'] ?? 'BellaNick Clinic');
         $replyTo = (string) ($config['reply_to'] ?? $fromEmail);
         $plain = self::wantsPlainText($config);
+        if ($plain) {
+            return self::sendPlainMail($to, $toName, $subject, self::htmlToText($html), $config);
+        }
         $boundary = $plain ? '' : self::boundary();
         $headers = self::headers($fromEmail, $fromName, $replyTo, $boundary, $plain);
         $encodedSubject = self::encodeHeader($subject);
@@ -58,6 +61,26 @@ final class MailService
             return @mail($toLine, $encodedSubject, $body, implode("\r\n", $headers));
         } catch (Throwable $e) {
             error_log('[mail-send] ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    private static function sendPlainMail(string $to, string $toName, string $subject, string $body, array $config): bool
+    {
+        $fromEmail = (string) ($config['from_email'] ?? '');
+        $fromName = (string) ($config['from_name'] ?? 'BellaNick Clinic');
+        $replyTo = (string) ($config['reply_to'] ?? $fromEmail);
+        $headers = [
+            'From: ' . $fromName . ' <' . $fromEmail . '>',
+            'Reply-To: ' . $replyTo,
+            'Content-Type: text/plain; charset=UTF-8',
+            'X-Mailer: PHP/' . PHP_VERSION,
+        ];
+
+        try {
+            return @mail($to, $subject, $body, implode("\r\n", $headers));
+        } catch (Throwable $e) {
+            error_log('[plain-mail-send] ' . $e->getMessage());
             return false;
         }
     }
