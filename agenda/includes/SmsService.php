@@ -173,7 +173,8 @@ final class SmsService
             'apikey_preview' => $apiKey !== '' ? substr($apiKey, 0, 4) . '...' . substr($apiKey, -4) : '',
             'sandbox' => !empty($config['sandbox']),
             'base_url' => (string) ($config['base_url'] ?? ''),
-            'config_path' => dirname(AGENDA_ROOT) . '/config/secrets.php',
+            'config_path' => (string) ($config['_config_path'] ?? ''),
+            'config_paths_checked' => self::secretsCandidates(),
         ];
     }
 
@@ -311,16 +312,37 @@ final class SmsService
 
     private static function config(): array
     {
-        $secretsPath = dirname(AGENDA_ROOT) . '/config/secrets.php';
-        $secrets = is_file($secretsPath) ? require $secretsPath : [];
+        $secretsPath = self::secretsPath();
+        $secrets = $secretsPath !== '' ? require $secretsPath : [];
         $sms = is_array($secrets) ? ($secrets['sms']['smsmasivos'] ?? []) : [];
-        return array_replace([
+        $config = array_replace([
             'enabled' => false,
             'apikey' => '',
             'base_url' => 'https://api.smsmasivos.com.mx',
             'sandbox' => true,
             'sender' => '',
         ], is_array($sms) ? $sms : []);
+        $config['_config_path'] = $secretsPath;
+        return $config;
+    }
+
+    private static function secretsPath(): string
+    {
+        foreach (self::secretsCandidates() as $path) {
+            if (is_file($path)) {
+                return $path;
+            }
+        }
+        return '';
+    }
+
+    private static function secretsCandidates(): array
+    {
+        return array_values(array_unique([
+            dirname(AGENDA_ROOT) . '/config/secrets.php',
+            dirname(AGENDA_ROOT, 2) . '/config/secrets.php',
+            AGENDA_ROOT . '/config/secrets.php',
+        ]));
     }
 
     private static function enabled(array $config): bool

@@ -63,6 +63,12 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
       <div>API key detectada: <?= !empty($configStatus['has_apikey']) ? 'si (' . e((string) $configStatus['apikey_preview']) . ')' : 'no' ?></div>
       <div>Sandbox: <?= !empty($configStatus['sandbox']) ? 'si' : 'no' ?></div>
       <div>Base URL: <?= e((string) $configStatus['base_url']) ?></div>
+      <div>Rutas revisadas:</div>
+      <ul class="mb-0">
+        <?php foreach (($configStatus['config_paths_checked'] ?? []) as $checkedPath): ?>
+          <li><?= e((string) $checkedPath) ?></li>
+        <?php endforeach; ?>
+      </ul>
     </div>
   </div>
 </div>
