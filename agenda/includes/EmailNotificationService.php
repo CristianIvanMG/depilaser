@@ -106,7 +106,7 @@ final class EmailNotificationService
             return ['ok' => true, 'sent' => true, 'type' => $type];
         }
 
-        $error = 'No fue posible enviar el correo en este momento.';
+        $error = MailService::lastError() ?: 'No fue posible enviar el correo en este momento.';
         Database::exec(
             "UPDATE appointment_email_logs
              SET status = 'failed', error_message = ?

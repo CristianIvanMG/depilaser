@@ -3,14 +3,22 @@ declare(strict_types=1);
 
 final class MailService
 {
+    private static ?string $lastError = null;
+
     public static function sendHtml(string $to, string $toName, string $subject, string $html): bool
     {
+        self::$lastError = null;
         $config = self::config();
         if (($config['driver'] ?? 'mail') === 'smtp') {
             return self::sendSmtp($to, $toName, $subject, $html, $config);
         }
 
         return self::sendMail($to, $toName, $subject, $html, $config);
+    }
+
+    public static function lastError(): ?string
+    {
+        return self::$lastError;
     }
 
     private static function config(): array
@@ -105,14 +113,14 @@ final class MailService
         $replyTo = (string) ($config['reply_to'] ?? $fromEmail);
 
         if ($host === '' || $username === '' || $password === '' || $fromEmail === '') {
-            error_log('[smtp-send] Configuracion SMTP incompleta.');
+            self::fail('Configuracion SMTP incompleta.');
             return false;
         }
 
         $remote = ($encryption === 'ssl' ? 'ssl://' : '') . $host . ':' . $port;
         $socket = @stream_socket_client($remote, $errno, $errstr, $timeout, STREAM_CLIENT_CONNECT);
         if (!$socket) {
-            error_log('[smtp-send] Conexion fallida: ' . $errstr . ' (' . $errno . ')');
+            self::fail('Conexion SMTP fallida: ' . $errstr . ' (' . $errno . ')');
             return false;
         }
         stream_set_timeout($socket, $timeout);
@@ -146,7 +154,7 @@ final class MailService
             fclose($socket);
             return true;
         } catch (Throwable $e) {
-            error_log('[smtp-send] ' . $e->getMessage());
+            self::fail($e->getMessage());
             @fwrite($socket, "QUIT\r\n");
             fclose($socket);
             return false;
@@ -214,6 +222,12 @@ final class MailService
         return '-f' . $fromEmail;
     }
 
+    private static function fail(string $message): void
+    {
+        self::$lastError = $message;
+        error_log('[mail-service] ' . $message);
+    }
+
     private static function address(string $email, string $name = ''): string
     {
         return $name !== '' ? self::encodeHeader($name) . ' <' . $email . '>' : $email;
@@ -226,7 +240,7 @@ final class MailService
 
     private static function smtpCommand($socket, string $command, array $expectedCodes): string
     {
-        fwrite($socket, $command . "\r\n");
+        fwrite($socket, self::smtpLines($command) . "\r\n");
         return self::smtpExpect($socket, $expectedCodes);
     }
 
@@ -252,6 +266,11 @@ final class MailService
 
     private static function dotStuff(string $html): string
     {
-        return preg_replace('/^\./m', '..', str_replace(["\r\n", "\r"], "\n", $html));
+        return preg_replace('/^\./m', '..', self::smtpLines($html));
+    }
+
+    private static function smtpLines(string $value): string
+    {
+        return str_replace("\n", "\r\n", str_replace(["\r\n", "\r"], "\n", $value));
     }
 }
