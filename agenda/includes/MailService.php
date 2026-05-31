@@ -46,12 +46,14 @@ final class MailService
         $fromEmail = (string) ($config['from_email'] ?? '');
         $fromName = (string) ($config['from_name'] ?? 'BellaNick Clinic');
         $replyTo = (string) ($config['reply_to'] ?? $fromEmail);
-        $headers = self::headers($fromEmail, $fromName, $replyTo);
+        $boundary = self::boundary();
+        $headers = self::headers($fromEmail, $fromName, $replyTo, $boundary);
         $encodedSubject = self::encodeHeader($subject);
         $toLine = self::address($to, $toName);
+        $body = self::multipartBody($html, $boundary);
 
         try {
-            return @mail($toLine, $encodedSubject, $html, implode("\r\n", $headers));
+            return @mail($toLine, $encodedSubject, $body, implode("\r\n", $headers));
         } catch (Throwable $e) {
             error_log('[mail-send] ' . $e->getMessage());
             return false;
@@ -100,10 +102,11 @@ final class MailService
             self::smtpCommand($socket, 'RCPT TO:<' . $to . '>', [250, 251]);
             self::smtpCommand($socket, 'DATA', [354]);
 
-            $headers = self::headers($fromEmail, $fromName, $replyTo);
+            $boundary = self::boundary();
+            $headers = self::headers($fromEmail, $fromName, $replyTo, $boundary);
             $headers[] = 'To: ' . self::address($to, $toName);
             $headers[] = 'Subject: ' . self::encodeHeader($subject);
-            $message = implode("\r\n", $headers) . "\r\n\r\n" . self::dotStuff($html) . "\r\n.";
+            $message = implode("\r\n", $headers) . "\r\n\r\n" . self::dotStuff(self::multipartBody($html, $boundary)) . "\r\n.";
             self::smtpCommand($socket, $message, [250]);
             self::smtpCommand($socket, 'QUIT', [221]);
             fclose($socket);
@@ -116,17 +119,52 @@ final class MailService
         }
     }
 
-    private static function headers(string $fromEmail, string $fromName, string $replyTo): array
+    private static function headers(string $fromEmail, string $fromName, string $replyTo, string $boundary): array
     {
+        $domain = parse_url(APP_BASE_URL, PHP_URL_HOST) ?: 'depilasermexico.com';
         return [
+            'Date: ' . date(DATE_RFC2822),
+            'Message-ID: <' . bin2hex(random_bytes(12)) . '.' . time() . '@' . $domain . '>',
             'MIME-Version: 1.0',
-            'Content-Type: text/html; charset=UTF-8',
+            'Content-Type: multipart/alternative; boundary="' . $boundary . '"',
             'From: ' . self::address($fromEmail, $fromName),
             'Reply-To: ' . $replyTo,
             'Auto-Submitted: auto-generated',
             'X-Auto-Response-Suppress: All',
             'X-Mailer: BellaNickAgenda',
         ];
+    }
+
+    private static function multipartBody(string $html, string $boundary): string
+    {
+        $text = self::htmlToText($html);
+        return "--{$boundary}\r\n"
+            . "Content-Type: text/plain; charset=UTF-8\r\n"
+            . "Content-Transfer-Encoding: 8bit\r\n\r\n"
+            . $text . "\r\n\r\n"
+            . "--{$boundary}\r\n"
+            . "Content-Type: text/html; charset=UTF-8\r\n"
+            . "Content-Transfer-Encoding: 8bit\r\n\r\n"
+            . $html . "\r\n\r\n"
+            . "--{$boundary}--";
+    }
+
+    private static function htmlToText(string $html): string
+    {
+        $text = preg_replace('/<style\b[^>]*>.*?<\/style>/is', '', $html);
+        $text = preg_replace('/<script\b[^>]*>.*?<\/script>/is', '', $text ?? '');
+        $text = preg_replace('/<\s*br\s*\/?>/i', "\n", $text ?? '');
+        $text = preg_replace('/<\/p\s*>/i', "\n\n", $text ?? '');
+        $text = strip_tags($text ?? '');
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $text = preg_replace("/[ \t]+/", ' ', $text);
+        $text = preg_replace("/\n{3,}/", "\n\n", $text ?? '');
+        return trim($text ?? '') ?: 'BellaNick Clinic';
+    }
+
+    private static function boundary(): string
+    {
+        return 'bnc_' . bin2hex(random_bytes(16));
     }
 
     private static function address(string $email, string $name = ''): string
