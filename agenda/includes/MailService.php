@@ -21,6 +21,17 @@ final class MailService
         return self::$lastError;
     }
 
+    public static function sendPlain(string $to, string $toName, string $subject, string $body): bool
+    {
+        self::$lastError = null;
+        $config = self::config();
+        if (($config['driver'] ?? 'mail') === 'smtp') {
+            return self::sendSmtp($to, $toName, $subject, nl2br(e($body)), array_replace($config, ['format' => 'plain']));
+        }
+
+        return self::sendPlainMail($to, $toName, $subject, $body, $config);
+    }
+
     private static function config(): array
     {
         global $CONFIG;
