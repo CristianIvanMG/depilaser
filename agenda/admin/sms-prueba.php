@@ -6,6 +6,7 @@ Auth::requireAdmin();
 $result = null;
 $phone = trim((string) ($_POST['phone'] ?? ''));
 $message = trim((string) ($_POST['message'] ?? 'BellaNick: prueba de SMS de la agenda.'));
+$configStatus = SmsService::configStatus();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::check($_POST[Csrf::FIELD] ?? '');
@@ -54,6 +55,15 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
     <p class="text-muted small mt-3 mb-0">
       Esta prueba usa la misma configuracion que el cron de recordatorios de citas.
     </p>
+    <hr>
+    <div class="small text-muted">
+      <div><strong>Diagnostico:</strong></div>
+      <div>Archivo: <?= e((string) $configStatus['config_path']) ?></div>
+      <div>Habilitado: <?= !empty($configStatus['enabled']) ? 'si' : 'no' ?></div>
+      <div>API key detectada: <?= !empty($configStatus['has_apikey']) ? 'si (' . e((string) $configStatus['apikey_preview']) . ')' : 'no' ?></div>
+      <div>Sandbox: <?= !empty($configStatus['sandbox']) ? 'si' : 'no' ?></div>
+      <div>Base URL: <?= e((string) $configStatus['base_url']) ?></div>
+    </div>
   </div>
 </div>
 

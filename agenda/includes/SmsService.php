@@ -163,6 +163,20 @@ final class SmsService
         return self::send($phone, self::cleanMessage($message), $config);
     }
 
+    public static function configStatus(): array
+    {
+        $config = self::config();
+        $apiKey = trim((string) ($config['apikey'] ?? ''));
+        return [
+            'enabled' => !empty($config['enabled']),
+            'has_apikey' => $apiKey !== '' && $apiKey !== 'TU_API_KEY_SMS_MASIVOS',
+            'apikey_preview' => $apiKey !== '' ? substr($apiKey, 0, 4) . '...' . substr($apiKey, -4) : '',
+            'sandbox' => !empty($config['sandbox']),
+            'base_url' => (string) ($config['base_url'] ?? ''),
+            'config_path' => dirname(AGENDA_ROOT) . '/config/secrets.php',
+        ];
+    }
+
     private static function send(string $phone, string $message, array $config): array
     {
         $url = rtrim((string) ($config['base_url'] ?? 'https://api.smsmasivos.com.mx'), '/') . '/sms/send';
