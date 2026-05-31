@@ -38,6 +38,7 @@ final class MailService
             'from_name' => 'BellaNick Clinic',
             'reply_to' => $supportEmail,
             'timeout' => 20,
+            'format' => 'html',
         ], $mail);
     }
 
@@ -46,11 +47,12 @@ final class MailService
         $fromEmail = (string) ($config['from_email'] ?? '');
         $fromName = (string) ($config['from_name'] ?? 'BellaNick Clinic');
         $replyTo = (string) ($config['reply_to'] ?? $fromEmail);
-        $boundary = self::boundary();
-        $headers = self::headers($fromEmail, $fromName, $replyTo, $boundary);
+        $plain = self::wantsPlainText($config);
+        $boundary = $plain ? '' : self::boundary();
+        $headers = self::headers($fromEmail, $fromName, $replyTo, $boundary, $plain);
         $encodedSubject = self::encodeHeader($subject);
         $toLine = self::address($to, $toName);
-        $body = self::multipartBody($html, $boundary);
+        $body = $plain ? self::htmlToText($html) : self::multipartBody($html, $boundary);
 
         try {
             return @mail($toLine, $encodedSubject, $body, implode("\r\n", $headers));
@@ -102,11 +104,13 @@ final class MailService
             self::smtpCommand($socket, 'RCPT TO:<' . $to . '>', [250, 251]);
             self::smtpCommand($socket, 'DATA', [354]);
 
-            $boundary = self::boundary();
-            $headers = self::headers($fromEmail, $fromName, $replyTo, $boundary);
+            $plain = self::wantsPlainText($config);
+            $boundary = $plain ? '' : self::boundary();
+            $headers = self::headers($fromEmail, $fromName, $replyTo, $boundary, $plain);
             $headers[] = 'To: ' . self::address($to, $toName);
             $headers[] = 'Subject: ' . self::encodeHeader($subject);
-            $message = implode("\r\n", $headers) . "\r\n\r\n" . self::dotStuff(self::multipartBody($html, $boundary)) . "\r\n.";
+            $body = $plain ? self::htmlToText($html) : self::multipartBody($html, $boundary);
+            $message = implode("\r\n", $headers) . "\r\n\r\n" . self::dotStuff($body) . "\r\n.";
             self::smtpCommand($socket, $message, [250]);
             self::smtpCommand($socket, 'QUIT', [221]);
             fclose($socket);
@@ -119,14 +123,14 @@ final class MailService
         }
     }
 
-    private static function headers(string $fromEmail, string $fromName, string $replyTo, string $boundary): array
+    private static function headers(string $fromEmail, string $fromName, string $replyTo, string $boundary, bool $plain = false): array
     {
         $domain = parse_url(APP_BASE_URL, PHP_URL_HOST) ?: 'depilasermexico.com';
         return [
             'Date: ' . date(DATE_RFC2822),
             'Message-ID: <' . bin2hex(random_bytes(12)) . '.' . time() . '@' . $domain . '>',
             'MIME-Version: 1.0',
-            'Content-Type: multipart/alternative; boundary="' . $boundary . '"',
+            $plain ? 'Content-Type: text/plain; charset=UTF-8' : 'Content-Type: multipart/alternative; boundary="' . $boundary . '"',
             'From: ' . self::address($fromEmail, $fromName),
             'Reply-To: ' . $replyTo,
             'Auto-Submitted: auto-generated',
@@ -165,6 +169,11 @@ final class MailService
     private static function boundary(): string
     {
         return 'bnc_' . bin2hex(random_bytes(16));
+    }
+
+    private static function wantsPlainText(array $config): bool
+    {
+        return strtolower((string) ($config['format'] ?? 'html')) === 'plain';
     }
 
     private static function address(string $email, string $name = ''): string
