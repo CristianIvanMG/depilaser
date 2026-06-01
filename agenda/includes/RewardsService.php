@@ -430,7 +430,7 @@ final class RewardsService
         );
     }
 
-    public static function dashboardClients(string $q = '', int $limit = 80): array
+    public static function dashboardClients(string $q = '', int $limit = 80, ?array $config = null): array
     {
         self::ensureSchema();
         if (!self::schemaReady()) return [];
@@ -443,24 +443,139 @@ final class RewardsService
         }
         $rows = Database::all(
             "SELECT u.id, u.name, u.email, u.phone, u.active,
-                    COUNT(DISTINCT al.id) AS total_attendances,
-                    COUNT(DISTINCT CASE WHEN cr.status = 'pendiente' THEN cr.id END) AS pending_rewards,
-                    COUNT(DISTINCT cr.id) AS total_rewards
+                    COALESCE(al.total_attendances, 0) AS total_attendances,
+                    COALESCE(cr.pending_rewards, 0) AS pending_rewards,
+                    COALESCE(cr.total_rewards, 0) AS total_rewards,
+                    al.last_scan_at
              FROM users u
              JOIN roles r ON r.id = u.role_id
-             LEFT JOIN attendance_logs al ON al.client_id = u.id
-             LEFT JOIN client_rewards cr ON cr.client_id = u.id
+             LEFT JOIN (
+                 SELECT client_id, COUNT(*) AS total_attendances, MAX(scanned_at) AS last_scan_at
+                 FROM attendance_logs
+                 GROUP BY client_id
+             ) al ON al.client_id = u.id
+             LEFT JOIN (
+                 SELECT client_id,
+                        SUM(CASE WHEN status = 'pendiente' THEN 1 ELSE 0 END) AS pending_rewards,
+                        COUNT(*) AS total_rewards
+                 FROM client_rewards
+                 GROUP BY client_id
+             ) cr ON cr.client_id = u.id
              WHERE {$where}
-             GROUP BY u.id, u.name, u.email, u.phone, u.active
-             ORDER BY MAX(al.scanned_at) DESC, u.name ASC
+             ORDER BY al.last_scan_at DESC, u.name ASC
              LIMIT " . max(10, $limit),
             $params
         );
+        $progressByClient = self::progressForClients(array_map(static fn ($row) => (int) $row['id'], $rows), $config);
         foreach ($rows as &$row) {
-            $row['progress'] = self::progressForClient((int) $row['id']);
+            $row['progress'] = $progressByClient[(int) $row['id']] ?? self::emptyProgress($config);
         }
         unset($row);
         return $rows;
+    }
+
+    private static function progressForClients(array $clientIds, ?array $config = null): array
+    {
+        $clientIds = array_values(array_unique(array_filter(array_map('intval', $clientIds))));
+        $config = $config ?: self::activeConfig();
+        $required = max(1, (int) ($config['attendances_required'] ?? 10));
+        $progress = [];
+        foreach ($clientIds as $clientId) {
+            $progress[$clientId] = self::emptyProgress($config);
+        }
+        if (!$clientIds || !$config) {
+            return $progress;
+        }
+        if (
+            !self::tableExists('attendance_logs')
+            || !self::tableExists('client_rewards')
+            || !self::tableExists('reward_counter_resets')
+            || !self::tableExists('reward_counter_adjustments')
+        ) {
+            return $progress;
+        }
+
+        $configId = (int) ($config['id'] ?? 0);
+        $in = implode(',', array_fill(0, count($clientIds), '?'));
+        $baselineParams = array_merge($clientIds, [$configId], $clientIds, [$configId]);
+        $baselineRows = Database::all(
+            "SELECT client_id, MAX(dt) AS baseline
+             FROM (
+                 SELECT client_id, generated_at AS dt
+                 FROM client_rewards
+                 WHERE client_id IN ({$in}) AND (config_id = ? OR config_id IS NULL)
+                 UNION ALL
+                 SELECT client_id, reset_at AS dt
+                 FROM reward_counter_resets
+                 WHERE client_id IN ({$in}) AND (config_id = ? OR config_id IS NULL)
+             ) x
+             GROUP BY client_id",
+            $baselineParams
+        );
+        $baselines = [];
+        foreach ($baselineRows as $row) {
+            if (!empty($row['baseline'])) {
+                $baselines[(int) $row['client_id']] = (string) $row['baseline'];
+            }
+        }
+        $minBaseline = $baselines ? min($baselines) : null;
+
+        $attendanceParams = $clientIds;
+        $attendanceWhere = "client_id IN ({$in})";
+        if ($minBaseline) {
+            $attendanceWhere .= ' AND scanned_at > ?';
+            $attendanceParams[] = $minBaseline;
+        }
+        $attendanceRows = Database::all(
+            "SELECT client_id, scanned_at FROM attendance_logs WHERE {$attendanceWhere}",
+            $attendanceParams
+        );
+        $visits = array_fill_keys($clientIds, 0);
+        foreach ($attendanceRows as $row) {
+            $clientId = (int) $row['client_id'];
+            $baseline = $baselines[$clientId] ?? null;
+            if (!$baseline || (string) $row['scanned_at'] > $baseline) {
+                $visits[$clientId]++;
+            }
+        }
+
+        $adjustmentParams = array_merge($clientIds, [$configId]);
+        $adjustmentWhere = "client_id IN ({$in}) AND (config_id = ? OR config_id IS NULL)";
+        if ($minBaseline) {
+            $adjustmentWhere .= ' AND created_at > ?';
+            $adjustmentParams[] = $minBaseline;
+        }
+        $adjustmentRows = Database::all(
+            "SELECT client_id, delta, created_at FROM reward_counter_adjustments WHERE {$adjustmentWhere}",
+            $adjustmentParams
+        );
+        $adjustments = array_fill_keys($clientIds, 0);
+        foreach ($adjustmentRows as $row) {
+            $clientId = (int) $row['client_id'];
+            $baseline = $baselines[$clientId] ?? null;
+            if (!$baseline || (string) $row['created_at'] > $baseline) {
+                $adjustments[$clientId] += (int) $row['delta'];
+            }
+        }
+
+        foreach ($clientIds as $clientId) {
+            $current = max(0, (int) ($visits[$clientId] ?? 0) + (int) ($adjustments[$clientId] ?? 0));
+            $progress[$clientId] = [
+                'config' => $config,
+                'current' => $current,
+                'required' => $required,
+                'percent' => min(100, (int) round(($current / $required) * 100)),
+                'remaining' => max(0, $required - $current),
+            ];
+        }
+
+        return $progress;
+    }
+
+    private static function emptyProgress(?array $config): array
+    {
+        $required = max(1, (int) ($config['attendances_required'] ?? 10));
+        return ['config' => $config, 'current' => 0, 'required' => $required, 'percent' => 0, 'remaining' => $required];
     }
 
     public static function recentAttendances(int $limit = 50): array

@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $q = trim((string) ($_GET['q'] ?? ''));
 $config = RewardsService::activeConfig();
-$clients = RewardsService::dashboardClients($q);
+$clients = RewardsService::dashboardClients($q, 80, $config);
 $recent = RewardsService::recentAttendances(60);
 $recentRewards = RewardsService::recentRewards(40);
 $pendingRewards = 0;
@@ -51,7 +51,7 @@ $todayScans = 0;
 $totalScans = 0;
 try {
     $pendingRewards = (int) (Database::one("SELECT COUNT(*) AS n FROM client_rewards WHERE status = 'pendiente'")['n'] ?? 0);
-    $todayScans = (int) (Database::one("SELECT COUNT(*) AS n FROM attendance_logs WHERE DATE(scanned_at) = CURDATE()")['n'] ?? 0);
+    $todayScans = (int) (Database::one("SELECT COUNT(*) AS n FROM attendance_logs WHERE scanned_at >= CURDATE() AND scanned_at < DATE_ADD(CURDATE(), INTERVAL 1 DAY)")['n'] ?? 0);
     $totalScans = (int) (Database::one("SELECT COUNT(*) AS n FROM attendance_logs")['n'] ?? 0);
 } catch (Throwable $e) {
     error_log('[admin-recompensas-counts] ' . $e->getMessage());
@@ -400,23 +400,43 @@ require __DIR__ . '/../includes/layouts/header_admin.php';
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-<script>window.QRCode || document.write('<script src="https://unpkg.com/qrcodejs@1.0.0/qrcode.min.js"><\/script>');</script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    if (!window.QRCode) return;
-    document.querySelectorAll('[data-branch-qr]').forEach((box) => {
-      const token = box.dataset.branchQr || '';
-      box.innerHTML = '';
-      new QRCode(box, {
-        text: token,
-        width: 150,
-        height: 150,
-        colorDark: '#15051a',
-        colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.M
+    const boxes = Array.from(document.querySelectorAll('[data-branch-qr]'));
+    if (!boxes.length) return;
+
+    const renderQr = () => {
+      if (!window.QRCode) return false;
+      boxes.forEach((box) => {
+        const token = box.dataset.branchQr || '';
+        box.innerHTML = '';
+        new QRCode(box, {
+          text: token,
+          width: 150,
+          height: 150,
+          colorDark: '#15051a',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.M
+        });
       });
-    });
+      return true;
+    };
+
+    const loadScript = (src, onload, onerror) => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.async = true;
+      script.onload = onload;
+      script.onerror = onerror;
+      document.body.appendChild(script);
+    };
+
+    if (renderQr()) return;
+    loadScript(
+      'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js',
+      renderQr,
+      () => loadScript('https://unpkg.com/qrcodejs@1.0.0/qrcode.min.js', renderQr)
+    );
   });
 </script>
 
