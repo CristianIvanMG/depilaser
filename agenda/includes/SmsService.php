@@ -383,6 +383,7 @@ final class SmsService
 
     private static function cleanMessage(string $message): string
     {
+        $message = self::stripAccents($message);
         if (function_exists('iconv')) {
             $converted = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $message);
             if (is_string($converted) && $converted !== '') {
@@ -394,9 +395,35 @@ final class SmsService
             'Á' => 'A', 'É' => 'E', 'Í' => 'I', 'Ó' => 'O', 'Ú' => 'U', 'Ñ' => 'N',
         ];
         $message = strtr($message, $map);
+        $message = self::stripAccents($message);
         $message = preg_replace('/[^\x20-\x7E]/', '', $message) ?? $message;
         $message = preg_replace('/\s+/', ' ', $message) ?? $message;
         return substr(trim($message), 0, 155);
+    }
+
+    private static function stripAccents(string $value): string
+    {
+        static $map = null;
+        if ($map === null) {
+            $map = [
+                "\xC3\xA1" => 'a', "\xC3\xA9" => 'e', "\xC3\xAD" => 'i', "\xC3\xB3" => 'o', "\xC3\xBA" => 'u',
+                "\xC3\x81" => 'A', "\xC3\x89" => 'E', "\xC3\x8D" => 'I', "\xC3\x93" => 'O', "\xC3\x9A" => 'U',
+                "\xC3\xA0" => 'a', "\xC3\xA8" => 'e', "\xC3\xAC" => 'i', "\xC3\xB2" => 'o', "\xC3\xB9" => 'u',
+                "\xC3\x80" => 'A', "\xC3\x88" => 'E', "\xC3\x8C" => 'I', "\xC3\x92" => 'O', "\xC3\x99" => 'U',
+                "\xC3\xA4" => 'a', "\xC3\xAB" => 'e', "\xC3\xAF" => 'i', "\xC3\xB6" => 'o', "\xC3\xBC" => 'u',
+                "\xC3\x84" => 'A', "\xC3\x8B" => 'E', "\xC3\x8F" => 'I', "\xC3\x96" => 'O', "\xC3\x9C" => 'U',
+                "\xC3\xA2" => 'a', "\xC3\xAA" => 'e', "\xC3\xAE" => 'i', "\xC3\xB4" => 'o', "\xC3\xBB" => 'u',
+                "\xC3\x82" => 'A', "\xC3\x8A" => 'E', "\xC3\x8E" => 'I', "\xC3\x94" => 'O', "\xC3\x9B" => 'U',
+                "\xC3\xB1" => 'n', "\xC3\x91" => 'N', "\xC3\xA7" => 'c', "\xC3\x87" => 'C',
+                "\xC2\xBF" => '', "\xC2\xA1" => '', "\xE2\x80\x93" => '-', "\xE2\x80\x94" => '-',
+                "\xE2\x80\x98" => "'", "\xE2\x80\x99" => "'", "\xE2\x80\x9C" => '"', "\xE2\x80\x9D" => '"',
+                "\xC3\x83\xC2\xA1" => 'a', "\xC3\x83\xC2\xA9" => 'e', "\xC3\x83\xC2\xAD" => 'i',
+                "\xC3\x83\xC2\xB3" => 'o', "\xC3\x83\xC2\xBA" => 'u', "\xC3\x83\xC2\xB1" => 'n',
+                "\xC3\x83\xC2\x81" => 'A', "\xC3\x83\xC2\x89" => 'E', "\xC3\x83\xC2\x8D" => 'I',
+                "\xC3\x83\xC2\x93" => 'O', "\xC3\x83\xC2\x9A" => 'U', "\xC3\x83\xC2\x91" => 'N',
+            ];
+        }
+        return strtr($value, $map);
     }
 
     private static function normalizeMxPhone(string $phone): string
