@@ -48,6 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     redirect('admin/configuraciones.php');
 }
 
+AppSettingsService::syncSmsInventoryWithAcceptedReminders();
 $sms = AppSettingsService::smsSettings();
 $smsStats = AppSettingsService::smsStats();
 $smsLogs = AppSettingsService::recentSmsInventoryLogs(18);

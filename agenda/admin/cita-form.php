@@ -98,6 +98,25 @@ $hasPackageBillingColumns = admin_appointment_columns_exist([
     'package_session_number',
     'package_total_sessions',
 ]);
+$hasPaymentColumns = admin_appointment_columns_exist([
+    'payment_required',
+    'payment_status',
+    'payment_amount_mxn',
+]);
+$hasEmailReminderColumns = admin_appointment_columns_exist([
+    'email_reminder_sent',
+    'email_reminder_sent_at',
+    'email_reminder_attempts',
+    'email_reminder_last_error',
+]);
+$hasSmsReminderColumns = admin_appointment_columns_exist([
+    'sms_reminder_sent',
+    'sms_reminder_sent_at',
+    'sms_reminder_attempts',
+    'sms_reminder_last_error',
+    'sms_reminder_provider',
+    'sms_reminder_reference',
+]);
 
 $appointment = null;
 if ($isEdit) {
@@ -507,10 +526,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         || $appointment['end_at'] !== $schedule['end_sql']
                         || (int) $appointment['branch_id'] !== $branchId
                         || (int) $appointment['service_id'] !== $serviceId;
-                    $reminderSql = $resetsReminder
-                        ? ', email_reminder_sent = 0, email_reminder_sent_at = NULL, email_reminder_attempts = 0, email_reminder_last_error = NULL'
-                        : '';
-                    $updateParams = [
+                    $sets = [
+                        'user_id = ?',
+                        'professional_id = ?',
+                        'branch_id = ?',
+                        'service_id = ?',
+                        'status_id = ?',
+                        'start_at = ?',
+                        'end_at = ?',
+                        'source = ?',
+                        'notes_admin = ?',
+                    ];
+                    $params = [
                         $userId,
                         $professionalId ?: null,
                         $branchId,
@@ -520,40 +547,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $schedule['end_sql'],
                         $source,
                         $notesAdmin ?: null,
-                        $billingType,
-                        $packageParentAppointmentId,
-                        $packageSessionNumber,
-                        $packageTotalSessions,
                     ];
-                    $updateParams = array_merge($updateParams, $cancelParams, [$appointmentId]);
                     if ($hasPackageBillingColumns) {
-                        Database::exec(
-                            'UPDATE appointments
-                             SET user_id = ?, professional_id = ?, branch_id = ?, service_id = ?, status_id = ?,
-                                 start_at = ?, end_at = ?, source = ?, notes_admin = ?,
-                                 billing_type = ?, package_parent_appointment_id = ?,
-                                 package_session_number = ?, package_total_sessions = ?,
-                                 payment_required = CASE WHEN ? = \'package_session\' THEN 0 ELSE payment_required END,
-                                 payment_status = CASE WHEN ? = \'package_session\' THEN \'not_required\' ELSE payment_status END,
-                                 payment_amount_mxn = CASE WHEN ? = \'package_session\' THEN 0.00 ELSE payment_amount_mxn END
-                                 ' . $cancelSql . $reminderSql . '
-                             WHERE id = ?',
-                            array_merge(
-                                array_slice($updateParams, 0, 13),
-                                [$billingType, $billingType, $billingType],
-                                array_slice($updateParams, 13)
-                            )
-                        );
-                    } else {
-                        Database::exec(
-                            'UPDATE appointments
-                             SET user_id = ?, professional_id = ?, branch_id = ?, service_id = ?, status_id = ?,
-                                 start_at = ?, end_at = ?, source = ?, notes_admin = ?
-                                 ' . $cancelSql . $reminderSql . '
-                             WHERE id = ?',
-                            array_merge(array_slice($updateParams, 0, 9), $cancelParams, [$appointmentId])
-                        );
+                        $sets[] = 'billing_type = ?';
+                        $sets[] = 'package_parent_appointment_id = ?';
+                        $sets[] = 'package_session_number = ?';
+                        $sets[] = 'package_total_sessions = ?';
+                        array_push($params, $billingType, $packageParentAppointmentId, $packageSessionNumber, $packageTotalSessions);
                     }
+                    if ($hasPaymentColumns && $billingType === 'package_session') {
+                        $sets[] = 'payment_required = 0';
+                        $sets[] = "payment_status = 'not_required'";
+                        $sets[] = 'payment_amount_mxn = 0.00';
+                    }
+                    if ($cancelSql !== '') {
+                        $sets[] = ltrim($cancelSql, ', ');
+                        $params = array_merge($params, $cancelParams);
+                    }
+                    if ($resetsReminder && $hasEmailReminderColumns) {
+                        $sets[] = 'email_reminder_sent = 0';
+                        $sets[] = 'email_reminder_sent_at = NULL';
+                        $sets[] = 'email_reminder_attempts = 0';
+                        $sets[] = 'email_reminder_last_error = NULL';
+                    }
+                    if ($resetsReminder && $hasSmsReminderColumns) {
+                        $sets[] = 'sms_reminder_sent = 0';
+                        $sets[] = 'sms_reminder_sent_at = NULL';
+                        $sets[] = 'sms_reminder_attempts = 0';
+                        $sets[] = 'sms_reminder_last_error = NULL';
+                        $sets[] = 'sms_reminder_provider = NULL';
+                        $sets[] = 'sms_reminder_reference = NULL';
+                    }
+                    $params[] = $appointmentId;
+                    Database::exec(
+                        'UPDATE appointments SET ' . implode(', ', $sets) . ' WHERE id = ?',
+                        $params
+                    );
                     $pdo->commit();
                     Auth::audit('appointment_update', 'appointment', $appointmentId, [
                         'before' => $before,
@@ -695,8 +724,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } elseif ($e->getMessage() === 'DUPLICATE_APPOINTMENT') {
                     $errors['_'] = 'Ya existe una cita igual para ese cliente, servicio y horario. Revisa el listado antes de crear otra.';
                 } else {
-                    error_log('[admin/cita-form] ' . $e->getMessage());
+                    $debugContext = [
+                        'appointment_id' => $isEdit ? $appointmentId : null,
+                        'is_edit' => $isEdit,
+                        'user_id' => $userId,
+                        'branch_id' => $branchId,
+                        'service_id' => $serviceId,
+                        'professional_id' => $professionalId,
+                        'status_id' => $statusId,
+                        'start_at' => $startAt,
+                        'billing_type' => $billingType,
+                    ];
+                    error_log('[admin/cita-form] ' . $e->getMessage() . ' | ' . json_encode($debugContext, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
                     $errors['_'] = 'No fue posible guardar la cita. Intenta nuevamente.';
+                    if (Auth::isSuperAdmin()) {
+                        $errors['_'] .= ' Detalle tecnico: ' . $e->getMessage();
+                    }
                 }
             }
         }

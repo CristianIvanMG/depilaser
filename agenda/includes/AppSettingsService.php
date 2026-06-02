@@ -120,12 +120,25 @@ final class AppSettingsService
     {
         self::ensureSchema();
         $settings = self::smsSettings();
-        if (empty($settings['inventory_enabled'])) {
-            return;
-        }
         $remaining = max(0, (int) $settings['remaining'] - 1);
         self::set('sms_remaining', $remaining, null);
         self::logSmsInventory('sent', -1, $remaining, $reference ?: null, $note ?: 'SMS enviado', null);
+    }
+
+    public static function syncSmsInventoryWithAcceptedReminders(): void
+    {
+        self::ensureSchema();
+        $sentReminders = self::safeCount("SELECT COUNT(*) AS n FROM appointments WHERE sms_reminder_sent = 1 AND sms_reminder_provider = 'smsmasivos'");
+        $loggedSent = self::safeCount("SELECT COALESCE(ABS(SUM(delta)), 0) AS n FROM sms_inventory_logs WHERE action = 'sent'");
+        $missing = max(0, $sentReminders - $loggedSent);
+        if ($missing <= 0) {
+            return;
+        }
+
+        $settings = self::smsSettings();
+        $remaining = max(0, (int) $settings['remaining'] - $missing);
+        self::set('sms_remaining', $remaining, null);
+        self::logSmsInventory('sent', -$missing, $remaining, null, 'Sincronizacion de SMS aceptados por cron', null);
     }
 
     public static function smsStats(): array
