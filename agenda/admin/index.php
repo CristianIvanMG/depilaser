@@ -4,19 +4,22 @@ Auth::requireAdmin();
 ServiceCatalogService::ensureSchema();
 
 // KPIs
-$today = date('Y-m-d');
-$kpiHoy = (int) (Database::one(
-    "SELECT COUNT(*) AS n FROM appointments a
-     JOIN appointment_statuses s ON s.id = a.status_id
-     WHERE DATE(a.start_at) = ? AND s.slug NOT IN ('cancelada')",
-    [$today]
-)['n'] ?? 0);
+$todayDate = new DateTimeImmutable('today');
+$today = $todayDate->format('Y-m-d');
+$todayStart = $todayDate->format('Y-m-d 00:00:00');
+$todayEnd = $todayDate->modify('+1 day')->format('Y-m-d 00:00:00');
+$weekStart = $todayDate->modify('monday this week')->format('Y-m-d 00:00:00');
+$weekEnd = $todayDate->modify('monday next week')->format('Y-m-d 00:00:00');
+$monthStart = $todayDate->modify('first day of this month')->format('Y-m-d 00:00:00');
+$monthEnd = $todayDate->modify('first day of next month')->format('Y-m-d 00:00:00');
 
 $kpiSemana = (int) (Database::one(
     "SELECT COUNT(*) AS n FROM appointments a
      JOIN appointment_statuses s ON s.id = a.status_id
-     WHERE YEARWEEK(a.start_at,1) = YEARWEEK(CURDATE(),1)
-       AND s.slug NOT IN ('cancelada')"
+     WHERE a.start_at >= ?
+       AND a.start_at < ?
+       AND s.slug NOT IN ('cancelada')",
+    [$weekStart, $weekEnd]
 )['n'] ?? 0);
 
 $kpiClientes = (int) (Database::one(
@@ -29,8 +32,9 @@ $kpiIngresoMes = (float) (Database::one(
      JOIN services s ON s.id = a.service_id
      JOIN appointment_statuses st ON st.id = a.status_id
      WHERE st.slug = 'atendida'
-       AND YEAR(a.start_at) = YEAR(CURDATE())
-       AND MONTH(a.start_at) = MONTH(CURDATE())"
+       AND a.start_at >= ?
+       AND a.start_at < ?",
+    [$monthStart, $monthEnd]
 )['t'] ?? 0);
 
 // Citas de hoy
@@ -45,10 +49,13 @@ $hoy = Database::all(
      JOIN services s ON s.id = a.service_id
      JOIN branches b ON b.id = a.branch_id
      JOIN appointment_statuses st ON st.id = a.status_id
-     WHERE DATE(a.start_at) = ?
+     WHERE a.start_at >= ?
+       AND a.start_at < ?
+       AND st.slug NOT IN ('cancelada')
      ORDER BY a.start_at ASC",
-    [$today]
+    [$todayStart, $todayEnd]
 );
+$kpiHoy = count($hoy);
 
 $pageTitle = 'Dashboard';
 require __DIR__ . '/../includes/layouts/header_admin.php';
