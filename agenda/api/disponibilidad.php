@@ -56,6 +56,9 @@ if (!$dateTs) {
 // Validar rango
 $minTs = strtotime('today') + $cfg['booking_min_hours'] * 3600;
 $maxTs = strtotime('today') + $cfg['booking_max_days'] * 86400;
+if (Auth::isAdmin()) {
+    $maxTs = strtotime(date('Y-12-31'));
+}
 if ($dateTs < strtotime('today')) {
     echo json_encode([
         'ok' => true,
@@ -70,7 +73,9 @@ if ($dateTs > $maxTs) {
         'ok' => true,
         'slots' => [],
         'count' => 0,
-        'note' => 'La fecha queda fuera del rango permitido de agenda',
+        'note' => Auth::isAdmin()
+            ? 'La fecha queda fuera del año permitido de agenda'
+            : 'La fecha queda fuera del rango permitido de agenda',
     ]);
     exit;
 }
